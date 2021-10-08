@@ -4,7 +4,7 @@ CFLAGS= -O3 -Wno-unused-result -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_D
 LDFLAGS= -flto=thin
 
 # WORKER
-WORKER_EXPORT="['_main',  '_pcsx_init', '_one_iter', '_get_ptr', '_ls','_lzd']"
+WORKER_EXPORT="['_main',  '_pcsx_init', '_one_iter', '_get_ptr', '_ls']"
 WORKER_OBJS=gui/workerMain.o gui/Plugin.o gui/Config.o \
 libpcsxcore/psxbios.o libpcsxcore/cdrom.o libpcsxcore/psxcounters.o \
 libpcsxcore/psxdma.o libpcsxcore/disr3000a.o libpcsxcore/spu.o libpcsxcore/sio.o \
