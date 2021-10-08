@@ -76,26 +76,26 @@ int LoadConfig(PcsxConfig *Conf) {
 	FILE *f;
 	int size;
 	char *data;
-char cfgfile[MAXPATHLEN];
-	char cfgfile_basename[MAXPATHLEN];
+// char cfgfile[MAXPATHLEN];
+	// char cfgfile_basename[MAXPATHLEN];
 	/* TODO local var called cfgfile */
 
 	// Ryan says: use dotdir, dotdir is GOOD
 	// No giant homedir names
-	strncpy(cfgfile, getenv("HOME"), 200);
-	strcat(cfgfile, PCSX_DOT_DIR);
+ // 	strncpy(cfgfile, getenv("HOME"), 200);
+//	strcat(cfgfile, PCSX_DOT_DIR);
 
 	// proceed to load the cfg file
 	// append its name
-	strcat(cfgfile, cfgfile_basename);
+//	strcat(cfgfile, cfgfile_basename);
 
 	// file is  now ~/.pcsx/pcsx.cfg (or whatever cfgfile_basename is)
-	if (stat(cfgfile, &buf) == -1) {
+//	if (stat(cfgfile, &buf) == -1) {
 		// the config file doesn't exist!
 		/* TODO Error checking? */
-		printf("Configuration file %s couldn't be found\n", cfgfile);
-		return -1;
-	}
+//		printf("Configuration file %s couldn't be found\n", cfgfile);
+//		return -1;
+//	}
 
 	size = buf.st_size;
 
