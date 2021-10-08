@@ -148,7 +148,7 @@ void SaveConfig() {
 	/* TODO Error checking for the next two lines, and at least log
 	   failures - suggest a file dialog to specify a new file or
 	   create a new file */
-	f = fopen(cfgfile, "w");
+	f =NULL;
 	if (f == NULL) return;
 
 	SetValue("Bios", Config.Bios);
