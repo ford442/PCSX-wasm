@@ -1,5 +1,5 @@
 CC=emcc
-CFLAGS=  -sUSE_SDL=1 -sALLOW_MEMORY_GROWTH=0 -O2 -g -Wno-unused-result  -lidbfs.js  \
+CFLAGS=  -sUSE_SDL=1  -O2 -g -Wno-unused-result  -lidbfs.js  \
 -D USESDLSOUND  -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= -flto=thin
 
