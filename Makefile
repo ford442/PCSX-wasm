@@ -1,10 +1,10 @@
 CC=emcc
-CFLAGS= -O2 -g -Wno-unused-result  -lidbfs.js -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_DUPLICATE_FUNCTIONS=1 \
+CFLAGS=  -sUSE_SDL=1 -sALLOW_MEMORY_GROWTH=0 -O2 -g -Wno-unused-result  -lidbfs.js  \
 -D USESDLSOUND  -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= -flto=thin
 
 # WORKER
-WORKER_EXPORT="['_main',  '_pcsx_init', '_one_iter', '_get_ptr', '_ls']"
+WORKER_EXPORT="['_main', '_pcsx_init', '_one_iter', '_get_ptr', '_ls']"
 WORKER_OBJS=gui/workerMain.o gui/Plugin.o gui/Config.o \
 libpcsxcore/psxbios.o libpcsxcore/cdrom.o libpcsxcore/psxcounters.o \
 libpcsxcore/psxdma.o libpcsxcore/disr3000a.o libpcsxcore/spu.o libpcsxcore/sio.o \
@@ -17,7 +17,7 @@ plugins/dfxvideo/prim.o  plugins/dfxvideo/zn.o plugins/dfxvideo/draw_null.o  \
 plugins/dfxvideo/gpu.o   plugins/dfxvideo/soft.o \
 plugins/dfsound/spu.o plugins/dfsound/cfg.o  plugins/dfsound/dma.o plugins/dfsound/registers.o plugins/dfsound/worker.o \
 plugins/sdlinput/cfg.o     plugins/sdlinput/pad_worker.o plugins/sdlinput/analog.o
-WORKER_FLAGS= -sUSE_SDL=1  --post-js js/worker_funcs.js -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -s EXPORTED_FUNCTIONS=$(WORKER_EXPORT)
+WORKER_FLAGS=  --post-js js/worker_funcs.js -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -s EXPORTED_FUNCTIONS=$(WORKER_EXPORT)
 
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
