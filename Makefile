@@ -1,5 +1,5 @@
 CC=emcc
-CFLAGS= -O3 -Wno-unused-result \
+CFLAGS= -O3 -Wno-unused-result -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_DUPLICATE_FUNCTIONS=1 \
 -D USESDLSOUND  -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= -flto=thin
 
