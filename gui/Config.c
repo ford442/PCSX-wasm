@@ -76,7 +76,8 @@ int LoadConfig(PcsxConfig *Conf) {
 	FILE *f;
 	int size;
 	char *data;
-
+char cfgfile[MAXPATHLEN];
+	char cfgfile_basename[MAXPATHLEN];
 	/* TODO local var called cfgfile */
 
 	// Ryan says: use dotdir, dotdir is GOOD
