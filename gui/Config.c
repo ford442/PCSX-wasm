@@ -100,7 +100,7 @@ int LoadConfig(PcsxConfig *Conf) {
 	size = buf.st_size;
 
 	/* TODO Error checking for the next two lines, and at least log failures */
-	f = fopen(cfgfile, "r");
+	f = NULL;
 	if (f == NULL) return -1;
 
 	data = (char *)malloc(size + 1);
