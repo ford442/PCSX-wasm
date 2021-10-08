@@ -22,7 +22,7 @@ WORKER_FLAGS= --post-js js/worker_funcs.js -sINITIAL_MEMORY=1400mb -s "EXTRA_EXP
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
-UI_FLAGS=-flto=thin -sENVIRONMENT=web,worker -s EXPORTED_FUNCTIONS=$(UI_EXPORT) -sINITIAL_MEMORY=1400mb -s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
+UI_FLAGS= -flto=thin -sENVIRONMENT=web,worker -s EXPORTED_FUNCTIONS=$(UI_EXPORT) -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
 
 
 ALL: pcsx_worker.js pcsx_ww.js
