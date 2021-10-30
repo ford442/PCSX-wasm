@@ -1,5 +1,5 @@
 CC=emcc
-CFLAGS= -flto=thin --closure 1 -g0 -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -lidbfs.js -s USE_ZLIB=1 -I./include -I./libpcsxcore
+CFLAGS= -flto=thin --closure 1 -g2 -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -lidbfs.js -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
 # WORKER
