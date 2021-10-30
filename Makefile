@@ -1,6 +1,6 @@
 CC=emcc
 CFLAGS= -sALLOW_MEMORY_GROWTH=0  -sUSE_SDL=1  -O2  -Wno-unused-result  -lidbfs.js  \
--D USESDLSOUND  -s USE_ZLIB=1 -I./include -I./libpcsxcore
+-s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= -flto=thin
 
 # WORKER
@@ -17,12 +17,12 @@ plugins/dfxvideo/prim.o  plugins/dfxvideo/zn.o plugins/dfxvideo/draw_null.o  \
 plugins/dfxvideo/gpu.o   plugins/dfxvideo/soft.o \
 plugins/dfsound/spu.o plugins/dfsound/cfg.o  plugins/dfsound/dma.o plugins/dfsound/registers.o plugins/dfsound/worker.o \
 plugins/sdlinput/cfg.o     plugins/sdlinput/pad_worker.o plugins/sdlinput/analog.o
-WORKER_FLAGS=  --post-js js/worker_funcs.js -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -s EXPORTED_FUNCTIONS=$(WORKER_EXPORT)
+WORKER_FLAGS=  --post-js js/worker_funcs.js -sTOTAL_MEMORY=419430400 -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -s EXPORTED_FUNCTIONS=$(WORKER_EXPORT)
 
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
-UI_FLAGS= -flto=thin -sENVIRONMENT=web,worker -s EXPORTED_FUNCTIONS=$(UI_EXPORT) -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
+UI_FLAGS= -flto=thin -s TOTAL_MEMORY=16777216 -s EXPORTED_FUNCTIONS=$(UI_EXPORT) -sINITIAL_MEMORY=1400mb -s "EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
 
 
 ALL: pcsx_worker.js pcsx_ww.js
