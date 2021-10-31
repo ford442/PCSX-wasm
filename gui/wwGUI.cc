@@ -105,7 +105,11 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 32, 0);
+    sdl_display = SDL_CreateWindow("My Game Window",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          640, 480,
+                          SDL_WINDOW_OPENGL);
     sdl_ximage = SDL_CreateRGBSurface(0, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
