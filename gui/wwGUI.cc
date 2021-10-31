@@ -68,7 +68,7 @@ extern "C" {
 void render(int x, int y, int sx, int sy, int dx, int dy, int rgb24)
 {
   BlitSDL32(sdl_ximage, x, y, sx, sy, rgb24);
-  SDL_Flip(sdl_ximage);
+//  SDL_Flip(sdl_ximage);
   dstrect.x = 0;
   dstrect.y = 0;
   dstrect.w = 640;
@@ -78,7 +78,7 @@ void render(int x, int y, int sx, int sy, int dx, int dy, int rgb24)
   srcrect.w = dx;
   srcrect.h = dy;
   SDL_BlitScaled(sdl_ximage, &srcrect, sdl_display, &dstrect);
-  SDL_Flip(sdl_display);
+//  SDL_Flip(sdl_display);
 }
 void *var_ptrs[] = {
     psxVub,
