@@ -37,7 +37,7 @@ extern "C" {
 #include <unistd.h>
 #include <pthread.h>
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 //#include <SDL_joystick.h>
 
 #include "psemu_plugin_defs.h"
