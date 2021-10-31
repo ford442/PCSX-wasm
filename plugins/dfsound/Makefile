@@ -327,8 +327,8 @@ POSUB = po
 PULSEAUDIO_CFLAGS = 
 PULSEAUDIO_LIBS = 
 RANLIB = ranlib
-SDL_CFLAGS = -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
-SDL_CONFIG = /usr/bin/sdl-config
+SDL_CFLAGS = -I/usr/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
+SDL_CONFIG = 
 SDL_LIBS = -L/usr/lib/x86_64-linux-gnu -lSDL
 SED = /bin/sed
 SET_MAKE = 
