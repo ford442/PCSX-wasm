@@ -29,7 +29,7 @@ void DestroyKeyboard() {
 void CheckKeyboard() {
 	uint8_t					i, j, found;
 	SDL_Event evt;
-	// SDLKey				Key;
+	unsigned char				Key;
 	
 	while (SDL_PollEvent(&evt)) {	
 		switch (evt.type) {
