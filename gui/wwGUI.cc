@@ -113,18 +113,19 @@ int main()
   LoadPADConfig();
   EM_ASM(
       FS.mkdir('/cfg');
-      FS.mount(IDBFS, {}, '/cfg/');
+      FS.mount(MEMFS, {}, '/cfg/');
 
       // sync from persisted state into memory and then
       // run the 'test' function
-      FS.syncfs(true, function(err) {
-        if(err){
-          cout_print("syncfs error!!")
-        }
-        assert(!err);
-        _LoadPADConfig();
-        cout_print("idbfs loaded\n");
-      }););
+  //    FS.syncfs(true, function(err) {
+   //     if(err){
+   //       cout_print("syncfs error!!")
+   //     }
+    //    assert(!err);
+  //     _LoadPADConfig();
+   //     cout_print("idbfs loaded\n");
+    //  });
+  );
   g.PadState[0].PadMode = 0;
   g.PadState[0].PadID = 0x41;
   g.PadState[1].PadMode = 0;
