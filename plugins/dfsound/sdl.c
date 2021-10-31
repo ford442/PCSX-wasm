@@ -19,7 +19,7 @@
 #include "stdafx.h"
 
 #include "externals.h"
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -58,7 +58,7 @@ static void InitSDL() {
 		printf("case 1\n");
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
-		SDL_Init(SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE);
+		SDL_Init(SDL_INIT_AUDIO);
 		printf("case 2\n");
 	}
 }
@@ -96,43 +96,29 @@ void SetupSound(void) {
 		SDL_CloseAudio();
 		return;
 	}
-
 	iReadPos = 0;
 	iWritePos = 0;
-
 	SDL_PauseAudio(0);
 }
-
 void RemoveSound(void) {
 	if (pSndBuffer == NULL) return;
-
 	SDL_CloseAudio();
 	DestroySDL();
-
 	free(pSndBuffer);
 	pSndBuffer = NULL;
 }
-
 unsigned long SoundGetBytesBuffered(void) {
 	int size;
-
 	if (pSndBuffer == NULL) return SOUNDSIZE;
-
 	size = iReadPos - iWritePos;
 	if (size <= 0) size += iBufSize;
-
 	if (size < iBufSize / 2) return SOUNDSIZE;
-
 	return 0;
 }
-
 void SoundFeedStreamData(unsigned char *pSound, long lBytes) {	
 	short *p = (short *)pSound;
 	long old_lBytes=lBytes;
-	//printf("soundfeedstreamdata %ld\n",lBytes);
-
 	if (pSndBuffer == NULL) return;
-
 	while (lBytes > 0) {
 		if (((iWritePos + 1) % iBufSize) == iReadPos) {
 			//printf("sound buffer full\n");
@@ -140,12 +126,9 @@ void SoundFeedStreamData(unsigned char *pSound, long lBytes) {
 			EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes", lBytes: $0});}, old_lBytes-lBytes);
 			#endif
 			break;}
-
 		pSndBuffer[iWritePos] = *p++;
-
 		++iWritePos;
 		if (iWritePos >= iBufSize) iWritePos = 0;
-
 		lBytes -= sizeof(short);
 	}
 }
