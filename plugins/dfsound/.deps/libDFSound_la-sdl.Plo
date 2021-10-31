@@ -64,21 +64,21 @@ libDFSound_la-sdl.lo: sdl.c /usr/include/stdc-predef.h stdafx.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/mathinline.h psemuxa.h externals.h \
  /usr/lib/gcc/x86_64-linux-gnu/6/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h /usr/include/SDL/SDL.h \
- /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_stdinc.h \
- /usr/include/SDL/SDL_config.h /usr/include/SDL/SDL_platform.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h /usr/include/SDL2/SDL.h \
+ /usr/include/SDL2/SDL_main.h /usr/include/SDL2/SDL_stdinc.h \
+ /usr/include/SDL2/SDL_config.h /usr/include/SDL2/SDL_platform.h \
  /usr/include/strings.h /usr/include/inttypes.h /usr/include/ctype.h \
- /usr/include/iconv.h /usr/include/SDL/begin_code.h \
- /usr/include/SDL/close_code.h /usr/include/SDL/SDL_audio.h \
- /usr/include/SDL/SDL_error.h /usr/include/SDL/SDL_endian.h \
- /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_thread.h \
- /usr/include/SDL/SDL_rwops.h /usr/include/SDL/SDL_cdrom.h \
- /usr/include/SDL/SDL_cpuinfo.h /usr/include/SDL/SDL_events.h \
- /usr/include/SDL/SDL_active.h /usr/include/SDL/SDL_keyboard.h \
- /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
- /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_joystick.h \
- /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_loadso.h \
- /usr/include/SDL/SDL_timer.h /usr/include/SDL/SDL_version.h
+ /usr/include/iconv.h /usr/include/SDL2/begin_code.h \
+ /usr/include/SDL2/close_code.h /usr/include/SDL2/SDL_audio.h \
+ /usr/include/SDL2/SDL_error.h /usr/include/SDL2/SDL_endian.h \
+ /usr/include/SDL2/SDL_mutex.h /usr/include/SDL2/SDL_thread.h \
+ /usr/include/SDL2/SDL_rwops.h /usr/include/SDL2/SDL_cdrom.h \
+ /usr/include/SDL2/SDL_cpuinfo.h /usr/include/SDL2/SDL_events.h \
+ /usr/include/SDL2/SDL_active.h /usr/include/SDL2/SDL_keyboard.h \
+ /usr/include/SDL2/SDL_keysym.h /usr/include/SDL2/SDL_mouse.h \
+ /usr/include/SDL2/SDL_video.h /usr/include/SDL2/SDL_joystick.h \
+ /usr/include/SDL2/SDL_quit.h /usr/include/SDL2/SDL_loadso.h \
+ /usr/include/SDL2/SDL_timer.h /usr/include/SDL2/SDL_version.h
 
 /usr/include/stdc-predef.h:
 
@@ -256,15 +256,15 @@ externals.h:
 
 /usr/include/x86_64-linux-gnu/bits/wchar.h:
 
-/usr/include/SDL/SDL.h:
+/usr/include/SDL2/SDL.h:
 
-/usr/include/SDL/SDL_main.h:
+/usr/include/SDL2/SDL_main.h:
 
-/usr/include/SDL/SDL_stdinc.h:
+/usr/include/SDL2/SDL_stdinc.h:
 
-/usr/include/SDL/SDL_config.h:
+/usr/include/SDL2/SDL_config.h:
 
-/usr/include/SDL/SDL_platform.h:
+/usr/include/SDL2/SDL_platform.h:
 
 /usr/include/strings.h:
 
@@ -274,44 +274,44 @@ externals.h:
 
 /usr/include/iconv.h:
 
-/usr/include/SDL/begin_code.h:
+/usr/include/SDL2/begin_code.h:
 
-/usr/include/SDL/close_code.h:
+/usr/include/SDL2/close_code.h:
 
-/usr/include/SDL/SDL_audio.h:
+/usr/include/SDL2/SDL_audio.h:
 
-/usr/include/SDL/SDL_error.h:
+/usr/include/SDL2/SDL_error.h:
 
-/usr/include/SDL/SDL_endian.h:
+/usr/include/SDL2/SDL_endian.h:
 
-/usr/include/SDL/SDL_mutex.h:
+/usr/include/SDL2/SDL_mutex.h:
 
-/usr/include/SDL/SDL_thread.h:
+/usr/include/SDL2/SDL_thread.h:
 
-/usr/include/SDL/SDL_rwops.h:
+/usr/include/SDL2/SDL_rwops.h:
 
-/usr/include/SDL/SDL_cdrom.h:
+/usr/include/SDL2/SDL_cdrom.h:
 
-/usr/include/SDL/SDL_cpuinfo.h:
+/usr/include/SDL2/SDL_cpuinfo.h:
 
-/usr/include/SDL/SDL_events.h:
+/usr/include/SDL2/SDL_events.h:
 
-/usr/include/SDL/SDL_active.h:
+/usr/include/SDL2/SDL_active.h:
 
-/usr/include/SDL/SDL_keyboard.h:
+/usr/include/SDL2/SDL_keyboard.h:
 
-/usr/include/SDL/SDL_keysym.h:
+/usr/include/SDL2/SDL_keysym.h:
 
-/usr/include/SDL/SDL_mouse.h:
+/usr/include/SDL2/SDL_mouse.h:
 
-/usr/include/SDL/SDL_video.h:
+/usr/include/SDL2/SDL_video.h:
 
-/usr/include/SDL/SDL_joystick.h:
+/usr/include/SDL2/SDL_joystick.h:
 
-/usr/include/SDL/SDL_quit.h:
+/usr/include/SDL2/SDL_quit.h:
 
-/usr/include/SDL/SDL_loadso.h:
+/usr/include/SDL2/SDL_loadso.h:
 
-/usr/include/SDL/SDL_timer.h:
+/usr/include/SDL2/SDL_timer.h:
 
-/usr/include/SDL/SDL_version.h:
+/usr/include/SDL2/SDL_version.h:
