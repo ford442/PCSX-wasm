@@ -34,7 +34,7 @@ void CheckKeyboard() {
 	while (SDL_PollEvent(&evt)) {	
 		switch (evt.type) {
 			case SDL_KEYDOWN:
-				Key = evt.key.keysym.sym;
+			/* 	Key = evt.key.keysym.sym;
 				found = 0;
 				for (i = 0; i < 2; i++) {
 					for (j = 0; j < DKEY_TOTAL; j++) {
@@ -46,11 +46,11 @@ void CheckKeyboard() {
 				}
 				if (!found ) {
 					g.KeyLeftOver = Key;
-				}
+				} */
 				return;
 
 			case SDL_KEYUP:		
-				Key = evt.key.keysym.sym;
+			/*	Key = evt.key.keysym.sym;
 				found = 0;
 				for (i = 0; i < 2; i++) {
 					for (j = 0; j < DKEY_TOTAL; j++) {
@@ -62,7 +62,7 @@ void CheckKeyboard() {
 				}
 				if (!found ) {
 					g.KeyLeftOver = ((long)Key | 0x40000000);
-				}
+				} */
 				break;
 /*
 			case ClientMessage:
