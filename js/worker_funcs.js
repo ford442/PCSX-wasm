@@ -1,5 +1,4 @@
 var Module;
-FS.mkdir("/");
 if (!Module) Module={};
 Module.setStatus=function (s) {
 postMessage({
@@ -81,6 +80,7 @@ let padStatus1;
 let isoDB;
 let readfile_and_run=function (iso_name,blob) {
 let run_arr=function (arr) {
+FS.mkdir("/");
 FS.createDataFile("/",iso_name,arr,true,true);
 Module.setStatus('Running!');
 pcsx_init("/" + iso_name);
