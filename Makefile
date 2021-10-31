@@ -1,5 +1,5 @@
 CC=emcc
-CFLAGS= -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_DUPLICATE_FUNCTIONS=1 -fno-rtti -fno-exceptions -sSTRICT_JS=1 -sWASM_BIGINT=1 -sPRINTF_LONG_DOUBLE=1 -sSUPPORT_LONGJMP=0 -sASSERTIONS=0 -g -sUSE_PTHREADS=1 -pthread -flto=thin -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -sFORCE_FILESYSTEM=1 -s USE_ZLIB=1 -I./include -I./libpcsxcore
+CFLAGS= -sAGGRESSIVE_VARIABLE_ELIMINATION=1 -sELIMINATE_DUPLICATE_FUNCTIONS=1 -fno-rtti -fno-exceptions -sSTRICT_JS=1 -sWASM_BIGINT=1 -sPRINTF_LONG_DOUBLE=1 -sSUPPORT_LONGJMP=0 -sASSERTIONS=0 -g -flto=thin -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -sFORCE_FILESYSTEM=1 -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
 # WORKER
@@ -30,10 +30,10 @@ ALL: pcsx_worker.js pcsx_ww.js
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o: %.cc
-	$(CC) -x c++ -std=c++2b -c -o $@ $< $(CFLAGS)
+	$(CC) -x c++ -std=c++14 -c -o $@ $< $(CFLAGS)
 
 gui/xbrz.o: gui/xbrz.cpp gui/xbrz.h
-	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++2b -DNDEBUG $<
+	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++14 -DNDEBUG $<
 
 pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CC) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
