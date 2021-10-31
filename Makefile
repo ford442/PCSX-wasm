@@ -1,5 +1,5 @@
 CC=emcc
-CFLAGS=-lworkerfs.js -g -pthread -flto=thin -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -sFORCE_FILESYSTEM=1 -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -lidbfs.js -s USE_ZLIB=1 -I./include -I./libpcsxcore
+CFLAGS=-lworkerfs.js -g -sUSE_PTHREADS=1 -pthread -flto=thin -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -sFORCE_FILESYSTEM=1 -ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -lidbfs.js -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
 # WORKER
