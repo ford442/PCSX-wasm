@@ -77,7 +77,7 @@ void render(int x, int y, int sx, int sy, int dx, int dy, int rgb24)
   srcrect.y = 0;
   srcrect.w = dx;
   srcrect.h = dy;
-  SDL_BlitScaled(sdl_ximage, &srcrect, sdl_display, &dstrect);
+//    SDL_BlitScaled(sdl_ximage, &srcrect, sdl_display, &dstrect);
 //  SDL_Flip(sdl_display);
 }
 void *var_ptrs[] = {
