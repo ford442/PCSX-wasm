@@ -90,7 +90,7 @@ typedef struct tagKeyDef {
 		uint16_t	Hat;	// 8-bit for hat number, 8-bit for direction
 		uint16_t	Button; // button number
 	} J;
-	SDLKey		Key;
+//	SDLKey		Key;
 } KEYDEF;
 
 enum { ANALOG_XP = 0, ANALOG_XM, ANALOG_YP, ANALOG_YM };
