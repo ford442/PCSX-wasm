@@ -8,7 +8,7 @@ void SetupSound(void);
 
 unsigned char psxVub[2 * 1024 * 1024];
 unsigned short *psxVuw;
-static SDL_Surface *sdl_display;
+static SDL_Window *sdl_display;
 static SDL_Surface *sdl_ximage;
 SDL_Rect srcrect;
 SDL_Rect dstrect;
