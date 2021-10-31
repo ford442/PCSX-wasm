@@ -115,10 +115,10 @@ run_arr(new Uint8Array(this.result))
 }
 reader.readAsArrayBuffer(blob);
 }
-let event_history=[];
-let clear_event_history=function () {
+var event_history=[];
+var clear_event_history=function () {
 self.onmessage=main_onmessage;
-for (let i in event_history) {
+for (var i in event_history) {
 main_onmessage(event_history[i]);
 }
 event_history=[];
