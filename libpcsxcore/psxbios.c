@@ -877,7 +877,7 @@ void psxBios_malloc() { // 0x33
 	// return pointer to allocated memory
 	v0 = ((unsigned long)chunk - (unsigned long)psxM) + 4;
 	v0|= 0x80000000;
-	SysPrintf ("malloc %x,%x\n", v0, a0);
+	// SysPrintf ("malloc %x,%x\n", v0, a0);
 	pc0 = ra;
 }
 
@@ -887,7 +887,7 @@ void psxBios_free() { // 0x34
 	PSXBIOS_LOG("psxBios_%s\n", biosA0n[0x34]);
 #endif
 
-	SysPrintf("free %x: %x bytes\n", a0, *(u32*)(Ra0-4));
+	// SysPrintf("free %x: %x bytes\n", a0, *(u32*)(Ra0-4));
 
 	*(u32*)(Ra0-4) |= 1;	// set chunk to free
 	pc0 = ra;
