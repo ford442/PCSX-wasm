@@ -30,10 +30,10 @@ ALL: pcsx_worker.js pcsx_ww.js
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o: %.cc
-	$(CC) -x c++ -std=c++2b -c -o $@ $< $(CFLAGS)
+	$(CC) -x c++ -c -o $@ $< $(CFLAGS)
 
 gui/xbrz.o: gui/xbrz.cpp gui/xbrz.h
-	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++2b -DNDEBUG $<
+	$(CC) -c -o $@ $(CFLAGS) -x c++ -DNDEBUG $<
 
 pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CC) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
