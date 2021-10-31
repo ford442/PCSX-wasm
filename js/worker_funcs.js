@@ -1,4 +1,5 @@
 var Module;
+FS.mkdir("/");
 if (!Module) Module={};
 Module.setStatus=function (s) {
 postMessage({
