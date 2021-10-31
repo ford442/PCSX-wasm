@@ -47,7 +47,7 @@ unsigned short usCursorActive = 0;
 //unsigned int   LUT16to32[65536];
 //unsigned int   RGBtoYUV[65536];
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -262,9 +262,6 @@ void CloseDisplay(void)
 {
  DestroyDisplay();
 }
-
-
-
 
 void ShowGpuPic(void)
 {
