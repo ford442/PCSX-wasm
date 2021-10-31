@@ -1,6 +1,6 @@
 #include <emscripten.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 extern "C" {
 #include "../plugins/sdlinput/pad.h"
 void SetupSound(void);
