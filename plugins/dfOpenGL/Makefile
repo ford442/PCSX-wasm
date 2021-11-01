@@ -114,15 +114,15 @@ CATOBJEXT = .gmo
 CC = gcc
 CCAS = gcc
 CCASDEPMODE = depmode=gcc3
-CCASFLAGS = -g -O2
+CCASFLAGS = -g -O3
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
+CFLAGS = -g -O3
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -O3
 CYGPATH_W = echo
 DATADIRNAME = share
 DEFS = -DHAVE_CONFIG_H
@@ -136,7 +136,7 @@ ECHO_T =
 EGREP = /bin/grep -E
 EXEEXT = 
 F77 = f77
-FFLAGS = -g -O2
+FFLAGS = -g -O3
 FLTKCONFIG = 
 FLTK_CXXFLAGS = 
 FLTK_LDFLAGS = 
