@@ -105,8 +105,8 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 32, 0);
-    sdl_ximage = SDL_CreateRGBSurface(0, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
+    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE);
+    sdl_ximage = SDL_CreateRGBSurface(0, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, SDL_SWSURFACE);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
