@@ -58,7 +58,7 @@ static void InitSDL() {
 		printf("case 1\n");
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
-		SDL_Init(SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE);
+		SDL_Init(SDL_INIT_AUDIO);
 		printf("case 2\n");
 	}
 }
