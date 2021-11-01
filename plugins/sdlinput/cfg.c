@@ -24,7 +24,7 @@ GLOBALDATA			g;
 void SetDefaultConfig() {
 	memset(&g.cfg, 0, sizeof(g.cfg));
 
-	g.cfg.Threaded = 0;
+	g.cfg.Threaded = 1;
 
 	g.cfg.PadDef[0].DevNum = 0;
 	g.cfg.PadDef[1].DevNum = 1;
@@ -117,11 +117,11 @@ void LoadPADConfig() {
 
 	SetDefaultConfig();
 
-	fp = fopen(CONFIG_FILE, "r");
-	if (fp == NULL) {
+	// fp = fopen(CONFIG_FILE, "r");
+	// if (fp == NULL) {
 		printf("cannot open %s\n", CONFIG_FILE);
 		return;
-	}
+	// }
 
 	current = 0;
 
