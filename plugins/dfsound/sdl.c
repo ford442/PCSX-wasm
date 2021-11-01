@@ -65,7 +65,6 @@ static void InitSDL() {
 
 static void DestroySDL() {
 		SDL_Quit();
-	}
 }
 
 void SetupSound(void) {
