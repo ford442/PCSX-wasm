@@ -21,9 +21,7 @@ void Blit32(uint32_t *dest_buf, int x, int y, int sx, int sy, int rgb24, int32_t
   uint32_t lu, lr, lg, lb;
   unsigned short s;
   unsigned short row, column;
-
   uint32_t *destpix;
-
   if (rgb24)
   {
     for (column = 0; column < sy; column++)
@@ -43,7 +41,6 @@ void Blit32(uint32_t *dest_buf, int x, int y, int sx, int sy, int rgb24, int32_t
   }
   else
   {
-    //printf("blt 2\n");
     for (column = 0; column < sy; column++)
     {
       startxy = (1024 * (column + y)) + x;
@@ -58,14 +55,17 @@ void Blit32(uint32_t *dest_buf, int x, int y, int sx, int sy, int rgb24, int32_t
   }
 }
 
-void BlitSDL32(SDL_Surface *surface, int x, int y, int sx, int sy, int rgb24)
-{
-  EM_ASM_({ my_SDL_LockSurface($0); }, surface);
-  Blit32((uint32_t *)surface->pixels, x, y, sx, sy, rgb24, surface->pitch >> 2);
-  EM_ASM_({ my_SDL_UnlockSurface($0); }, surface);
-}
+
 
 extern "C" {
+  
+  void BlitSDL32(SDL_Surface *surface, int x, int y, int sx, int sy, int rgb24)
+{
+    EM_ASM_({ my_SDL_LockSurface($0); }, surface);
+    Blit32((uint32_t *)surface->pixels, x, y, sx, sy, rgb24, surface->pitch >> 2);
+    EM_ASM_({ my_SDL_UnlockSurface($0); }, surface);
+  }
+  
 void render(int x, int y, int sx, int sy, int dx, int dy, int rgb24)
 {
   BlitSDL32(sdl_ximage, x, y, sx, sy, rgb24);
@@ -103,8 +103,8 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ASYNCBLIT | SDL_NOFRAME);
-    sdl_ximage = SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ASYNCBLIT | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
+    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_NOFRAME);
+    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
