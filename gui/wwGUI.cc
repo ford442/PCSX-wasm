@@ -6,7 +6,6 @@ extern "C" {
 #include "../plugins/sdlinput/pad.h"
 void SetupSound(void);
 }
-
 unsigned char psxVub[2 * 1024 * 1024];
 unsigned short *psxVuw;
 static SDL_Surface *sdl_display;
@@ -54,11 +53,7 @@ void Blit32(uint32_t *dest_buf, int x, int y, int sx, int sy, int rgb24, int32_t
     }
   }
 }
-
-
-
 extern "C" {
-  
   void BlitSDL32(SDL_Surface *surface, int x, int y, int sx, int sy, int rgb24)
 {
     EM_ASM_({ my_SDL_LockSurface($0); }, surface);
@@ -103,15 +98,14 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_NOFRAME);
-    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
+    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ASYNCBLIT | SDL_NOFRAME);
+    sdl_ximage = SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ASYNCBLIT | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
   LoadPADConfig();
   EM_ASM(
-      FS.mkdir('/cfg');
-   //   FS.mount(MEMFS, {}, '/cfg/');
+  FS.mkdir('/cfg');
   );
   g.PadState[0].PadMode = 0;
   g.PadState[0].PadID = 0x41;
