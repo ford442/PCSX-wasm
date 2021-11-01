@@ -73,7 +73,7 @@ void SetupSound(void) {
 	if (pSndBuffer != NULL) return;
 	InitSDL();
 
-	spec.freq = 22050;
+	spec.freq = 44100;
 	spec.format = AUDIO_S16SYS;
 	spec.channels = 2;
 	spec.samples = 512;
