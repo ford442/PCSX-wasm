@@ -103,10 +103,8 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 24, SDL_SWSURFACE | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
-);
-    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
-, 640, 480, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
+    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_SWSURFACE | SDL_NOFRAME);
+    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
@@ -114,17 +112,6 @@ int main()
   EM_ASM(
       FS.mkdir('/cfg');
    //   FS.mount(MEMFS, {}, '/cfg/');
-
-      // sync from persisted state into memory and then
-      // run the 'test' function
-  //    FS.syncfs(true, function(err) {
-   //     if(err){
-   //       cout_print("syncfs error!!")
-   //     }
-    //    assert(!err);
-  //     _LoadPADConfig();
-   //     cout_print("idbfs loaded\n");
-    //  });
   );
   g.PadState[0].PadMode = 0;
   g.PadState[0].PadID = 0x41;
