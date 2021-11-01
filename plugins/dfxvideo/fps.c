@@ -28,8 +28,8 @@ float          fFrameRateHz=0;
 DWORD          dwFrameRateTicks=16;
 float          fFrameRate;
 int            iFrameLimit;
-int            UseFrameLimit=0;
-int            UseFrameSkip=0;
+int            UseFrameLimit=1;
+int            UseFrameSkip=1;
 
 // FPS skipping / limit
 BOOL   bInitCap = TRUE;
