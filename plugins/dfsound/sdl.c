@@ -74,7 +74,7 @@ void SetupSound(void) {
 	InitSDL();
 
 	spec.freq = 22050;
-	spec.format = AUDIO_S16LSB;
+	spec.format = AUDIO_S16SYS;
 	spec.channels = 2;
 	spec.samples = 512;
 	spec.callback = SOUND_FillAudio;
