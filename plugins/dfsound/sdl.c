@@ -54,7 +54,7 @@ static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
 
 static void InitSDL() {
 	printf("spu initsdl\n");
-	if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
+	if (SDL_WasInit(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)) {
 		printf("case 1\n");
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
@@ -64,9 +64,6 @@ static void InitSDL() {
 }
 
 static void DestroySDL() {
-	if (SDL_WasInit(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO)) {
-		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-	} else {
 		SDL_Quit();
 	}
 }
