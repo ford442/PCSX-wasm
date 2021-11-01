@@ -1,4 +1,5 @@
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 extern "C" {
@@ -88,8 +89,6 @@ void *get_ptr(int i)
 {
   return var_ptrs[i];
 }
-#include <emscripten.h>
-#include <emscripten/html5.h>
 EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEvent, void *userData)
 {
   printf("eventtype %d\n", eventType);
@@ -99,16 +98,15 @@ EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEve
 }
 int main()
 {
-  //	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_AUDIO)<0)
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0)
     printf("(x) Failed to Init SDL!!!\n");
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_DOUBLEBUF | SDL_HWPALETTE | SDL_ANYFORMAT  
+    sdl_display = SDL_SetVideoMode(640, 480, 24, SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
 );
-    sdl_ximage = SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_DOUBLEBUF | SDL_HWPALETTE | SDL_ANYFORMAT  
-, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, SDL_SWSURFACE);
+    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
+, 640, 480, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
