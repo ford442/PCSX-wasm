@@ -103,9 +103,9 @@ int main()
   else
   {
     printf("sdl init ok\n");
-    sdl_display = SDL_SetVideoMode(640, 480, 24, SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
+    sdl_display = SDL_SetVideoMode(640, 480, 24, SDL_SWSURFACE | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
 );
-    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_ASYNCBLIT | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
+    sdl_ximage = SDL_CreateRGBSurface(SDL_SWSURFACE | SDL_FULLSCREEN | SDL_HWPALETTE | SDL_ANYFORMAT  
 , 640, 480, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
