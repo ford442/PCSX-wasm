@@ -115,7 +115,7 @@ int main()
   LoadPADConfig();
   EM_ASM(
       FS.mkdir('/cfg');
-      FS.mount(MEMFS, {}, '/cfg/');
+   //   FS.mount(MEMFS, {}, '/cfg/');
 
       // sync from persisted state into memory and then
       // run the 'test' function
