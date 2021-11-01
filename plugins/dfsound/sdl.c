@@ -30,7 +30,7 @@ short			*pSndBuffer = NULL;
 int				iBufSize = 0;
 volatile int	iReadPos = 0, iWritePos = 0;
 
-static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
+static void SOUND_FillAudio(void *unused, Uint8* stream, int len) {
 	short *p = (short *)stream;
 	int lBytes=0;
 
@@ -54,7 +54,7 @@ static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
 
 static void InitSDL() {
 	printf("spu initsdl\n");
-	if (SDL_WasInit(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)) {
+	if (SDL_WasInit(SDL_INIT_AUDIO)) {
 		printf("case 1\n");
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
@@ -75,7 +75,7 @@ void SetupSound(void) {
 
 	spec.freq = 44100;
 	spec.format = AUDIO_S16SYS;
-	spec.channels = iDisStereo ? 1 : 2;
+	spec.channels = 2;
 	spec.samples = 512;
 	spec.callback = SOUND_FillAudio;
 
