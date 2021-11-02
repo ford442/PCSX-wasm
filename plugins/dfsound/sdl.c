@@ -23,7 +23,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-#define BUFFER_SIZE		(44100)
+#define BUFFER_SIZE		(44100 * 1024)
 
 
 short			*pSndBuffer = NULL;
@@ -76,7 +76,7 @@ void SetupSound(void) {
 	spec.freq = 44100;
 	spec.format = AUDIO_S16SYS;
 	spec.channels = iDisStereo ? 1 : 2;
-	spec.samples = 512;
+	spec.samples = 1024;
 	spec.callback = SOUND_FillAudio;
 
 	if (SDL_OpenAudio(&spec, NULL) < 0) {
