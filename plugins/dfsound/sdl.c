@@ -23,7 +23,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-#define BUFFER_SIZE		(22050)
+#define BUFFER_SIZE		(44100)
 
 
 short			*pSndBuffer = NULL;
