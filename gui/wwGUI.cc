@@ -12,7 +12,7 @@ static SDL_Surface *sdl_display;
 static SDL_Surface *sdl_ximage;
 SDL_Rect srcrect;
 SDL_Rect dstrect;
-int iDisStereo = 0;
+int iDisStereo = 1;
 void Blit32(uint32_t *dest_buf, int x, int y, int sx, int sy, int rgb24, int32_t lPitch)
 {
   unsigned char *pD;
