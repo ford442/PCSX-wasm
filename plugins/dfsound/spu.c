@@ -68,7 +68,7 @@ int             iUseTimer=2;
 int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
-int             iUseReverb=0;
+int             iUseReverb=1;
 int             iUseInterpolation=0;
 int             iDisStereo=1;
 
