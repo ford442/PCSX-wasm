@@ -160,8 +160,8 @@ void ReadConfig(void)
  iSPUIRQWait=1;
  iUseTimer=2;
  iUseReverb=2;
- iUseInterpolation=2;
- iDisStereo=0;
+ iUseInterpolation=0;
+ iDisStereo=1;
  
  //ReadConfigFile();
 }
