@@ -69,11 +69,10 @@ void SetupSound(void) {
 	printf("setupsound\n");
 	if (pSndBuffer != NULL) return;
 	InitSDL();
-
-//	spec.freq = 44100;
-	// spec.format = AUDIO_S16LSB;
+	spec.freq = 44100;
+	spec.format = AUDIO_S16LSB;
  	spec.channels = 2;
-	// spec.samples = 4096;
+	spec.samples = 256;
 	spec.callback = SOUND_FillAudio;
 
 	if (SDL_OpenAudio(&spec, NULL) < 0) {
