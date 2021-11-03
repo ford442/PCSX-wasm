@@ -23,7 +23,7 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-#define BUFFER_SIZE		32767
+#define BUFFER_SIZE		44100
 
 short *pSndBuffer = NULL;
 int iBufSize = 0;
@@ -70,7 +70,7 @@ void SetupSound(void) {
 	if (pSndBuffer != NULL) return;
 	InitSDL();
 	spec.freq = 44100;
-	spec.format = AUDIO_S16LSB;
+	spec.format = AUDIO_S16SYS;
  	spec.channels = 2;
 	spec.samples = 32767;
 	spec.callback = SOUND_FillAudio;
