@@ -21,7 +21,7 @@
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
 
-#define BUFFER_SIZE		(44100+4096)
+#define BUFFER_SIZE		2*(44100+4096)
 short *pSndBuffer = NULL;
 int iBufSize = 0;
 volatile int iReadPos = 0, iWritePos = 0;
