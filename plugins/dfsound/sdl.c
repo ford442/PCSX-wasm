@@ -25,15 +25,15 @@
 short *pSndBuffer = NULL;
 int iBufSize = 0;
 volatile int iReadPos = 0, iWritePos = 0;
-static void SOUND_FillAudio(void *unused, Uint8* stream, int len) {
+static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
 	short *p = (short *)stream;
-	int lBytes=0;
+	int lBytes = 0;
 	len /= sizeof(short);
 	while (iReadPos != iWritePos && len > 0) {
 		*p++ = pSndBuffer[iReadPos++];
 		if (iReadPos >= iBufSize) iReadPos = 0;
 		--len;
-		lBytes+=2;
+		lBytes += 2;
 	}
     EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes", lBytes: $0});}, lBytes);
 	while (len > 0) {
