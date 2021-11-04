@@ -23,15 +23,11 @@
 GLOBALDATA			g;
 void SetDefaultConfig() {
 	memset(&g.cfg, 0, sizeof(g.cfg));
-
-	g.cfg.Threaded = 1;
-
+	g.cfg.Threaded = 0;
 	g.cfg.PadDef[0].DevNum = 0;
 	g.cfg.PadDef[1].DevNum = 1;
-
 	g.cfg.PadDef[0].Type = PSE_PAD_TYPE_STANDARD;
 	g.cfg.PadDef[1].Type = PSE_PAD_TYPE_STANDARD;
-
 	// Pad1 keyboard
 	g.cfg.PadDef[0].KeyDef[DKEY_SELECT].Key = SDLK_c;
 	g.cfg.PadDef[0].KeyDef[DKEY_START].Key = SDLK_v;
