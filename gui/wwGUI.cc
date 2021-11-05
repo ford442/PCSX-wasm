@@ -2,6 +2,8 @@
 #include <emscripten/html5.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
+#include <pthread.h>
+
 extern "C" {
 #include "../plugins/sdlinput/pad.h"
 void SetupSound(void);
