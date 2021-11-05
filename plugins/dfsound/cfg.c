@@ -159,9 +159,9 @@ void ReadConfig(void)
  iXAPitch=0;
  iSPUIRQWait=1;
  iUseTimer=2;
- iUseReverb=2;
+ iUseReverb=0;
  iUseInterpolation=0;
- iDisStereo=1;
+ iDisStereo=0;
  
  //ReadConfigFile();
 }
