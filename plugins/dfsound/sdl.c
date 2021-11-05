@@ -45,9 +45,9 @@ static void InitSDL() {
 	printf("spu initsdl\n");
 	if (SDL_WasInit(SDL_INIT_AUDIO)) {
 		printf("case 1\n");
-		SDL_InitSubSystem(SDL_INIT_AUDIO);
+	//	SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
-		SDL_Init(SDL_INIT_AUDIO);
+	//	SDL_Init(SDL_INIT_AUDIO);
 		printf("case 2\n");
 	}
 }
