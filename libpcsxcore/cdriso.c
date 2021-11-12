@@ -150,7 +150,8 @@ void playcdda()
 	
 	long			t, d, i, s;
 	unsigned char	tmp;
-	 
+	 static boolean cddaBigEndian = TRUE;
+
 
 
 		t = GetTickCount() + CDDA_FRAMETIME;
