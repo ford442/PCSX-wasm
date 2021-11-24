@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "../include/config.h"
+#include "config.h"
 
 // System includes
 #include <stdio.h>
