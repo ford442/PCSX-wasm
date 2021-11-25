@@ -17,55 +17,53 @@
  */
 #include "stdafx.h"
 #include "externals.h"
-#include <SDL/SDL.h>
 #include <emscripten/emscripten.h>
-#include <emscripten/html5.h>
 
 #define BUFFER_SIZE		44100
-short *pSndBuffer = NULL;
-int iBufSize = 0;
-volatile int iReadPos = 0, iWritePos = 0;
-static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
-	short *p = (short *)stream;
-	int lBytes = 0;
-	len /= sizeof(short);
-	while (iReadPos != iWritePos && len > 0) {
-		*p++ = pSndBuffer[iReadPos++];
-		if (iReadPos >= iBufSize) iReadPos = 0;
-		--len;
-		lBytes += 2;
-	}
-    EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes", lBytes: $0});}, lBytes);
-	while (len > 0) {
-		*p++ = 0;
-		--len;
-	}
+short *pSndBuffer=NULL;
+int iBufSize=0;
+volatile int iReadPos=0,iWritePos=0;
+static void SOUND_FillAudio(void *unused,Uint8 *stream,int len) {
+short *p=(short *)stream;
+int lBytes=0;
+len /= sizeof(short);
+while (iReadPos != iWritePos && len > 0) {
+*p++=pSndBuffer[iReadPos++];
+if (iReadPos >= iBufSize) iReadPos=0;
+--len;
+lBytes += 2;
+}
+EM_ASM({pcsx_worker.postMessage({cmd:"soundBytes",lBytes:$0});},lBytes);
+while (len > 0) {
+*p++=0;
+--len;
+}
 }
 static void InitSDL() {
-	printf("spu initsdl\n");
-	if (SDL_WasInit(SDL_INIT_AUDIO)) {
-		printf("case 1\n");
-		SDL_InitSubSystem(SDL_INIT_AUDIO);
-	} else {
-		SDL_Init(SDL_INIT_AUDIO);
-		printf("case 2\n");
-	}
+printf("spu initsdl\n");
+if (SDL_WasInit(SDL_INIT_AUDIO)) {
+printf("case 1\n");
+SDL_InitSubSystem(SDL_INIT_AUDIO);
+} else {
+SDL_Init(SDL_INIT_AUDIO);
+printf("case 2\n");
+}
 }
 static void DestroySDL() {
-		SDL_Quit();
+SDL_Quit();
 }
 void SetupSound(void) {
-	SDL_AudioSpec spec;
-	printf("setupsound\n");
-	if (pSndBuffer != NULL) return;
-	InitSDL();
-	spec.freq = 44100;
-	spec.format = AUDIO_S16SYS;
-	spec.channels = iDisStereo ? 1 : 2;
-	spec.samples = 512;
-	spec.callback = SOUND_FillAudio;
-	if (SDL_OpenAudio(&spec, NULL) < 0) {
-		DestroySDL();
+SDL_AudioSpec spec;
+printf("setupsound\n");
+if (pSndBuffer != NULL) return;
+InitSDL();
+spec.freq = 44100;
+spec.format = AUDIO_S16SYS;
+spec.channels = 2;
+spec.samples = 1024;
+spec.callback = SOUND_FillAudio;
+if (SDL_OpenAudio(&spec, NULL) < 0) {
+DestroySDL();
 		return;
 	}
 	iBufSize = BUFFER_SIZE;
