@@ -17,7 +17,7 @@
  */
 #include "stdafx.h"
 #include "externals.h"
-#include <SDL/sdl.h>
+#include <SDL/SDL.h>
 #include <emscripten/emscripten.h>
 
 #define BUFFER_SIZE		44100
