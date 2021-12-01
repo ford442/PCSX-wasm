@@ -95,6 +95,9 @@
 /* Version number of package */
 #define VERSION "1.9"
 
+/* define on a big endian system */
+#define __BIGENDIAN__
+
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
 #if defined AC_APPLE_UNIVERSAL_BUILD
@@ -107,8 +110,6 @@
 # endif
 #endif
 
-/* define on a big endian system */
-/* #undef __BIGENDIAN__ */
 
 /* Define if building on a GNU/Linux system. */
 #define __LINUX__ 1
