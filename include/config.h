@@ -96,7 +96,7 @@
 #define VERSION "1.9"
 
 /* define on a big endian system */
-#define __BIGENDIAN__
+// #define __BIGENDIAN__
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
