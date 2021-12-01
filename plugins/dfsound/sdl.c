@@ -17,135 +17,96 @@
  */
 
 #include "stdafx.h"
-
 #include "externals.h"
 #include <SDL/SDL.h>
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
-#endif
 #define BUFFER_SIZE		(22050+4096)
-
 
 short			*pSndBuffer = NULL;
 int				iBufSize = 0;
 volatile int	iReadPos = 0, iWritePos = 0;
-
 static void SOUND_FillAudio(void *unused, Uint8 *stream, int len) {
 	short *p = (short *)stream;
 	int lBytes=0;
-
 	len /= sizeof(short);
-
 	while (iReadPos != iWritePos && len > 0) {
 		*p++ = pSndBuffer[iReadPos++];
 		if (iReadPos >= iBufSize) iReadPos = 0;
 		--len;
 		lBytes+=2;
 	}
-	#ifdef __EMSCRIPTEN__
     EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes", lBytes: $0});}, lBytes);
-	#endif
-	// Fill remaining space with zero
 	while (len > 0) {
 		*p++ = 0;
 		--len;
 	}
 }
-
 static void InitSDL() {
 	printf("spu initsdl\n");
 	if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
 		printf("case 1\n");
+		SDL_SetMainReady();
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
 	} else {
-		SDL_Init(SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE);
+		SDL_SetMainReady();
+		SDL_Init(SDL_INIT_AUDIO);
 		printf("case 2\n");
 	}
 }
-
 static void DestroySDL() {
-	if (SDL_WasInit(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO)) {
-		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-	} else {
-		SDL_Quit();
-	}
 }
-
 void SetupSound(void) {
 	SDL_AudioSpec				spec;
 	printf("setupsound\n");
 	if (pSndBuffer != NULL) return;
 	InitSDL();
-
 	spec.freq = 44100;
 	spec.format = AUDIO_S16SYS;
 	spec.channels = iDisStereo ? 1 : 2;
 	spec.samples = 512;
 	spec.callback = SOUND_FillAudio;
-
 	if (SDL_OpenAudio(&spec, NULL) < 0) {
 		DestroySDL();
 		return;
 	}
-
 	iBufSize = BUFFER_SIZE;
 	if (iDisStereo) iBufSize /= 2;
-
 	pSndBuffer = (short *)malloc(iBufSize * sizeof(short));
 	if (pSndBuffer == NULL) {
 		SDL_CloseAudio();
 		return;
 	}
-
 	iReadPos = 0;
 	iWritePos = 0;
-
 	SDL_PauseAudio(0);
 }
 
 void RemoveSound(void) {
 	if (pSndBuffer == NULL) return;
-
 	SDL_CloseAudio();
 	DestroySDL();
-
 	free(pSndBuffer);
 	pSndBuffer = NULL;
 }
-
 unsigned long SoundGetBytesBuffered(void) {
 	int size;
-
 	if (pSndBuffer == NULL) return SOUNDSIZE;
-
 	size = iReadPos - iWritePos;
 	if (size <= 0) size += iBufSize;
-
 	if (size < iBufSize / 2) return SOUNDSIZE;
-
 	return 0;
 }
-
 void SoundFeedStreamData(unsigned char *pSound, long lBytes) {	
 	short *p = (short *)pSound;
 	long old_lBytes=lBytes;
-	//printf("soundfeedstreamdata %ld\n",lBytes);
-
 	if (pSndBuffer == NULL) return;
-
 	while (lBytes > 0) {
 		if (((iWritePos + 1) % iBufSize) == iReadPos) {
-			//printf("sound buffer full\n");
-			#ifdef __EMSCRIPTEN__
 			EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes", lBytes: $0});}, old_lBytes-lBytes);
-			#endif
 			break;}
-
 		pSndBuffer[iWritePos] = *p++;
-
 		++iWritePos;
 		if (iWritePos >= iBufSize) iWritePos = 0;
-
 		lBytes -= sizeof(short);
 	}
 }
