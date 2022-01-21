@@ -26,8 +26,8 @@ static short *pSndBuffer=NULL;
 static int iBufSize=0;
 static volatile int iReadPos=0,iWritePos=0;
 static void SOUND_FillAudio(void *unused,Uint8 *stream,int len) {
-short *p=(short *)stream;
-int lBytes=0;
+ short *p=(short *)stream;
+ int lBytes=0;
 len /= sizeof(short);
 while (iReadPos != iWritePos && len > 0) {*p++=pSndBuffer[iReadPos++];
 if (iReadPos >= iBufSize) iReadPos=0;
@@ -41,12 +41,18 @@ while (len > 0) {
 }
 }
 static void InitSDL() {
+printf("spu initsdl\n");
+	// if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
+	//	printf("case 1\n");
+	//	SDL_InitSubSystem(SDL_INIT_AUDIO);
+//	} else {
 SDL_Init(SDL_INIT_AUDIO);
 printf("case 2\n");
+	// }
 }
 static void DestroySDL() {
 }
-void SetupSound(void) {
+ void SetupSound(void) {
 SDL_AudioSpec				spec;
 printf("setupsound\n");
 if (pSndBuffer != NULL) return;
@@ -71,32 +77,33 @@ iReadPos=0;
 iWritePos=0;
 SDL_PauseAudio(0);
 }
+
 static void RemoveSound(void) {
-if (pSndBuffer == NULL) return;
-SDL_CloseAudio();
-DestroySDL();
-free(pSndBuffer);
-pSndBuffer=NULL;
+	if (pSndBuffer == NULL) return;
+	SDL_CloseAudio();
+	DestroySDL();
+	free(pSndBuffer);
+	pSndBuffer=NULL;
 }
-unsigned long SoundGetBytesBuffered(void) {
-static int size;
-if (pSndBuffer == NULL) return SOUNDSIZE;
-size=iReadPos - iWritePos;
-if (size <= 0) size += iBufSize;
-if (size < iBufSize / 2) return SOUNDSIZE;
-return 0;
+ unsigned long SoundGetBytesBuffered(void) {
+	static int size;
+	if (pSndBuffer == NULL) return SOUNDSIZE;
+	size=iReadPos - iWritePos;
+	if (size <= 0) size += iBufSize;
+	if (size < iBufSize / 2) return SOUNDSIZE;
+	return 0;
 }
 void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
-short *p=(short *)pSound;
-long old_lBytes=lBytes;
-if (pSndBuffer == NULL) return;
-while (lBytes > 0) {
-if (((iWritePos + 1) % iBufSize) == iReadPos) {
-EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes",lBytes: $0});},old_lBytes-lBytes);
-break;}
-pSndBuffer[iWritePos]=*p++;
-++iWritePos;
-if (iWritePos >= iBufSize) iWritePos=0;
-lBytes -= sizeof(short);
-}
+	 short *p=(short *)pSound;
+	 long old_lBytes=lBytes;
+	if (pSndBuffer == NULL) return;
+	while (lBytes > 0) {
+		if (((iWritePos + 1) % iBufSize) == iReadPos) {
+			EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes",lBytes: $0});},old_lBytes-lBytes);
+			break;}
+		pSndBuffer[iWritePos]=*p++;
+		++iWritePos;
+		if (iWritePos >= iBufSize) iWritePos=0;
+		lBytes -= sizeof(short);
+	}
 }
