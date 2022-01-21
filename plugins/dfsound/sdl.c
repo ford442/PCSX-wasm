@@ -85,7 +85,7 @@ static void RemoveSound(void) {
 	free(pSndBuffer);
 	pSndBuffer=NULL;
 }
-static unsigned long SoundGetBytesBuffered(void) {
+ unsigned long SoundGetBytesBuffered(void) {
 	static int size;
 	if (pSndBuffer == NULL) return SOUNDSIZE;
 	size=iReadPos - iWritePos;
