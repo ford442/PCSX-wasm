@@ -208,14 +208,14 @@ void ReadGPUConfig(void)
  iColDepth=32;
  iWindowMode=1;
  iMaintainAspect=0;
- UseFrameLimit=1;
+ UseFrameLimit=01;
  UseFrameSkip=0;
  iFrameLimit=2;
- fFrameRate=200.0f;
+ fFrameRate=60.0f;
  dwCfgFixes=0;
  iUseFixes=0;
  iUseNoStretchBlt=0;
- iUseDither=0;
+ iUseDither=1;
  iShowFPS=0;
 
  // read sets
@@ -249,11 +249,11 @@ out = fopen(t,"rb");
   UseFrameLimit=0;
   UseFrameSkip=0;
   iFrameLimit=2;
-  fFrameRate=200.0f;
+  fFrameRate=60.0f;
   dwCfgFixes=0;
   iUseFixes=0;
   iUseNoStretchBlt=0;
-  iUseDither=0;
+  iUseDither=1;
   iShowFPS=0;
 
   size = 0;
