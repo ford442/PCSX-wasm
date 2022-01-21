@@ -208,7 +208,7 @@ void ReadGPUConfig(void)
  iColDepth=32;
  iWindowMode=1;
  iMaintainAspect=0;
- UseFrameLimit=01;
+ UseFrameLimit=0;
  UseFrameSkip=0;
  iFrameLimit=2;
  fFrameRate=60.0f;
