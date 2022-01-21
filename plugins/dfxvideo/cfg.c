@@ -29,47 +29,54 @@
 #include "cfg.h"
 #include "gpu.h"
 
+
+// CONFIG FILE helpers....
+// some helper macros:
+
 #define GetValue(name, var) \
- p=strstr(pB, name); \
+ p = strstr(pB, name); \
  if (p != NULL) { \
   p+=strlen(name); \
   while ((*p == ' ') || (*p == '=')) p++; \
-  if (*p != '\n') var=atoi(p); \
+  if (*p != '\n') var = atoi(p); \
  }
+
 #define GetFloatValue(name, var) \
- p=strstr(pB, name); \
+ p = strstr(pB, name); \
  if (p != NULL) { \
   p+=strlen(name); \
   while ((*p == ' ') || (*p == '=')) p++; \
-  if (*p != '\n') var=(float)atof(p); \
+  if (*p != '\n') var = (float)atof(p); \
  }
+
 #define SetValue(name, var) \
- p=strstr(pB, name); \
+ p = strstr(pB, name); \
  if (p != NULL) { \
   p+=strlen(name); \
   while ((*p == ' ') || (*p == '=')) p++; \
   if (*p != '\n') { \
-   len=sprintf(t1, "%d", var); \
+   len = sprintf(t1, "%d", var); \
    strncpy(p, t1, len); \
-   if (p[len] != ' ' && p[len] != '\n' && p[len] != 0) p[len]=' '; \
+   if (p[len] != ' ' && p[len] != '\n' && p[len] != 0) p[len] = ' '; \
   } \
  } \
  else { \
-  size+=sprintf(pB+size, "%s=%d\n", name, var); \
+  size+=sprintf(pB+size, "%s = %d\n", name, var); \
  }
+
 #define SetFloatValue(name, var) \
- p=strstr(pB, name); \
+ p = strstr(pB, name); \
  if (p != NULL) { \
   p+=strlen(name); \
   while ((*p == ' ') || (*p == '=')) p++; \
   if (*p != '\n') { \
-   len=sprintf(t1, "%.1f", (double)var); \
+   len = sprintf(t1, "%.1f", (double)var); \
    strncpy(p, t1, len); \
-   if (p[len] != ' ' && p[len] != '\n' && p[len] != 0) p[len]=' '; \
+   if (p[len] != ' ' && p[len] != '\n' && p[len] != 0) p[len] = ' '; \
   } \
  } \
  else { \
-  size+=sprintf(pB+size, "%s=%.1f\n", name, (double)var); \
+  size+=sprintf(pB+size, "%s = %.1f\n", name, (double)var); \
  }
 #if 0
 static void ReadConfigFile()
@@ -77,56 +84,79 @@ static void ReadConfigFile()
  struct stat buf;
  FILE *in;char t[256];int len, size;
  char * pB, * p;
+
+
    strcpy(t,"dfxvideo.cfg");
-   in=fopen(t,"rb");
+   in = fopen(t,"rb");
+
  if (stat(t, &buf) == -1) return;
- size=buf.st_size;
- in=fopen(t,"rb");
+ size = buf.st_size;
+
+ in = fopen(t,"rb");
  if (!in) return;
+
  pB=(char *)malloc(size + 1);
  memset(pB,0,size + 1);
- len=fread(pB, 1, size, in);
+
+ len = fread(pB, 1, size, in);
  fclose(in);
+
  GetValue("ResX", iResX);
  if(iResX<20) iResX=20;
  iResX=(iResX/4)*4;
+
  GetValue("ResY", iResY);
  if(iResY<20) iResY=20;
  iResY=(iResY/4)*4;
+
  iWinSize=MAKELONG(iResX,iResY);
+
  GetValue("NoStretch", iUseNoStretchBlt);
+
  GetValue("Dithering", iUseDither);
+
  GetValue("FullScreen", iWindowMode);
  if(iWindowMode!=0) iWindowMode=0;
  else               iWindowMode=1;
+
  GetValue("ShowFPS", iShowFPS);
  if(iShowFPS<0) iShowFPS=0;
  if(iShowFPS>1) iShowFPS=1;
+
  GetValue("Maintain43", iMaintainAspect);
  if(iMaintainAspect<0) iMaintainAspect=0;
  if(iMaintainAspect>1) iMaintainAspect=1;
+
  GetValue("UseFrameLimit", UseFrameLimit);
  if(UseFrameLimit<0) UseFrameLimit=0;
  if(UseFrameLimit>1) UseFrameLimit=1;
+
  GetValue("UseFrameSkip", UseFrameSkip);
  if(UseFrameSkip<0) UseFrameSkip=0;
  if(UseFrameSkip>1) UseFrameSkip=1;
+
  GetValue("FPSDetection", iFrameLimit);
  if(iFrameLimit<1) iFrameLimit=1;
  if(iFrameLimit>2) iFrameLimit=2;
+
  GetFloatValue("FrameRate", fFrameRate);
  fFrameRate/=10;
  if(fFrameRate<10.0f)   fFrameRate=10.0f;
  if(fFrameRate>1000.0f) fFrameRate=1000.0f;
+
  GetValue("CfgFixes", dwCfgFixes);
+
  GetValue("UseFixes", iUseFixes);
  if(iUseFixes<0) iUseFixes=0;
  if(iUseFixes>1) iUseFixes=1;
+
  free(pB);
 }
+
 void ExecCfg(char *arg) {
 	char cfg[256];
 	struct stat buf;
+
 	strcpy(cfg, "./cfgDFXVideo");
 	if (stat(cfg, &buf) != -1) {
 		if (fork() == 0) {
@@ -135,6 +165,7 @@ void ExecCfg(char *arg) {
 		}
 		return;
 	}
+
 	strcpy(cfg, "./cfg/cfgDFXVideo");
 	if (stat(cfg, &buf) != -1) {
 		if (fork() == 0) {
@@ -143,6 +174,7 @@ void ExecCfg(char *arg) {
 		}
 		return;
 	}
+
 	sprintf(cfg, "%s/.pcsx/plugins/cfg/cfgDFXVideo", getenv("HOME"));
 	if (stat(cfg, &buf) != -1) {
 		if (fork() == 0) {
@@ -151,27 +183,32 @@ void ExecCfg(char *arg) {
 		}
 		return;
 	}
-printf("ERROR: cfgDFXVideo file not found!\n");
+
+	printf("ERROR: cfgDFXVideo file not found!\n");
 }
+
 void SoftDlgProc(void)
 {
 	ExecCfg("CFG");
 }
+
 void AboutDlgProc(void)
 {
 	char args[256];
+
 	sprintf(args, "ABOUT");
 	ExecCfg(args);
 }
 #endif
 void ReadGPUConfig(void)
 {
+ // defaults
  iResX=640;iResY=480;
  iWinSize=MAKELONG(iResX,iResY);
  iColDepth=32;
  iWindowMode=1;
  iMaintainAspect=0;
- UseFrameLimit=0;
+ UseFrameLimit=01;
  UseFrameSkip=0;
  iFrameLimit=2;
  fFrameRate=60.0f;
@@ -180,20 +217,29 @@ void ReadGPUConfig(void)
  iUseNoStretchBlt=0;
  iUseDither=1;
  iShowFPS=0;
+
+ // read sets
+ //ReadConfigFile();
+
+ // additional checks
  if(!iColDepth)       iColDepth=32;
  if(iUseFixes)        dwActFixes=dwCfgFixes;
  SetFixes();
 }
 #if 0
 void WriteConfig(void) {
+
  struct stat buf;
  FILE *out;char t[256];int len, size;
  char * pB, * p; char t1[8];
+
 strcpy(t,"dfxvideo.cfg");
-out=fopen(t,"rb");
- if (stat(t, &buf) != -1) size=buf.st_size;
- else size=0;
- out=fopen(t,"rb");
+out = fopen(t,"rb");
+
+ if (stat(t, &buf) != -1) size = buf.st_size;
+ else size = 0;
+
+ out = fopen(t,"rb");
  if (!out) {
   // defaults
   iResX=640;iResY=480;
@@ -209,16 +255,19 @@ out=fopen(t,"rb");
   iUseNoStretchBlt=0;
   iUseDither=1;
   iShowFPS=0;
-  size=0;
+
+  size = 0;
   pB=(char *)malloc(4096);
   memset(pB,0,4096);
  }
  else {
   pB=(char *)malloc(size+4096);
   memset(pB,0,size+4096);
-  len=fread(pB, 1, size, out);
+
+  len = fread(pB, 1, size, out);
   fclose(out);
  }
+
  SetValue("ResX", iResX);
  SetValue("ResY", iResY);
  SetValue("NoStretch", iUseNoStretchBlt);
@@ -232,10 +281,13 @@ out=fopen(t,"rb");
  SetFloatValue("FrameRate", fFrameRate);
  SetValue("CfgFixes", (unsigned int)dwCfgFixes);
  SetValue("UseFixes", iUseFixes);
- out=fopen(t,"wb");
+
+ out = fopen(t,"wb");
  if (!out) return;
- len=fwrite(pB, 1, size, out);
+
+ len = fwrite(pB, 1, size, out);
  fclose(out);
+
  free(pB);
 }
 #endif
