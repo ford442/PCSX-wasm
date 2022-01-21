@@ -26,8 +26,8 @@ static short *pSndBuffer=NULL;
 static int iBufSize=0;
 static volatile int iReadPos=0,iWritePos=0;
 static void SOUND_FillAudio(void *unused,Uint8 *stream,int len) {
- short *p=(short *)stream;
- int lBytes=0;
+static short *p=(short *)stream;
+static int lBytes=0;
 len /= sizeof(short);
 while (iReadPos != iWritePos && len > 0) {*p++=pSndBuffer[iReadPos++];
 if (iReadPos >= iBufSize) iReadPos=0;
@@ -52,7 +52,7 @@ printf("case 2\n");
 }
 static void DestroySDL() {
 }
- void SetupSound(void) {
+static void SetupSound(void) {
 SDL_AudioSpec				spec;
 printf("setupsound\n");
 if (pSndBuffer != NULL) return;
@@ -85,7 +85,7 @@ static void RemoveSound(void) {
 	free(pSndBuffer);
 	pSndBuffer=NULL;
 }
- unsigned long SoundGetBytesBuffered(void) {
+static unsigned long SoundGetBytesBuffered(void) {
 	static int size;
 	if (pSndBuffer == NULL) return SOUNDSIZE;
 	size=iReadPos - iWritePos;
@@ -93,9 +93,9 @@ static void RemoveSound(void) {
 	if (size < iBufSize / 2) return SOUNDSIZE;
 	return 0;
 }
-void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
-	 short *p=(short *)pSound;
-	 long old_lBytes=lBytes;
+static void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
+	static short *p=(short *)pSound;
+	static long old_lBytes=lBytes;
 	if (pSndBuffer == NULL) return;
 	while (lBytes > 0) {
 		if (((iWritePos + 1) % iBufSize) == iReadPos) {
