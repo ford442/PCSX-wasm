@@ -52,7 +52,7 @@ printf("case 2\n");
 }
 static void DestroySDL() {
 }
-static void SetupSound(void) {
+ void SetupSound(void) {
 SDL_AudioSpec				spec;
 printf("setupsound\n");
 if (pSndBuffer != NULL) return;
@@ -85,7 +85,7 @@ static void RemoveSound(void) {
 	free(pSndBuffer);
 	pSndBuffer=NULL;
 }
-static unsigned long SoundGetBytesBuffered(void) {
+ unsigned long SoundGetBytesBuffered(void) {
 	static int size;
 	if (pSndBuffer == NULL) return SOUNDSIZE;
 	size=iReadPos - iWritePos;
@@ -93,7 +93,7 @@ static unsigned long SoundGetBytesBuffered(void) {
 	if (size < iBufSize / 2) return SOUNDSIZE;
 	return 0;
 }
-static void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
+ void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
 	 short *p=(short *)pSound;
 	 long old_lBytes=lBytes;
 	if (pSndBuffer == NULL) return;
