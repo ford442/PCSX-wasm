@@ -90,9 +90,9 @@ SDL_PauseAudio(0);
 	return 0;
 }
  void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
-	static short *p=(short *)pSound;
-	static long old_lBytes=lBytes;
-	if (pSndBuffer == NULL) return;
+short *p=(short *)pSound;
+long old_lBytes=lBytes;
+if (pSndBuffer == NULL) return;
 	while (lBytes > 0) {
 		if (((iWritePos + 1) % iBufSize) == iReadPos) {
 			EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes",lBytes: $0});},old_lBytes-lBytes);
