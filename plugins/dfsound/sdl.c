@@ -52,7 +52,7 @@ printf("case 2\n");
 }
 static void DestroySDL() {
 }
-static void SetupSound(void) {
+ void SetupSound(void) {
 SDL_AudioSpec				spec;
 printf("setupsound\n");
 if (pSndBuffer != NULL) return;
