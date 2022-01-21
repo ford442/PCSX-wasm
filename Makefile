@@ -2,7 +2,7 @@ CC=emcc
 CXX=em++
 CFLAGS= -sFULL_ES2=1 -sFULL_ES3=0 -sGL_TESTING=1 -D USESDLSOUND -Wpointer-sign \
 -sUSE_WEBGL2=1 -sOFFSCREEN_FRAMEBUFFER=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sELIMINATE_DUPLICATE_FUNCTIONS=1 \
--ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -sFORCE_FILESYSTEM=1 -s USE_ZLIB=1 -I./include -I./libpcsxcore -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" 
+-ffast-math -sUSE_SDL=1 -O3 -Wno-unused-result -sFORCE_FILESYSTEM=1 -s USE_ZLIB=1 -I./include -I./libpcsxcore 
 LDFLAGS=
 
 # WORKER
