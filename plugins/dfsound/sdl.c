@@ -26,8 +26,8 @@ static short *pSndBuffer=NULL;
 static int iBufSize=0;
 static volatile int iReadPos=0,iWritePos=0;
 static void SOUND_FillAudio(void *unused,Uint8 *stream,int len) {
-static short *p=(short *)stream;
-static int lBytes=0;
+ short *p=(short *)stream;
+ int lBytes=0;
 len /= sizeof(short);
 while (iReadPos != iWritePos && len > 0) {*p++=pSndBuffer[iReadPos++];
 if (iReadPos >= iBufSize) iReadPos=0;
@@ -42,17 +42,13 @@ while (len > 0) {
 }
 static void InitSDL() {
 printf("spu initsdl\n");
-	// if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
-	//	printf("case 1\n");
-	//	SDL_InitSubSystem(SDL_INIT_AUDIO);
-//	} else {
+	
 SDL_Init(SDL_INIT_AUDIO);
 printf("case 2\n");
-	// }
 }
 static void DestroySDL() {
 }
-static void SetupSound(void) {
+ void SetupSound(void) {
 SDL_AudioSpec				spec;
 printf("setupsound\n");
 if (pSndBuffer != NULL) return;
@@ -78,14 +74,14 @@ iWritePos=0;
 SDL_PauseAudio(0);
 }
 
-static void RemoveSound(void) {
+ void RemoveSound(void) {
 	if (pSndBuffer == NULL) return;
 	SDL_CloseAudio();
 	DestroySDL();
 	free(pSndBuffer);
 	pSndBuffer=NULL;
 }
-static unsigned long SoundGetBytesBuffered(void) {
+ unsigned long SoundGetBytesBuffered(void) {
 	static int size;
 	if (pSndBuffer == NULL) return SOUNDSIZE;
 	size=iReadPos - iWritePos;
@@ -93,7 +89,7 @@ static unsigned long SoundGetBytesBuffered(void) {
 	if (size < iBufSize / 2) return SOUNDSIZE;
 	return 0;
 }
-static void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
+ void SoundFeedStreamData(unsigned char *pSound,long lBytes) {	
 	static short *p=(short *)pSound;
 	static long old_lBytes=lBytes;
 	if (pSndBuffer == NULL) return;
