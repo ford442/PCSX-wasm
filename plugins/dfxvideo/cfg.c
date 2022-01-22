@@ -30,9 +30,6 @@
 #include "gpu.h"
 
 
-// CONFIG FILE helpers....
-// some helper macros:
-
 #define GetValue(name, var) \
  p = strstr(pB, name); \
  if (p != NULL) { \
@@ -84,7 +81,6 @@ static void ReadConfigFile()
  struct stat buf;
  FILE *in;char t[256];int len, size;
  char * pB, * p;
-
 
    strcpy(t,"dfxvideo.cfg");
    in = fopen(t,"rb");
@@ -195,33 +191,27 @@ void SoftDlgProc(void)
 void AboutDlgProc(void)
 {
 	char args[256];
-
 	sprintf(args, "ABOUT");
 	ExecCfg(args);
 }
 #endif
 void ReadGPUConfig(void)
 {
- // defaults
  iResX=640;iResY=480;
  iWinSize=MAKELONG(iResX,iResY);
  iColDepth=32;
  iWindowMode=1;
  iMaintainAspect=0;
- UseFrameLimit=1;
+ UseFrameLimit=0;
  UseFrameSkip=0;
  iFrameLimit=2;
- fFrameRate=200.0f;
+ fFrameRate=60.0f;
  dwCfgFixes=0;
  iUseFixes=0;
  iUseNoStretchBlt=0;
- iUseDither=0;
+ iUseDither=1;
  iShowFPS=0;
 
- // read sets
- //ReadConfigFile();
-
- // additional checks
  if(!iColDepth)       iColDepth=32;
  if(iUseFixes)        dwActFixes=dwCfgFixes;
  SetFixes();
@@ -241,7 +231,6 @@ out = fopen(t,"rb");
 
  out = fopen(t,"rb");
  if (!out) {
-  // defaults
   iResX=640;iResY=480;
   iColDepth=32;
   iWindowMode=1;
@@ -249,7 +238,7 @@ out = fopen(t,"rb");
   UseFrameLimit=0;
   UseFrameSkip=0;
   iFrameLimit=2;
-  fFrameRate=200.0f;
+  fFrameRate=60.0f;
   dwCfgFixes=0;
   iUseFixes=0;
   iUseNoStretchBlt=0;
