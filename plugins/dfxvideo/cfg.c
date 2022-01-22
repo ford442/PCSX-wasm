@@ -78,12 +78,13 @@
 #if 0
 static void ReadConfigFile()
 {
- struct stat buf;
- FILE *in;char t[256];int len, size;
- char * pB, * p;
-   strcpy(t,"dfxvideo.cfg");
-   in = fopen(t,"rb");
- if (stat(t, &buf) == -1) return;
+struct stat buf;
+FILE *in;char t[256];
+int len, size;
+char * pB, * p;
+strcpy(t,"dfxvideo.cfg");
+in = fopen(t,"rb");
+if (stat(t, &buf) == -1) return;
  size = buf.st_size;
  in = fopen(t,"rb");
  if (!in) return;
@@ -101,31 +102,31 @@ static void ReadConfigFile()
  GetValue("NoStretch", iUseNoStretchBlt);
  GetValue("Dithering", iUseDither);
  GetValue("FullScreen", iWindowMode);
- if(iWindowMode!=0) iWindowMode=0;
- else               iWindowMode=1;
+ if(iWindowMode!=0){ iWindowMode=0;}
+ else             {  iWindowMode=1;}
  GetValue("ShowFPS", iShowFPS);
- if(iShowFPS<0) iShowFPS=0;
- if(iShowFPS>1) iShowFPS=1;
+ if(iShowFPS<0) {iShowFPS=0;}
+ if(iShowFPS>1) {iShowFPS=1;}
  GetValue("Maintain43", iMaintainAspect);
- if(iMaintainAspect<0) iMaintainAspect=0;
- if(iMaintainAspect>1) iMaintainAspect=1;
+ if(iMaintainAspect<0) {iMaintainAspect=0;}
+ if(iMaintainAspect>1) {iMaintainAspect=1;}
  GetValue("UseFrameLimit", UseFrameLimit);
- if(UseFrameLimit<0) UseFrameLimit=0;
- if(UseFrameLimit>1) UseFrameLimit=1;
+ if(UseFrameLimit<0) {UseFrameLimit=0;}
+ if(UseFrameLimit>1) {UseFrameLimit=1;}
  GetValue("UseFrameSkip", UseFrameSkip);
- if(UseFrameSkip<0) UseFrameSkip=0;
- if(UseFrameSkip>1) UseFrameSkip=1;
+ if(UseFrameSkip<0) {UseFrameSkip=0;}
+ if(UseFrameSkip>1) {UseFrameSkip=1;}
  GetValue("FPSDetection", iFrameLimit);
- if(iFrameLimit<1) iFrameLimit=1;
- if(iFrameLimit>2) iFrameLimit=2;
+ if(iFrameLimit<1) {iFrameLimit=1;}
+ if(iFrameLimit>2) {iFrameLimit=2;}
  GetFloatValue("FrameRate", fFrameRate);
  fFrameRate/=10;
- if(fFrameRate<10.0f)   fFrameRate=10.0f;
- if(fFrameRate>1000.0f) fFrameRate=1000.0f;
+ if(fFrameRate<10.0f)   {fFrameRate=10.0f;}
+ if(fFrameRate>1000.0f) {fFrameRate=1000.0f;}
  GetValue("CfgFixes", dwCfgFixes);
  GetValue("UseFixes", iUseFixes);
- if(iUseFixes<0) iUseFixes=0;
- if(iUseFixes>1) iUseFixes=1;
+ if(iUseFixes<0) {iUseFixes=0;}
+ if(iUseFixes>1) {iUseFixes=1;}
 
  free(pB);
 }
@@ -173,7 +174,8 @@ void AboutDlgProc(void)
 #endif
 void ReadGPUConfig(void)
 {
- iResX=640;iResY=480;
+ iResX=640;
+iResY=480;
  iWinSize=MAKELONG(iResX,iResY);
  iColDepth=32;
  iWindowMode=1;
@@ -188,8 +190,8 @@ void ReadGPUConfig(void)
  iUseDither=1;
  iShowFPS=0;
 
- if(!iColDepth)       iColDepth=32;
- if(iUseFixes)        dwActFixes=dwCfgFixes;
+ if(!iColDepth)      { iColDepth=32;}
+ if(iUseFixes)        {dwActFixes=dwCfgFixes;}
  SetFixes();
 }
 #if 0
@@ -202,8 +204,8 @@ void WriteConfig(void) {
 strcpy(t,"dfxvideo.cfg");
 out = fopen(t,"rb");
 
- if (stat(t, &buf) != -1) size = buf.st_size;
- else size = 0;
+ if (stat(t, &buf) != -1) {size = buf.st_size;}
+ else {size = 0;}
 
  out = fopen(t,"rb");
  if (!out) {
@@ -228,7 +230,6 @@ out = fopen(t,"rb");
  else {
   pB=(char *)malloc(size+4096);
   memset(pB,0,size+4096);
-
   len = fread(pB, 1, size, out);
   fclose(out);
  }
@@ -246,10 +247,8 @@ out = fopen(t,"rb");
  SetFloatValue("FrameRate", fFrameRate);
  SetValue("CfgFixes", (unsigned int)dwCfgFixes);
  SetValue("UseFixes", iUseFixes);
-
  out = fopen(t,"wb");
- if (!out) return;
-
+ if (!out) {return;}
  len = fwrite(pB, 1, size, out);
  fclose(out);
 
