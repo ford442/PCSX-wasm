@@ -20,6 +20,7 @@
 #include "externals.h"
 #include <SDL/SDL.h>
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #define BUFFER_SIZE		(22050+4096)
 
 short			*pSndBuffer = NULL;
