@@ -1,5 +1,5 @@
 #include <emscripten.h>
-#include <emscripten_html5.h>
+#include <emscripten/html5.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 extern "C" {
