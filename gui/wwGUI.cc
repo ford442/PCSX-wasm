@@ -1,4 +1,5 @@
 #include <emscripten.h>
+#include <emscripten_html5.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 extern "C" {
@@ -88,8 +89,6 @@ void *get_ptr(int i)
 {
   return var_ptrs[i];
 }
-#include <emscripten.h>
-#include <emscripten/html5.h>
 EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEvent, void *userData)
 {
   printf("eventtype %d\n", eventType);
