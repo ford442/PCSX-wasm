@@ -88,6 +88,7 @@ void *get_ptr(int i)
 {
   return var_ptrs[i];
 }
+#include <emscripten/html5.h>
 EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEvent, void *userData)
 {
   printf("eventtype %d\n", eventType);
