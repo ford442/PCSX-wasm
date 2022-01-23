@@ -1,4 +1,4 @@
-#include <emscripten.h>
+#include <emscripten/emscripten.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
 extern "C" {
