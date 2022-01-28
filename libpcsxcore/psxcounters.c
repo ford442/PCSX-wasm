@@ -235,9 +235,7 @@ void psxRcntReset( u32 index )
 
     psxRcntSet();
 }
-#ifdef __EMSCRIPTEN__
 extern int DoGPUUpdate;
-#endif
 void psxRcntUpdate()
 {
     u32 cycle;
@@ -293,16 +291,11 @@ void psxRcntUpdate()
         if( hSyncCount >= (Config.VSyncWA ? HSyncTotal[Config.PsxType] / BIAS : HSyncTotal[Config.PsxType]) )
         {
             hSyncCount = 0;
-#ifdef __EMSCRIPTEN__            
             DoGPUUpdate=1;
-#else
-
             GPU_vBlank( 0 );
             setIrq( 0x01 );
-
             GPU_updateLace();
             EmuUpdate();
-#endif
         }
     }
 
