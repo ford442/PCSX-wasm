@@ -147,20 +147,12 @@ void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y)
      pD = &psxVub[startxy*2];
      destpix = (uint32_t *)(surface->pixels + (column * lPitch));
      for (row = 0; row < dx; row++)
-      {
-      //printf("column %d %d %d\n",column, dy, row);
-      
+      {      
        lr = pD[0];
        lg = pD[1];
        lb = pD[2];
-       #ifdef __EMSCRIPTEN__
        destpix[row] = 
           0xff000000 | (lb << 16) | (lg << 8) | (lr);
-       #else
-       destpix[row] = 
-          0xff000000 | (lr << 16) | (lg << 8) | (lb);
-      #endif
-
        pD += 3;
       }
     }
