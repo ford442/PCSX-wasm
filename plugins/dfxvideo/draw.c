@@ -59,24 +59,16 @@ int yuv_port = -1;
 int yuv_id = -1;
 int use_yuv = 0;
 int xv_vsync = 0;
-
 int finalw,finalh;
-
-
 #include <time.h>
-
 
 static SDL_Surface *sdl_display;
 static SDL_Surface *sdl_ximage;
-
-
 
 char *               Xpixels;
 char *               pCaptionText;
 
 static int fx=0;
-
-
 
 // close display
 
@@ -90,14 +82,12 @@ void DestroyDisplay(void)
 
 static int depth=32;
 int root_window_id=0;
-
-
 // Create display
 SDL_Rect srcrect;
 SDL_Rect dstrect;
 void CreateDisplay(void)
 {
-if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_AUDIO)<0)
+if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)<0)
    {
 	  printf ("(x) Failed to Init SDL!!!\n");	  
    }
@@ -225,7 +215,6 @@ inline void MaintainAspect(unsigned int *dx,unsigned int *dy,unsigned int *dw,un
 
 void DoBufferSwap(void)
 {  
-#ifdef __EMSCRIPTEN__
   BlitSDL32(sdl_ximage, PSXDisplay.DisplayPosition.x, PSXDisplay.DisplayPosition.y);
   SDL_Flip(sdl_ximage);
   dstrect.x=0;
@@ -237,9 +226,6 @@ void DoBufferSwap(void)
   srcrect.w=PSXDisplay.DisplayMode.x;
   srcrect.h=PSXDisplay.DisplayMode.y;
   SDL_BlitScaled(sdl_ximage, &srcrect, sdl_display, &dstrect);
-#else
-  BlitSDL32(sdl_display, PSXDisplay.DisplayPosition.x, PSXDisplay.DisplayPosition.y);
-#endif
   SDL_Flip(sdl_display);
 }
 
