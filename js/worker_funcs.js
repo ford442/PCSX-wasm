@@ -1,21 +1,9 @@
 var Module;
 if (!Module) Module={};
-Module.setStatus=function (s) {
-postMessage({
-cmd: "print",
-txt: s
-});};
-function cout_print(s) {
-postMessage({
-cmd: "print",
-txt: s
-});}
+Module.setStatus=function(s){postMessage({cmd:"print",txt:s});};
+function cout_print(s){postMessage({cmd: "print",txt: s});}
 function set_progress(k,r) {
-postMessage({
-cmd: "setUI",
-key: k + "_progress",
-properties: r
-});}
+postMessage({cmd: "setUI",key: k + "_progress",properties: r});}
 function show_error(prefix) {
 return function (evt) {
 cout_print(prefix);
@@ -40,17 +28,7 @@ vram_arr.set(vram_src);
 vram_cres++;
 vram_arr=new Uint8Array(vram_src);
 }
-postMessage({
-cmd: "render",
-x: x,
-y: y,
-sx: sx,
-sy: sy,
-dx: dx,
-dy: dy,
-rgb24: rgb24,
-vram: vram_arr
-},[vram_arr.buffer]);
+postMessage({cmd: "render",x: x,y: y,sx: sx,sy: sy,dx: dx,dy: dy,rgb24: rgb24,vram: vram_arr},[vram_arr.buffer]);
 }
 let pSound_arrs=[];
 let SendSound=function (pSound_ptr,lBytes) {
@@ -74,8 +52,8 @@ lBytes: lBytes
 function pcsx_mainloop() {
 _one_iter();
 }
-let pcsx_init=Module.cwrap("pcsx_init","number",["string"])
-let ls=Module.cwrap("ls","null",["string"])
+let pcsx_init=Module.cwrap("pcsx_init","number",["string"]);
+let ls=Module.cwrap("ls","null",["string"]);
 let padStatus1;
 let isoDB;
 let readfile_and_run=function (iso_name,blob) {
@@ -95,22 +73,14 @@ let reader=new FileReader();
 Module.setStatus("reading file");
 reader.onprogress=function (e) {
 if (e.lengthComputable) {
-set_progress('readfile',{
-value: e.loaded,
-max: e.total,
-hidden: false
-});
+set_progress('readfile',{value: e.loaded,max: e.total,hidden: false});
 } else
-cout_print(e.loaded + "bytes")
+cout_print(e.loaded + "bytes");
 }
 reader.onload=function (e) {
 cout_print("" + iso_name + " loaded");
-set_progress('readfile',{
-value: 1,
-max: 1,
-hidden: false
-});
-run_arr(new Uint8Array(this.result))
+set_progress('readfile',{value: 1,max: 1,hidden: false});
+run_arr(new Uint8Array(this.result));
 }
 reader.readAsArrayBuffer(blob);
 }
@@ -148,10 +118,10 @@ case "soundBytes":
 Module.setValue(soundbuffer_ptr,Module.getValue(soundbuffer_ptr,"i32") - data.lBytes,"i32");
 break;
 case "return_vram":
-vram_arrs.push(data.vram)
+vram_arrs.push(data.vram);
 break;
 case "return_pSound":
-pSound_arrs.push(data.pSound)
+pSound_arrs.push(data.pSound);
 break;
 case "ls":
 ls(data.dir);
@@ -163,7 +133,7 @@ readfile_and_run(data.file.name,data.file);
 break;
 case "loadurl":
 cout_print("load..." + data.iso);
-load_or_fetch(data.iso)
+load_or_fetch(data.iso);
 break;
 default:
 postMessage({
