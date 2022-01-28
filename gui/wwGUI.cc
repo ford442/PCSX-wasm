@@ -107,7 +107,7 @@ int main()
   {
     printf("sdl init ok\n");
     sdl_display = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    sdl_ximage = SDL_CreateRGBSurface(SDL_HWSURFACE  | SDL_NOFRAME, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
+    sdl_ximage = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
   }
   psxVuw = (unsigned short *)psxVub;
   SetupSound();
@@ -115,9 +115,6 @@ int main()
   EM_ASM(
       FS.mkdir('/cfg');
       FS.mount(IDBFS, {}, '/cfg/');
-
-      // sync from persisted state into memory and then
-      // run the 'test' function
       FS.syncfs(true, function(err) {
         if(err){
           cout_print("syncfs error!!")
