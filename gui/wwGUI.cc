@@ -101,7 +101,7 @@ EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEve
 int main()
 {
   //	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_AUDIO)<0)
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0)
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
     printf("(x) Failed to Init SDL!!!\n");
   else
   {
