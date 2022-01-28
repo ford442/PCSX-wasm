@@ -48,7 +48,6 @@ static void CreateMemcard(char *filename, char *conf_mcd)
     }
 }
 void execI();
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 extern int updated_display;
 void one_iter()
@@ -65,7 +64,6 @@ void run()
 {
     mainloop("_.bin");
 }
-#endif
 
 int mainloop(const char *isofilename)
 {
