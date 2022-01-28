@@ -779,21 +779,13 @@ void execI() {
 	psxBSC[psxRegs.code >> 26]();
 }
 
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
-#endif
 
 
 static void intExecute() {
 
-#ifdef __EMSCRIPTEN__
   // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
-  emscripten_set_main_loop(execI, 0, 1);
-#else
-  while (1) {
-    execI();
-  }
-#endif
+  emscripten_set_main_loop(execI, 0, 0);
 }
 
 
