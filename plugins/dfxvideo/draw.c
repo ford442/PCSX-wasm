@@ -171,13 +171,8 @@ void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y)
        //printf("blt row %d\n", row);
        s = GETLE16(&psxVuw[startxy++]);
       //printf("blt s %d\n", s);
-      #ifdef __EMSCRIPTEN__
       destpix[row] = 
           (((s << 3) & 0xf8) | ((s << 6) & 0xf800) | ((s << 9) & 0xf80000)) | 0xff000000;
-      #else
-       destpix[row] = 
-          (((s << 19) & 0xf80000) | ((s << 6) & 0xf800) | ((s >> 7) & 0xf8)) | 0xff000000;
-      #endif
       //printf("blt d %x\n", destpix[row]);
       }
     }
