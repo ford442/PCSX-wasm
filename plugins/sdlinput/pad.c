@@ -54,7 +54,7 @@ long PADopen(unsigned long *Disp) {
                         if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
                                 return PSE_PAD_ERR_FAILURE;
                         }
-                } else if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE) == -1) {
+                } else if (SDL_Init(SDL_INIT_JOYSTICK) == -1) {
                         return PSE_PAD_ERR_FAILURE;
         }
 		InitSDLJoy();
