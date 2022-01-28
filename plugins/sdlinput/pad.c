@@ -36,7 +36,6 @@ long PADshutdown(void) {
 	PADclose();
 	return PSE_PAD_ERR_SUCCESS;
 }
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5.h>
 EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEvent, void *userData)
@@ -45,8 +44,6 @@ EM_BOOL gamepad_callback(int eventType, const EmscriptenGamepadEvent *gamepadEve
 	InitSDLJoy();
 	return 0;
 };
- 
-#endif
 long PADopen(unsigned long *Disp) {
 	if (!g.Opened) {
 		printf("PADopen\n");
@@ -59,10 +56,8 @@ long PADopen(unsigned long *Disp) {
         }
 		InitSDLJoy();
 		InitKeyboard();
-		#ifdef __EMSCRIPTEN__
 		emscripten_set_gamepadconnected_callback(0,1,gamepad_callback);
 		emscripten_set_gamepaddisconnected_callback(0,1,gamepad_callback);
-		#endif
 		g.KeyLeftOver = 0;
 	}
 
