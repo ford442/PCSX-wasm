@@ -474,7 +474,7 @@ static void *MAINThread(void *arg)
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
      printf("sleep!\n");
-     usleep(PAUSE_L);                                  // else sleep for x ms (linux)
+  //    usleep(PAUSE_L);                                  // else sleep for x ms (linux)
 
      if(dwNewChannel) iSecureStart=1;                  // if a new channel kicks in (or, of course, sound buffer runs low), we will leave the loop
 #endif
@@ -609,7 +609,7 @@ static void *MAINThread(void *arg)
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
                          printf("sleep\n");
-                     usleep(1000L);
+               //       usleep(1000L);
                        }
                 }
                else
@@ -856,7 +856,10 @@ void RemoveTimer(void)
  if(!iUseTimer)                                        // linux tread?
   {
    int i=0;
-   while(!bThreadEnded && i<2000) {usleep(1000L);i++;printf("sleep\n");} // -> wait until thread has ended
+   while(!bThreadEnded && i<2000) {
+   //  usleep(1000L);
+     i++;printf("sleep\n");
+   } // -> wait until thread has ended
    if(thread!=(pthread_t)-1) {pthread_cancel(thread);thread=(pthread_t)-1;}  // -> cancel thread anyway
   }
 #endif
