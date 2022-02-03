@@ -26,6 +26,9 @@
 // XA GLOBALS
 ////////////////////////////////////////////////////////////////////////
 
+struct timespec rem;
+struct timespec req={0,15000000};
+
 xa_decode_t   * xapGlobal=0;
 
 uint32_t * XAFeed  = NULL;
@@ -399,7 +402,7 @@ INLINE void FeedCDDA(unsigned char *pcm, int nBytes)
          (CDDAFeed==CDDAEnd-1&&CDDAPlay==CDDAStart))
    {
 if(!iUseTimer){
-// usleep(1000);
+nanosleep(&req,&rem);
 }
 else return;
 }
