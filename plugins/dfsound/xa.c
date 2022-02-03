@@ -398,9 +398,11 @@ INLINE void FeedCDDA(unsigned char *pcm, int nBytes)
    while(CDDAFeed==CDDAPlay-1||
          (CDDAFeed==CDDAEnd-1&&CDDAPlay==CDDAStart))
    {
-    if (!iUseTimer) usleep(1000);
-    else return;
-   }
+if(!iUseTimer){
+// usleep(1000);
+}
+else return;
+}
    *CDDAFeed++=(*pcm | (*(pcm+1)<<8) | (*(pcm+2)<<16) | (*(pcm+3)<<24));
    nBytes-=4;
    pcm+=4;
