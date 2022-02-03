@@ -160,7 +160,12 @@ iUseInterpolation=0;
 if(iUseInterpolation>3){
 iUseInterpolation=3; 
 }
-strcpy(t,"\nDisStereo");p=strstr(pB,t);if(p) {p=strstr(p,"=");len=1;} 
+strcpy(t,"\nDisStereo");
+p=strstr(pB,t);
+if(p){
+p=strstr(p,"=");
+len=1;
+} 
 if(p){
 iDisStereo=atoi(p+len); 
 }
