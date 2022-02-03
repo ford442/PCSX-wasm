@@ -20,7 +20,7 @@
 #include "externals.h"
 #include <emscripten.h>
 #include <emscripten/html5.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #define BUFFER_SIZE		(22050+4096)
 
