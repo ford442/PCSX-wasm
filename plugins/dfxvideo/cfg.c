@@ -77,8 +77,8 @@
  else { \
   size+=sprintf(pB+size, "%s = %.1f\n", name, (double)var); \
  }
-#if 0
 static int W,H;
+#if 0
 static void ReadConfigFile(){
 struct stat buf;
 FILE *in;char t[256];
