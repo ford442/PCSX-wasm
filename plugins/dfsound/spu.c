@@ -49,6 +49,10 @@ static char * libraryName     = N_("NULL Sound");
 
 static char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 
+// globals
+
+// psx buffer / addresses
+
 unsigned short  regArea[10000];
 unsigned short  spuMem[256*1024];
 unsigned char * spuMemC;
@@ -56,15 +60,19 @@ unsigned char * pSpuIrq=0;
 unsigned char * pSpuBuffer;
 unsigned char * pMixIrq=0;
 
-int iVolume=3;
-int iXAPitch=1;
-int iUseTimer=2;
-int iSPUIRQWait=1;
-int iSoundDebugMode=0;
-int iRecordMode=0;
-int iUseReverb=0;
-int iUseInterpolation=1;
-int iDisStereo=0;
+// user settings
+
+int             iVolume=3;
+int             iXAPitch=1;
+int             iUseTimer=2;
+int             iSPUIRQWait=1;
+int             iSoundDebugMode=0;
+int             iRecordMode=0;
+int             iUseReverb=0;
+int             iUseInterpolation=1;
+int             iDisStereo=0;
+
+// MAIN infos struct for each channel
 
 SPUCHAN         s_chan[MAXCHAN+1];                     // channel + 1 infos (1 is security for fmod handling)
 REVERBInfo      rvb;
@@ -89,147 +97,243 @@ unsigned long dwNewChannel=0;                          // flags for faster testi
 void (CALLBACK *irqCallback)(void)=0;                  // func of main emu, called on spu irq
 void (CALLBACK *cddavCallback)(unsigned short,unsigned short)=0;
 
+// certain globals (were local before, but with the new timeproc I need em global)
 
-static const int f[5][2]={{0,0},{60,0},{115,-52},{98,-55},{122,-60}};
+static const int f[5][2] = {   {    0,  0  },
+                        {   60,  0  },
+                        {  115, -52 },
+                        {   98, -55 },
+                        {  122, -60 } };
 int SSumR[NSSIZE];
 int SSumL[NSSIZE];
 int iFMod[NSSIZE];
 int iCycle = 0;
 short * pS;
 
-int lastch=-1;
-static int lastns=0;
-static int iSecureStart=0;
+int lastch=-1;             // last channel processed on spu irq in timer mode
+static int lastns=0;       // last ns pos
+static int iSecureStart=0; // secure start counter
+
+////////////////////////////////////////////////////////////////////////
+// CODE AREA
+////////////////////////////////////////////////////////////////////////
+
+// dirty inline func includes
 
 #include "reverb.c"
 #include "adsr.c"
 
-INLINE void InterpolateUp(int ch){
-if(s_chan[ch].SB[32]==1){
-const int id1=s_chan[ch].SB[30]-s_chan[ch].SB[29]; 
-const int id2=s_chan[ch].SB[31]-s_chan[ch].SB[30];
-s_chan[ch].SB[32]=0;
-if(id1>0){
-if(id2<id1){
-s_chan[ch].SB[28]=id1;s_chan[ch].SB[32]=2;
-}else{
-if(id2<(id1<<1)){
-s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x10000L;
-}
-else{s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x20000L; 
-}}else{
-if(id2>id1){
-s_chan[ch].SB[28]=id1;s_chan[ch].SB[32]=2;
-}else{
-if(id2>(id1<<1)){
-s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x10000L;
-}else{
-s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x20000L; 
-}}}}}else{
-if(s_chan[ch].SB[32]==2){
-s_chan[ch].SB[32]=0;
-s_chan[ch].SB[28]=(s_chan[ch].SB[28]*s_chan[ch].sinc)/0x20000L;
-if(s_chan[ch].sinc<=0x8000){
-s_chan[ch].SB[29]=s_chan[ch].SB[30]-(s_chan[ch].SB[28]*((0x10000/s_chan[ch].sinc)-1));
-}else{s_chan[ch].SB[29]+=s_chan[ch].SB[28];
-}}}else{
-s_chan[ch].SB[29]+=s_chan[ch].SB[28];
-}}
+////////////////////////////////////////////////////////////////////////
+// helpers for simple interpolation
 
-INLINE void InterpolateDown(int ch){
-if(s_chan[ch].sinc>=0x20000L){
-s_chan[ch].SB[29]+=(s_chan[ch].SB[30]-s_chan[ch].SB[29])/2;
-if(s_chan[ch].sinc>=0x30000L){
-s_chan[ch].SB[29]+=(s_chan[ch].SB[31]-s_chan[ch].SB[30])/2;
-}}
+//
+// easy interpolation on upsampling, no special filter, just "Pete's common sense" tm
+//
+// instead of having n equal sample values in a row like:
+//       ____
+//           |____
+//
+// we compare the current delta change with the next delta change.
+//
+// if curr_delta is positive,
+//
+//  - and next delta is smaller (or changing direction):
+//         \.
+//          -__
+//
+//  - and next delta significant (at least twice) bigger:
+//         --_
+//            \.
+//
+//  - and next delta is nearly same:
+//          \.
+//           \.
+//
+//
+// if curr_delta is negative,
+//
+//  - and next delta is smaller (or changing direction):
+//          _--
+//         /
+//
+//  - and next delta significant (at least twice) bigger:
+//            /
+//         __- 
+//
+//  - and next delta is nearly same:
+//           /
+//          /
+//
+
+
+INLINE void InterpolateUp(int ch)
+{
+ if(s_chan[ch].SB[32]==1)                              // flag == 1? calc step and set flag... and don't change the value in this pass
+  {
+   const int id1=s_chan[ch].SB[30]-s_chan[ch].SB[29];  // curr delta to next val
+   const int id2=s_chan[ch].SB[31]-s_chan[ch].SB[30];  // and next delta to next-next val :)
+
+   s_chan[ch].SB[32]=0;
+
+   if(id1>0)                                           // curr delta positive
+    {
+     if(id2<id1)
+      {s_chan[ch].SB[28]=id1;s_chan[ch].SB[32]=2;}
+     else
+     if(id2<(id1<<1))
+      s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x10000L;
+     else
+      s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x20000L; 
+    }
+   else                                                // curr delta negative
+    {
+     if(id2>id1)
+      {s_chan[ch].SB[28]=id1;s_chan[ch].SB[32]=2;}
+     else
+     if(id2>(id1<<1))
+      s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x10000L;
+     else
+      s_chan[ch].SB[28]=(id1*s_chan[ch].sinc)/0x20000L; 
+    }
+  }
+ else
+ if(s_chan[ch].SB[32]==2)                              // flag 1: calc step and set flag... and don't change the value in this pass
+  {
+   s_chan[ch].SB[32]=0;
+
+   s_chan[ch].SB[28]=(s_chan[ch].SB[28]*s_chan[ch].sinc)/0x20000L;
+   if(s_chan[ch].sinc<=0x8000)
+        s_chan[ch].SB[29]=s_chan[ch].SB[30]-(s_chan[ch].SB[28]*((0x10000/s_chan[ch].sinc)-1));
+   else s_chan[ch].SB[29]+=s_chan[ch].SB[28];
+  }
+ else                                                  // no flags? add bigger val (if possible), calc smaller step, set flag1
+  s_chan[ch].SB[29]+=s_chan[ch].SB[28];
+}
+
+//
+// even easier interpolation on downsampling, also no special filter, again just "Pete's common sense" tm
+//
+
+INLINE void InterpolateDown(int ch)
+{
+ if(s_chan[ch].sinc>=0x20000L)                                 // we would skip at least one val?
+  {
+   s_chan[ch].SB[29]+=(s_chan[ch].SB[30]-s_chan[ch].SB[29])/2; // add easy weight
+   if(s_chan[ch].sinc>=0x30000L)                               // we would skip even more vals?
+    s_chan[ch].SB[29]+=(s_chan[ch].SB[31]-s_chan[ch].SB[30])/2;// add additional next weight
+  }
+}
+
+////////////////////////////////////////////////////////////////////////
+// helpers for gauss interpolation
 
 #define gval0 (((short*)(&s_chan[ch].SB[29]))[gpos])
 #define gval(x) (((short*)(&s_chan[ch].SB[29]))[(gpos+x)&3])
 
 #include "gauss_i.h"
 
+////////////////////////////////////////////////////////////////////////
+
 #include "xa.c"
 
-INLINE void StartSound(int ch){
-StartADSR(ch);
-StartREVERB(ch);
-s_chan[ch].pCurr=s_chan[ch].pStart;
-s_chan[ch].s_1=0;
-s_chan[ch].s_2=0;
-s_chan[ch].iSBPos=28;
-s_chan[ch].bNew=0;
-s_chan[ch].bStop=0;
-s_chan[ch].bOn=1;
-s_chan[ch].SB[29]=0;
-s_chan[ch].SB[30]=0;
-if(iUseInterpolation>=2){
-s_chan[ch].spos=0x30000L;
-s_chan[ch].SB[28]=0;
-}else{
-s_chan[ch].spos=0x10000L;
-s_chan[ch].SB[31]=0;
-}
-dwNewChannel&=~(1<<ch);
+////////////////////////////////////////////////////////////////////////
+// START SOUND... called by main thread to setup a new sound on a channel
+////////////////////////////////////////////////////////////////////////
+
+INLINE void StartSound(int ch)
+{
+ StartADSR(ch);
+ StartREVERB(ch);
+
+ s_chan[ch].pCurr=s_chan[ch].pStart;                   // set sample start
+
+ s_chan[ch].s_1=0;                                     // init mixing vars
+ s_chan[ch].s_2=0;
+ s_chan[ch].iSBPos=28;
+
+ s_chan[ch].bNew=0;                                    // init channel flags
+ s_chan[ch].bStop=0;
+ s_chan[ch].bOn=1;
+
+ s_chan[ch].SB[29]=0;                                  // init our interpolation helpers
+ s_chan[ch].SB[30]=0;
+
+ if(iUseInterpolation>=2)                              // gauss interpolation?
+      {s_chan[ch].spos=0x30000L;s_chan[ch].SB[28]=0;}  // -> start with more decoding
+ else {s_chan[ch].spos=0x10000L;s_chan[ch].SB[31]=0;}  // -> no/simple interpolation starts with one 44100 decoding
+
+ dwNewChannel&=~(1<<ch);                               // clear new channel bit
 }
 
-INLINE void VoiceChangeFrequency(int ch){
-s_chan[ch].iUsedFreq=s_chan[ch].iActFreq;
-s_chan[ch].sinc=s_chan[ch].iRawPitch<<4;
-if(!s_chan[ch].sinc){
-s_chan[ch].sinc=1;
-}
-if(iUseInterpolation==1){
-s_chan[ch].SB[32]=1;
-}}
+////////////////////////////////////////////////////////////////////////
+// ALL KIND OF HELPERS
+////////////////////////////////////////////////////////////////////////
 
-INLINE void FModChangeFrequency(int ch,int ns){
-int NP=s_chan[ch].iRawPitch;
-NP=((32768L+iFMod[ns])*NP)/32768L;
-if(NP>0x3fff){
-NP=0x3fff;
+INLINE void VoiceChangeFrequency(int ch)
+{
+ s_chan[ch].iUsedFreq=s_chan[ch].iActFreq;             // -> take it and calc steps
+ s_chan[ch].sinc=s_chan[ch].iRawPitch<<4;
+ if(!s_chan[ch].sinc) s_chan[ch].sinc=1;
+ if(iUseInterpolation==1) s_chan[ch].SB[32]=1;         // -> freq change in simle imterpolation mode: set flag
 }
-if(NP<0x1){
-NP=0x1;
-}
-NP=(44100L*NP)/(4096L);
-s_chan[ch].iActFreq=NP;
-s_chan[ch].iUsedFreq=NP;
-s_chan[ch].sinc=(((NP/10)<<16)/4410);
-if(!s_chan[ch].sinc){
-s_chan[ch].sinc=1;
-}
-if(iUseInterpolation==1){
-s_chan[ch].SB[32]=1;
-}
-iFMod[ns]=0;
+
+////////////////////////////////////////////////////////////////////////
+
+INLINE void FModChangeFrequency(int ch,int ns)
+{
+ int NP=s_chan[ch].iRawPitch;
+
+ NP=((32768L+iFMod[ns])*NP)/32768L;
+
+ if(NP>0x3fff) NP=0x3fff;
+ if(NP<0x1)    NP=0x1;
+
+ NP=(44100L*NP)/(4096L);                               // calc frequency
+
+ s_chan[ch].iActFreq=NP;
+ s_chan[ch].iUsedFreq=NP;
+ s_chan[ch].sinc=(((NP/10)<<16)/4410);
+ if(!s_chan[ch].sinc) s_chan[ch].sinc=1;
+ if(iUseInterpolation==1)                              // freq change in simple interpolation mode
+ s_chan[ch].SB[32]=1;
+ iFMod[ns]=0;
 }                    
 
-INLINE int iGetNoiseVal(int ch){
-int fa;
-if((dwNoiseVal<<=1)&0x80000000L){
-dwNoiseVal^=0x0040001L;
-fa=((dwNoiseVal>>2)&0x7fff);
-fa=-fa;
-}else{
-fa=(dwNoiseVal>>2)&0x7fff;
-}
-fa=s_chan[ch].iOldNoise+((fa-s_chan[ch].iOldNoise)/((0x001f-((spuCtrl&0x3f00)>>9))+1));
-if(fa>32767L){
-fa=32767L;
-}
-if(fa<-32767L){
-fa=-32767L;  
-}            
-s_chan[ch].iOldNoise=fa;
-if(iUseInterpolation<2){
-s_chan[ch].SB[29]=fa;
-}
-return fa;
+////////////////////////////////////////////////////////////////////////
+
+// noise handler... just produces some noise data
+// surely wrong... and no noise frequency (spuCtrl&0x3f00) will be used...
+// and sometimes the noise will be used as fmod modulation... pfff
+
+INLINE int iGetNoiseVal(int ch)
+{
+ int fa;
+
+ if((dwNoiseVal<<=1)&0x80000000L)
+  {
+   dwNoiseVal^=0x0040001L;
+   fa=((dwNoiseVal>>2)&0x7fff);
+   fa=-fa;
+  }
+ else fa=(dwNoiseVal>>2)&0x7fff;
+
+ // mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
+ fa=s_chan[ch].iOldNoise+((fa-s_chan[ch].iOldNoise)/((0x001f-((spuCtrl&0x3f00)>>9))+1));
+ if(fa>32767L)  fa=32767L;
+ if(fa<-32767L) fa=-32767L;              
+ s_chan[ch].iOldNoise=fa;
+
+ if(iUseInterpolation<2)                               // no gauss/cubic interpolation?
+ s_chan[ch].SB[29] = fa;                               // -> store noise val in "current sample" slot
+ return fa;
 }                                 
 
-INLINE void StoreInterpolationVal(int ch,int fa){
-if(s_chan[ch].bFMod==2) {                              // fmod freq channel
-s_chan[ch].SB[29]=fa;}
+////////////////////////////////////////////////////////////////////////
+
+INLINE void StoreInterpolationVal(int ch,int fa)
+{
+ if(s_chan[ch].bFMod==2)                               // fmod freq channel
+  s_chan[ch].SB[29]=fa;
  else
   {
    if((spuCtrl&0x4000)==0) fa=0;                       // muted?
@@ -370,7 +474,7 @@ static void *MAINThread(void *arg)
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
      printf("sleep!\n");
-  //    usleep(PAUSE_L);                                  // else sleep for x ms (linux)
+     usleep(PAUSE_L);                                  // else sleep for x ms (linux)
 
      if(dwNewChannel) iSecureStart=1;                  // if a new channel kicks in (or, of course, sound buffer runs low), we will leave the loop
 #endif
@@ -505,7 +609,7 @@ static void *MAINThread(void *arg)
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
                          printf("sleep\n");
-               //       usleep(1000L);
+                     usleep(1000L);
                        }
                 }
                else
@@ -752,10 +856,7 @@ void RemoveTimer(void)
  if(!iUseTimer)                                        // linux tread?
   {
    int i=0;
-   while(!bThreadEnded && i<2000) {
-   //  usleep(1000L);
-     i++;printf("sleep\n");
-   } // -> wait until thread has ended
+   while(!bThreadEnded && i<2000) {usleep(1000L);i++;printf("sleep\n");} // -> wait until thread has ended
    if(thread!=(pthread_t)-1) {pthread_cancel(thread);thread=(pthread_t)-1;}  // -> cancel thread anyway
   }
 #endif
