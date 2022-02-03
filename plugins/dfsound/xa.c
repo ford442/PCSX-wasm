@@ -26,9 +26,6 @@
 // XA GLOBALS
 ////////////////////////////////////////////////////////////////////////
 
-struct timespec rem;
-struct timespec req={0,15000000};
-
 xa_decode_t   * xapGlobal=0;
 
 uint32_t * XAFeed  = NULL;
