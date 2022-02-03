@@ -49,10 +49,6 @@ static char * libraryName     = N_("NULL Sound");
 
 static char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 
-// globals
-
-// psx buffer / addresses
-
 unsigned short  regArea[10000];
 unsigned short  spuMem[256*1024];
 unsigned char * spuMemC;
@@ -60,19 +56,15 @@ unsigned char * pSpuIrq=0;
 unsigned char * pSpuBuffer;
 unsigned char * pMixIrq=0;
 
-// user settings
-
-int             iVolume=3;
-int             iXAPitch=1;
-int             iUseTimer=2;
-int             iSPUIRQWait=1;
-int             iSoundDebugMode=0;
-int             iRecordMode=0;
-int             iUseReverb=1;
-int             iUseInterpolation=2;
-int             iDisStereo=1;
-
-// MAIN infos struct for each channel
+int iVolume=3;
+int iXAPitch=1;
+int iUseTimer=2;
+int iSPUIRQWait=1;
+int iSoundDebugMode=0;
+int iRecordMode=0;
+int iUseReverb=0;
+int iUseInterpolation=1;
+int iDisStereo=0;
 
 SPUCHAN         s_chan[MAXCHAN+1];                     // channel + 1 infos (1 is security for fmod handling)
 REVERBInfo      rvb;
