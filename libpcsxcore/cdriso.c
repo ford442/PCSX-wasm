@@ -36,6 +36,9 @@
 #include <emscripten.h>
 #include <sys/time.h>
 
+struct timespec rem;
+struct timespec req={0,15000000};
+
 static FILE *cdHandle = NULL;
 static FILE *cddaHandle = NULL;
 static FILE *subHandle = NULL;
@@ -284,7 +287,11 @@ static void *playthread(void *param)
 		Sleep(d);
 #else
 		printf("sleep\n");
-		usleep(d * 1000);
+		nanosleep(&req,&rem);
+		nanosleep(&req,&rem);
+		nanosleep(&req,&rem);
+		nanosleep(&req,&rem);
+		// usleep(d * 1000);
 #endif
 
 		t = GetTickCount() + CDDA_FRAMETIME;
