@@ -149,7 +149,7 @@ iUseReverb=atoi(p+len);
 }
 if(iUseReverb<0){
 iUseReverb=0; 
-}}
+}
 if(iUseReverb>2){
 iUseReverb=2;
 }
