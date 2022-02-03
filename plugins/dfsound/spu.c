@@ -69,7 +69,7 @@ int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
 int             iUseReverb=0;
-int             iUseInterpolation=0;
+int             iUseInterpolation=2;
 int             iDisStereo=0;
 
 // MAIN infos struct for each channel
