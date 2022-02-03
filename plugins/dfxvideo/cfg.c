@@ -78,171 +78,204 @@
   size+=sprintf(pB+size, "%s = %.1f\n", name, (double)var); \
  }
 #if 0
-static void ReadConfigFile()
-{
- struct stat buf;
- FILE *in;char t[256];int len, size;
- char * pB, * p;
-   strcpy(t,"dfxvideo.cfg");
-   in = fopen(t,"rb");
- if (stat(t, &buf) == -1) return;
- size = buf.st_size;
- in = fopen(t,"rb");
- if (!in) return;
- pB=(char *)malloc(size + 1);
- memset(pB,0,size + 1);
- len = fread(pB, 1, size, in);
- fclose(in);
- GetValue("ResX", iResX);
- if(iResX<20) iResX=20;
- iResX=(iResX/4)*4;
- GetValue("ResY", iResY);
- if(iResY<20) iResY=20;
- iResY=(iResY/4)*4;
- iWinSize=MAKELONG(iResX,iResY);
- GetValue("NoStretch", iUseNoStretchBlt);
- GetValue("Dithering", iUseDither);
- GetValue("FullScreen", iWindowMode);
- if(iWindowMode!=0) iWindowMode=0;
- else               iWindowMode=1;
- GetValue("ShowFPS", iShowFPS);
- if(iShowFPS<0) iShowFPS=0;
- if(iShowFPS>1) iShowFPS=1;
- GetValue("Maintain43", iMaintainAspect);
- if(iMaintainAspect<0) iMaintainAspect=0;
- if(iMaintainAspect>1) iMaintainAspect=1;
- GetValue("UseFrameLimit", UseFrameLimit);
- if(UseFrameLimit<0) UseFrameLimit=0;
- if(UseFrameLimit>1) UseFrameLimit=1;
- GetValue("UseFrameSkip", UseFrameSkip);
- if(UseFrameSkip<0) UseFrameSkip=0;
- if(UseFrameSkip>1) UseFrameSkip=1;
- GetValue("FPSDetection", iFrameLimit);
- if(iFrameLimit<1) iFrameLimit=1;
- if(iFrameLimit>2) iFrameLimit=2;
- GetFloatValue("FrameRate", fFrameRate);
- fFrameRate/=10;
- if(fFrameRate<10.0f)   fFrameRate=10.0f;
- if(fFrameRate>1000.0f) fFrameRate=1000.0f;
- GetValue("CfgFixes", dwCfgFixes);
- GetValue("UseFixes", iUseFixes);
- if(iUseFixes<0) iUseFixes=0;
- if(iUseFixes>1) iUseFixes=1;
- free(pB);
+static int W,H;
+static void ReadConfigFile(){
+struct stat buf;
+FILE *in;char t[256];
+int len, size;
+char * pB,* p;
+strcpy(t,"dfxvideo.cfg");
+in=fopen(t,"rb");
+if(stat(t,&buf)==-1){
+return;
 }
-void ExecCfg(char *arg) {
-	char cfg[256];
-	struct stat buf;
-	strcpy(cfg, "./cfgDFXVideo");
-	if (stat(cfg, &buf) != -1) {
-		if (fork() == 0) {
-			execl(cfg, "cfgDFXVideo", arg, NULL);
-			exit(0);
-		}
-		return;
-	}
-	strcpy(cfg, "./cfg/cfgDFXVideo");
-	if (stat(cfg, &buf) != -1) {
-		if (fork() == 0) {
-			execl(cfg, "cfgDFXVideo", arg, NULL);
-			exit(0);
-		}
-		return;
-	}
-	sprintf(cfg, "%s/.pcsx/plugins/cfg/cfgDFXVideo", getenv("HOME"));
-	if (stat(cfg, &buf) != -1) {
-		if (fork() == 0) {
-			execl(cfg, "cfgDFXVideo", arg, NULL);
-			exit(0);
-		}
-		return;
-	}
-	printf("ERROR: cfgDFXVideo file not found!\n");
+size=buf.st_size;
+in=fopen(t,"rb");
+if(!in){
+return;
 }
-void SoftDlgProc(void)
-{
-	ExecCfg("CFG");
+pB=(char *)malloc(size + 1);
+memset(pB,0,size+1);
+len=fread(pB,1,size,in);
+fclose(in);
+GetValue("ResX",iResX);
+if(iResX<20){
+iResX=20;
 }
-void AboutDlgProc(void)
-{
-	char args[256];
-	sprintf(args, "ABOUT");
-	ExecCfg(args);
+iResX=(iResX/4)*4;
+GetValue("ResY",iResY);
+if(iResY<20){
+iResY=20;
+}
+iResY=(iResY/4)*4;
+iWinSize=MAKELONG(iResX,iResY);
+GetValue("NoStretch",iUseNoStretchBlt);
+GetValue("Dithering",iUseDither);
+GetValue("FullScreen",iWindowMode);
+if(iWindowMode!=0){
+iWindowMode=0;
+}else{
+iWindowMode=1;
+}
+GetValue("ShowFPS",iShowFPS);
+if(iShowFPS<0){
+iShowFPS=0;
+}
+if(iShowFPS>1){
+iShowFPS=1;
+}
+GetValue("Maintain43",iMaintainAspect);
+if(iMaintainAspect<0){iMaintainAspect=0;}
+if(iMaintainAspect>1){iMaintainAspect=1;}
+GetValue("UseFrameLimit",UseFrameLimit);
+if(UseFrameLimit<0){UseFrameLimit=0;}
+if(UseFrameLimit>1){UseFrameLimit=1;}
+GetValue("UseFrameSkip",UseFrameSkip);
+if(UseFrameSkip<0){UseFrameSkip=0;}
+if(UseFrameSkip>1){UseFrameSkip=1;}
+GetValue("FPSDetection",iFrameLimit);
+if(iFrameLimit<1){iFrameLimit=1;}
+if(iFrameLimit>2){iFrameLimit=2;}
+GetFloatValue("FrameRate",fFrameRate);
+fFrameRate/=10;
+if(fFrameRate<10.0f){
+fFrameRate=10.0f;
+}
+if(fFrameRate>1000.0f){
+fFrameRate=1000.0f;
+}
+GetValue("CfgFixes",dwCfgFixes);
+GetValue("UseFixes",iUseFixes);
+if(iUseFixes<0){
+iUseFixes=0;
+}
+if(iUseFixes>1){
+iUseFixes=1;
+}
+free(pB);
+}
+void ExecCfg(char *arg){
+char cfg[256];
+struct stat buf;
+strcpy(cfg,"./cfgDFXVideo");
+if(stat(cfg,&buf)!=-1){
+if(fork()==0){
+execl(cfg,"cfgDFXVideo",arg,NULL);
+exit(0);
+}
+return;
+}
+strcpy(cfg,"./cfg/cfgDFXVideo");
+if(stat(cfg,&buf)!=-1){
+if(fork()==0){
+execl(cfg,"cfgDFXVideo",arg,NULL);
+exit(0);
+}
+return;
+}
+sprintf(cfg,"%s/.pcsx/plugins/cfg/cfgDFXVideo",getenv("HOME"));
+if(stat(cfg,&buf)!=-1){
+if(fork()==0){
+execl(cfg, "cfgDFXVideo",arg,NULL);
+exit(0);
+}
+return;
+}
+printf("ERROR: cfgDFXVideo file not found!\n");
+}
+void SoftDlgProc(void){
+ExecCfg("CFG");
+}
+void AboutDlgProc(void){
+char args[256];
+sprintf(args,"ABOUT");
+ExecCfg(args);
 }
 #endif
-void ReadGPUConfig(void)
-{
- // defaults
- iResX=640;iResY=480;
- iWinSize=MAKELONG(iResX,iResY);
- iColDepth=32;
- iWindowMode=1;
- iMaintainAspect=0;
- UseFrameLimit=0;
- UseFrameSkip=0;
- iFrameLimit=2;
- fFrameRate=60.0f;
- dwCfgFixes=0;
- iUseFixes=0;
- iUseNoStretchBlt=0;
- iUseDither=1;
- iShowFPS=0;
- if(!iColDepth)       iColDepth=32;
- if(iUseFixes)        dwActFixes=dwCfgFixes;
- SetFixes();
+void ReadGPUConfig(void){
+W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
+H=W*0.75;
+iResX=H;
+iResY=W;
+iWinSize=MAKELONG(iResX,iResY);
+iColDepth=32;
+iWindowMode=1;
+iMaintainAspect=0;
+UseFrameLimit=0;
+UseFrameSkip=0;
+iFrameLimit=2;
+fFrameRate=60.0f;
+dwCfgFixes=0;
+iUseFixes=0;
+iUseNoStretchBlt=0;
+iUseDither=1;
+iShowFPS=0;
+if(!iColDepth){
+iColDepth=32;
+}
+if(iUseFixes){
+dwActFixes=dwCfgFixes;
+}
+SetFixes();
 }
 #if 0
-void WriteConfig(void) {
- struct stat buf;
- FILE *out;char t[256];int len, size;
- char * pB, * p; char t1[8];
+void WriteConfig(void){
+struct stat buf;
+FILE *out;char t[256];
+int len,size;
+char * pB,* p; 
+char t1[8];
 strcpy(t,"dfxvideo.cfg");
-out = fopen(t,"rb");
- if (stat(t, &buf) != -1) size = buf.st_size;
- else size = 0;
- out = fopen(t,"rb");
- if (!out) {
-  // defaults
-  iResX=640;iResY=480;
-  iColDepth=32;
-  iWindowMode=1;
-  iMaintainAspect=0;
-  UseFrameLimit=0;
-  UseFrameSkip=0;
-  iFrameLimit=2;
-  fFrameRate=60.0f;
-  dwCfgFixes=0;
-  iUseFixes=0;
-  iUseNoStretchBlt=0;
-  iUseDither=1;
-  iShowFPS=0;
-  size = 0;
-  pB=(char *)malloc(4096);
-  memset(pB,0,4096);
- }
- else {
-  pB=(char *)malloc(size+4096);
-  memset(pB,0,size+4096);
-  len = fread(pB, 1, size, out);
-  fclose(out);
- }
- SetValue("ResX", iResX);
- SetValue("ResY", iResY);
- SetValue("NoStretch", iUseNoStretchBlt);
- SetValue("Dithering", iUseDither);
- SetValue("FullScreen", !iWindowMode);
- SetValue("ShowFPS", iShowFPS);
- SetValue("Maintain43", iMaintainAspect);
- SetValue("UseFrameLimit", UseFrameLimit);
- SetValue("UseFrameSkip", UseFrameSkip);
- SetValue("FPSDetection", iFrameLimit);
- SetFloatValue("FrameRate", fFrameRate);
- SetValue("CfgFixes", (unsigned int)dwCfgFixes);
- SetValue("UseFixes", iUseFixes);
- out = fopen(t,"wb");
- if (!out) return;
- len = fwrite(pB, 1, size, out);
- fclose(out);
- free(pB);
+out=fopen(t,"rb");
+if(stat(t,&buf)!=-1){
+size=buf.st_size;
+}
+else size = 0;
+out=fopen(t,"rb");
+if(!out){
+W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
+H=W*0.75;
+iResX=640;iResY=480;
+iColDepth=32;
+iWindowMode=1;
+iMaintainAspect=0;
+UseFrameLimit=0;
+UseFrameSkip=0;
+iFrameLimit=2;
+fFrameRate=60.0f;
+dwCfgFixes=0;
+iUseFixes=0;
+iUseNoStretchBlt=0;
+iUseDither=0;
+iShowFPS=0;
+size=0;
+pB=(char *)malloc(4096);
+memset(pB,0,4096);
+}else{
+pB=(char *)malloc(size+4096);
+memset(pB,0,size+4096);
+len=fread(pB,1,size,out);
+fclose(out);
+}
+SetValue("ResX",iResX);
+SetValue("ResY",iResY);
+SetValue("NoStretch",iUseNoStretchBlt);
+SetValue("Dithering",iUseDither);
+SetValue("FullScreen",!iWindowMode);
+SetValue("ShowFPS",iShowFPS);
+SetValue("Maintain43",iMaintainAspect);
+SetValue("UseFrameLimit",UseFrameLimit);
+SetValue("UseFrameSkip",UseFrameSkip);
+SetValue("FPSDetection",iFrameLimit);
+SetFloatValue("FrameRate",fFrameRate);
+SetValue("CfgFixes",(unsigned int)dwCfgFixes);
+SetValue("UseFixes",iUseFixes);
+out=fopen(t,"wb");
+if(!out){
+return;
+}
+len=fwrite(pB,1,size,out);
+fclose(out);
+free(pB);
 }
 #endif
