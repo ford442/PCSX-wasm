@@ -19,12 +19,12 @@ plugins/dfxvideo/prim.o plugins/dfxvideo/zn.o plugins/dfxvideo/draw_null.o \
 plugins/dfxvideo/gpu.o plugins/dfxvideo/soft.o \
 plugins/dfsound/spu.o plugins/dfsound/cfg.o  plugins/dfsound/dma.o plugins/dfsound/registers.o plugins/dfsound/worker.o \
 plugins/sdlinput/cfg.o plugins/sdlinput/pad_worker.o plugins/sdlinput/analog.o
-WORKER_FLAGS= --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT)
+WORKER_FLAGS= --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT) -sENVIRONMENT=worker
 
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
-UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
+UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sENVIRONMENT=web
 
 
 ALL: pcsx_worker.js pcsx_ww.js
