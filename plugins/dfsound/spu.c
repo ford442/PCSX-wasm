@@ -64,7 +64,7 @@ unsigned char * pMixIrq=0;
 
 int             iVolume=3;
 int             iXAPitch=1;
-int             iUseTimer=2;
+int             iUseTimer=1;
 int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
