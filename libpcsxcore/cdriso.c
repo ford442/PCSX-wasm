@@ -36,9 +36,6 @@
 #include <emscripten.h>
 #include <sys/time.h>
 
-struct timespec rem;
-struct timespec req={0,15000000};
-
 static FILE *cdHandle = NULL;
 static FILE *cddaHandle = NULL;
 static FILE *subHandle = NULL;
