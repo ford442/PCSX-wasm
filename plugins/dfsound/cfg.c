@@ -77,7 +77,9 @@ in=fopen(t,"rb");
 if(!in){
 sprintf(t,"%s/dfsound.cfg",getenv("HOME")); 
 in=fopen(t,"rb"); 
-if(!in)return;
+if(!in){
+return;
+}
 }}
 pB=(char *)malloc(32767);
 memset(pB,0,32767);
@@ -86,7 +88,8 @@ fclose(in);
 strcpy(t,"\nVolume");
 p=strstr(pB,t);
 if(p){
-p=strstr(p,"=");len=1;
+p=strstr(p,"=");
+len=1;
 }
 if(p){
 iVolume=4-atoi(p+len);
@@ -111,7 +114,12 @@ iXAPitch=0;
 if(iXAPitch>1){
 iXAPitch=1;
 }
-strcpy(t,"\nHighCompMode");p=strstr(pB,t);if(p) {p=strstr(p,"=");len=1;} 
+strcpy(t,"\nHighCompMode");
+p=strstr(pB,t);
+if(p){
+p=strstr(p,"=");
+len=1;
+} 
 if(p){
 iUseTimer=atoi(p+len);
 }
