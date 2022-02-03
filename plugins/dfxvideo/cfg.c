@@ -20,6 +20,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <emscripten.h>
+#include <emscripten/html5.h>
 
 #undef FALSE
 #undef TRUE
@@ -193,7 +195,7 @@ ExecCfg(args);
 }
 #endif
 void ReadGPUConfig(void){
-W=EM_ASM({return parseInt(window.innerHeight,10);});
+W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
 H=W*0.75;
 iResX=H;
 iResY=W;
