@@ -23,6 +23,7 @@
 #include "cfg.h"
 #include "dsoundoss.h"
 #include "regs.h"
+#include <ctime>
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
@@ -46,6 +47,9 @@ static char * libraryName     = N_("PulseAudio Sound");
 #else
 static char * libraryName     = N_("NULL Sound");
 #endif
+
+struct timespec rem;
+struct timespec req={0,1000000};
 
 static char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 
@@ -474,19 +478,25 @@ static void *MAINThread(void *arg)
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
      printf("sleep!\n");
-     usleep(PAUSE_L);                                  // else sleep for x ms (linux)
+    // usleep(PAUSE_L);                                  // else sleep for x ms (linux)
+nanosleep(&req,&rem);
+nanosleep(&req,&rem);
+nanosleep(&req,&rem);
+nanosleep(&req,&rem);
+nanosleep(&req,&rem);
+if(dwNewChannel){
+iSecureStart=1; 
+}       
 
-     if(dwNewChannel) iSecureStart=1;                  // if a new channel kicks in (or, of course, sound buffer runs low), we will leave the loop
 #endif
-    }
+}
 
-   //--------------------------------------------------// continue from irq handling in timer mode? 
-
-   if(lastch>=0)                                       // will be -1 if no continue is pending
-    {
-     ch=lastch; ns=lastns; lastch=-1;                  // -> setup all kind of vars to continue
-     goto GOON;                                        // -> directly jump to the continue point
-    }
+if(lastch>=0){
+ch=lastch; 
+ns=lastns; 
+lastch=-1;
+goto GOON;
+}
 
    //--------------------------------------------------//
    //- main channel loop                              -// 
@@ -609,7 +619,9 @@ static void *MAINThread(void *arg)
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
                          printf("sleep\n");
-                     usleep(1000L);
+                   //  usleep(1000L);
+                    nanosleep(&req,&rem);
+
                        }
                 }
                else
@@ -856,7 +868,12 @@ void RemoveTimer(void)
  if(!iUseTimer)                                        // linux tread?
   {
    int i=0;
-   while(!bThreadEnded && i<2000) {usleep(1000L);i++;printf("sleep\n");} // -> wait until thread has ended
+   while(!bThreadEnded && i<2000) {
+   //  usleep(1000L);
+     nanosleep(&req,&rem);
+     i++;
+     printf("sleep\n");
+   } 
    if(thread!=(pthread_t)-1) {pthread_cancel(thread);thread=(pthread_t)-1;}  // -> cancel thread anyway
   }
 #endif
