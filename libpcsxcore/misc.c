@@ -376,7 +376,7 @@ int CheckCdrom() {
 	return 0;
 }
 
-static int PSXGetFileType(FILE *f) {
+int PSXGetFileType(FILE *f) {
 	unsigned long current;
 	u8 mybuf[2048];
 	EXE_HEADER *exe_hdr;
@@ -481,11 +481,11 @@ int Load(const char *ExePath) {
 
 // STATES
 
-static const char PcsxHeader[32] = "STv4 PCSX v" PACKAGE_VERSION;
+const char PcsxHeader[32] = "STv4 PCSX v" PACKAGE_VERSION;
 
 // Savestate Versioning!
 // If you make changes to the savestate version, please increment the value below.
-static const u32 SaveVersion = 0x8b410004;
+const u32 SaveVersion = 0x8b410004;
 
 #if 0 // remove 
 int SaveState(const char *file) {
@@ -692,7 +692,7 @@ void trim(char *str) {
 }
 
 // lookup table for crc calculation
-static unsigned short crctab[256] = {
+unsigned short crctab[256] = {
 	0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7, 0x8108,
 	0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF, 0x1231, 0x0210,
 	0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6, 0x9339, 0x8318, 0xB37B,
