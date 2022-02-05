@@ -51,9 +51,9 @@ printf("spu initsdl\n");
 SDL_Init(SDL_INIT_AUDIO);
 printf("SDL-1.2 start\n");
 }
-static void DestroySDL() {
+static void DestroySDL(){
 }
-static void SetupSound(void) {
+void SetupSound(void){
 SDL_AudioSpec spec;
 printf("setupsound\n");
 if(pSndBuffer!=NULL){
