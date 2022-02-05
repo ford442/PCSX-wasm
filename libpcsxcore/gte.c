@@ -215,7 +215,7 @@ inline u32 limE(u32 result) {
 
 #include "gte_divider.h"
 
-inline u32 MFC2(int reg) {
+static inline u32 MFC2(int reg) {
 	switch (reg) {
 		case 1:
 		case 3:
