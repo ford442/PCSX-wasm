@@ -23,13 +23,13 @@
 
 #include "psxhle.h"
 
-static void hleDummy() {
+void hleDummy() {
 	psxRegs.pc = psxRegs.GPR.n.ra;
 
 	psxBranchTest();
 }
 
-static void hleA0() {
+void hleA0() {
 	u32 call = psxRegs.GPR.n.t1 & 0xff;
 
 	if (biosA0[call]) biosA0[call]();
@@ -37,7 +37,7 @@ static void hleA0() {
 	psxBranchTest();
 }
 
-static void hleB0() {
+void hleB0() {
 	u32 call = psxRegs.GPR.n.t1 & 0xff;
 
 	if (biosB0[call]) biosB0[call]();
@@ -45,7 +45,7 @@ static void hleB0() {
 	psxBranchTest();
 }
 
-static void hleC0() {
+void hleC0() {
 	u32 call = psxRegs.GPR.n.t1 & 0xff;
 
 	if (biosC0[call]) biosC0[call]();
@@ -53,7 +53,7 @@ static void hleC0() {
 	psxBranchTest();
 }
 
-static void hleBootstrap() { // 0xbfc00000
+void hleBootstrap() { // 0xbfc00000
 	SysPrintf("hleBootstrap\n");
 	CheckCdrom();
 	LoadCdrom();
@@ -74,7 +74,7 @@ typedef struct {
 	u32 _sp,_fp,_gp,ret,base;
 } EXEC;
 
-static void hleExecRet() {
+void hleExecRet() {
 	EXEC *header = (EXEC*)PSXM(psxRegs.GPR.n.s0);
 
 	SysPrintf("ExecRet %x: %x\n", psxRegs.GPR.n.s0, header->ret);
