@@ -23,17 +23,6 @@
 
 #define BUFFER_SIZE		(22050+4096)
 
-extern "C" {
-void SetupSound(){
-eSetupSound();
-}
-void SoundGetBytesBuffered(){
-eSoundGetBytesBuffered();
-}
-void SoundFeedStreamData(){
-eSoundFeedStreamData();
-}}
-
 short *pSndBuffer=NULL;
 static int iBufSize=0;
 volatile int iReadPos=0,iWritePos=0;
@@ -63,7 +52,7 @@ printf("SDL-1.2 start\n");
 };
 static void DestroySDL(){
 };
-static void eSetupSound(void){
+void SetupSound(void){
 SDL_AudioSpec spec;
 printf("setupsound\n");
 if(pSndBuffer!=NULL){
@@ -99,7 +88,7 @@ DestroySDL();
 free(pSndBuffer);
 pSndBuffer=NULL;
 };
-static unsigned long eSoundGetBytesBuffered(void){
+unsigned long SoundGetBytesBuffered(void){
 static int size;
 if(pSndBuffer==NULL){
 return SOUNDSIZE;
@@ -113,7 +102,7 @@ return SOUNDSIZE;
 }
 return 0;
 };
-static void eSoundFeedStreamData(unsigned char *pSound, long lBytes){	
+void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
 long old_lBytes=lBytes;
 if(pSndBuffer==NULL){
