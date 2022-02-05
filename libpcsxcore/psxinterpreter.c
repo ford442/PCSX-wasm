@@ -26,9 +26,9 @@
 #include "gte.h"
 #include "psxhle.h"
 #include <stdio.h>
-static int branch = 0;
-static int branch2 = 0;
-static u32 branchPC;
+int branch = 0;
+int branch2 = 0;
+u32 branchPC;
 
 // These macros are used to assemble the repassembler functions
 FILE *mylogf=NULL;
@@ -49,7 +49,7 @@ void (*psxCP0[32])();
 void (*psxCP2[64])();
 void (*psxCP2BSC[32])();
 
-static void delayRead(int reg, u32 bpc) {
+void delayRead(int reg, u32 bpc) {
 	u32 rold, rnew;
 
 //	SysPrintf("delayRead at %x!\n", psxRegs.pc);
@@ -69,7 +69,7 @@ static void delayRead(int reg, u32 bpc) {
 	branch = 0;
 }
 
-static void delayWrite(int reg, u32 bpc) {
+void delayWrite(int reg, u32 bpc) {
 
 /*	SysPrintf("delayWrite at %x!\n", psxRegs.pc);
 
@@ -86,7 +86,7 @@ static void delayWrite(int reg, u32 bpc) {
 	psxBranchTest();
 }
 
-static void delayReadWrite(int reg, u32 bpc) {
+void delayReadWrite(int reg, u32 bpc) {
 
 //	SysPrintf("delayReadWrite at %x!\n", psxRegs.pc);
 
@@ -274,7 +274,7 @@ void psxDelayTest(int reg, u32 bpc) {
 	psxBranchTest();
 }
 
-__inline static void doBranch(u32 tar) {
+__inline void doBranch(u32 tar) {
 	u32 *code;
 	u32 tmp;
 
@@ -642,7 +642,7 @@ void psxTestSWInts() {
 	}
 }
 
-__inline static void MTC0(int reg, u32 val) {
+__inline void MTC0(int reg, u32 val) {
 //	SysPrintf("MTC0 %d: %x\n", reg, val);
 	switch (reg) {
 		case 12: // Status
@@ -757,11 +757,11 @@ void (*psxCP2BSC[32])() = {
 
 ///////////////////////////////////////////
 
-static int intInit() {
+int intInit() {
 	return 0;
 }
 
-static void intReset() {
+void intReset() {
 }
 
 
@@ -782,7 +782,7 @@ void execI() {
 #include <emscripten.h>
 
 
-static void intExecute() {
+void intExecute() {
 
   // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
   emscripten_set_main_loop(execI, 0, 0);
@@ -790,15 +790,15 @@ static void intExecute() {
 
 
 
-static void intExecuteBlock() {
+void intExecuteBlock() {
 	branch2 = 0;
 	while (!branch2) execI();
 }
 
-static void intClear(u32 Addr, u32 Size) {
+void intClear(u32 Addr, u32 Size) {
 }
 
-static void intShutdown() {
+void intShutdown() {
 }
 
 // interpreter execution
