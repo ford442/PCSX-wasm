@@ -26,7 +26,7 @@
 char ostr[256];
 
 // Names of registers
-static char *disRNameGPR[] = {
+char *disRNameGPR[] = {
 	"r0", "at", "v0", "v1", "a0", "a1","a2", "a3",
 	"t0", "t1", "t2", "t3", "t4", "t5","t6", "t7",
 	"s0", "s1", "s2", "s3", "s4", "s5","s6", "s7",
@@ -40,7 +40,7 @@ char *disRNameCP0[] = {
 
 
 // Type deffinition of our functions
-static unsigned int AGEMO_CALC_ADDR(unsigned int _base, unsigned int _off)
+unsigned int AGEMO_CALC_ADDR(unsigned int _base, unsigned int _off)
 {
         if (_off >= 0x8000)
                 return _base + _off - 0x10000;
@@ -53,7 +53,7 @@ typedef char* (*TdisR3000AF)(u32 code, u32 pc);
 // These macros are used to assemble the disassembler functions
 #define MakeDisFg(fn, b) char* fn(u32 code, u32 pc) { b; return ostr; }
 #define MakeDisF(fn, b) \
-	static char* fn(u32 code, u32 pc) { \
+	char* fn(u32 code, u32 pc) { \
 		sprintf (ostr, "%8.8x :", pc ); \
 		b; /*ostr[(strlen(ostr) - 1)] = 0;*/ return ostr; \
 	}
