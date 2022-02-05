@@ -138,7 +138,7 @@ void psxMemShutdown() {
 	free(psxMemWLUT);
 }
 
-static int writeok = 1;
+int writeok = 1;
 
 u8 psxMemRead8(u32 mem) {
 	char *p;
