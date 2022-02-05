@@ -26,7 +26,7 @@ const unsigned char build =		0;
 
 // to obtain library name for your plugin, mail: plugin@psemu.com
 // this must be unique, and only we can provide this
-static char *libraryName =		"OpenGL Driver";
+char *libraryName =		"OpenGL Driver";
 
 float scalarDispWidth,scalarDispHeight;
 float scalarDrawWidth,scalarDrawHeight;
@@ -35,8 +35,8 @@ float scalarDrawWidth,scalarDrawHeight;
 // driver dependant variables
 GpuConfS gpuConfig;
 
-static int initGPU = 0;
-static int ScreenOpened = 0;
+int initGPU = 0;
+int ScreenOpened = 0;
 
 #define RED(x) (x & 0xff)
 #define BLUE(x) ((x>>16) & 0xff)
@@ -54,42 +54,31 @@ unsigned short *psxVuw;
 signed short *psxVsw;
 uint32_t *psxVul;
 int32_t *psxVsl;
-
 int flip;
-
-// internal GPU
-
-static int32_t GPUdataRet;
+int32_t GPUdataRet;
 int32_t GPUstatusRet;
 int32_t GPUInfoVals[16];
 
-static uint32_t gpuData[100];
-static unsigned char gpuCommand = 0;
-static int32_t gpuDataC = 0;
-static int32_t gpuDataP = 0;
-
+uint32_t gpuData[100];
+unsigned char gpuCommand = 0;
+int32_t gpuDataC = 0;
+int32_t gpuDataP = 0;
 int drawingLines;
-
 VRAMLoad_t vramWrite;
 struct PSXDisplay_t psxDisp, oldpsxDisp;
 struct PSXDraw_t psxDraw;
-
 short dispWidths[8] = {256,320,512,640,368,384,512,640};
-
 int dispLace = 0;
 int dispLaceNew;
 int imageTransfer;
 int drawLace;
-
 #define FRAMES 16
 GLuint drawrec;
 int drawreccount;
-
 short imTYc,imTXc,imTY,imTX;
 int imSize;
 short imageX0,imageX1;
 short imageY0,imageY1;
-
 unsigned short textBuf[512*512];
 int newTextX0,newTextX1,newTextX2,newTextX3;
 int newTextY0,newTextY1,newTextY2,newTextY3;
@@ -98,8 +87,6 @@ GLuint xferTexture16 = 0;
 GLuint xferTexture24 = 0;
 
 uint32_t gpuDataX;
-
-
 typedef struct
 {
 	Display 				*dpy;
@@ -114,21 +101,19 @@ typedef struct
 	unsigned int			bpp;
 }GLWindow;
 
-static GLWindow GLWin;	/* Set our OpenGL Window to static, we only want one */
+GLWindow GLWin;	/* Set our OpenGL Window to static, we only want one */
 
-
-
-static char * CALLBACK PSEgetLibName(void)
+char * CALLBACK PSEgetLibName(void)
 {
 	return libraryName;
 }
 
-static unsigned long CALLBACK PSEgetLibType(void)
+unsigned long CALLBACK PSEgetLibType(void)
 {
 	return  PSE_LT_GPU;
 }
 
-static unsigned long CALLBACK PSEgetLibVersion(void)
+unsigned long CALLBACK PSEgetLibVersion(void)
 {
 	return version<<16|revision<<8|build;
 }
