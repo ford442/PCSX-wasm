@@ -55,8 +55,8 @@ const  unsigned char build    = 17;   // increase that with each version
 char *libraryName      = N_("SoftGL Driver");
 char *libraryInfo      = N_("P.E.Op.S. SoftGL Driver V1.17\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 #else
-char *libraryName      = N_("XVideo Driver");
-char *libraryInfo      = N_("P.E.Op.S. Xvideo Driver V1.17\nCoded by Pete Bernert and the P.E.Op.S. team\n");
+static char *libraryName      = N_("XVideo Driver");
+static char *libraryInfo      = N_("P.E.Op.S. Xvideo Driver V1.17\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 #endif
 
 char *PluginAuthor     = N_("Pete Bernert and the P.E.Op.S. team");
