@@ -197,8 +197,8 @@ ExecCfg(args);
 void ReadGPUConfig(void){
 W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
 H=W*0.75;
-iResX=W;
-iResY=H;
+iResX=640;
+iResY=480;
 iWinSize=MAKELONG(iResX,iResY);
 iColDepth=32;
 iWindowMode=1;
@@ -210,7 +210,7 @@ fFrameRate=60.0f;
 dwCfgFixes=0;
 iUseFixes=0;
 iUseNoStretchBlt=0;
-iUseDither=0;
+iUseDither=1;
 iShowFPS=0;
 if(!iColDepth){
 iColDepth=32;
@@ -237,7 +237,7 @@ out=fopen(t,"rb");
 if(!out){
 W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
 H=W*0.75;
-iResX=W;iResY=H;
+iResX=640;iResY=480;
 iColDepth=32;
 iWindowMode=1;
 iMaintainAspect=0;
@@ -248,7 +248,7 @@ fFrameRate=60.0f;
 dwCfgFixes=0;
 iUseFixes=0;
 iUseNoStretchBlt=0;
-iUseDither=0;
+iUseDither=1;
 iShowFPS=0;
 size=0;
 pB=(char *)malloc(4096);
