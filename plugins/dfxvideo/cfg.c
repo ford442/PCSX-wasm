@@ -210,7 +210,7 @@ fFrameRate=60.0f;
 dwCfgFixes=0;
 iUseFixes=0;
 iUseNoStretchBlt=0;
-iUseDither=1;
+iUseDither=0;
 iShowFPS=0;
 if(!iColDepth){
 iColDepth=32;
@@ -237,7 +237,7 @@ out=fopen(t,"rb");
 if(!out){
 W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
 H=W*0.75;
-iResX=640;iResY=480;
+iResX=W;iResY=H;
 iColDepth=32;
 iWindowMode=1;
 iMaintainAspect=0;
