@@ -29,7 +29,7 @@ static int iBufSize=0;
 volatile int iReadPos=0,iWritePos=0;
 static void SOUND_FillAudio(void *unused,Uint8 *stream,int len){
 short *p=(short *)stream;
-static int lBytes=0;
+int lBytes=0;
 len /= sizeof(short);
 while(iReadPos != iWritePos && len>0){
 *p++=pSndBuffer[iReadPos++];
@@ -105,7 +105,7 @@ return 0;
 }
 static void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
-static long old_lBytes=lBytes;
+long old_lBytes=lBytes;
 if(pSndBuffer==NULL){
 return;
 }
