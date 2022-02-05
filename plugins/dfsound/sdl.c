@@ -23,6 +23,17 @@
 
 #define BUFFER_SIZE		(22050+4096)
 
+extern "C" {
+void SetupSound(){
+eSetupSound();
+}
+void SoundGetBytesBuffered(){
+eSoundGetBytesBuffered();
+}
+void SoundFeedStreamData(){
+eSoundFeedStreamData();
+}}
+
 short *pSndBuffer=NULL;
 static int iBufSize=0;
 volatile int iReadPos=0,iWritePos=0;
@@ -123,13 +134,4 @@ iWritePos=0;
 lBytes-=sizeof(short);
 }};
 
-extern "C" {
-void SetupSound(){
-eSetupSound();
-}
-void SoundGetBytesBuffered(){
-eSoundGetBytesBuffered();
-}
-void SoundFeedStreamData(){
-eSoundFeedStreamData();
-}}
+
