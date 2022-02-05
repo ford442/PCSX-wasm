@@ -34,19 +34,19 @@
 
 #include "../libpcsxcore/plugins.h"
 
-static void OnBiosPath_Changed(GtkWidget *wdg, gpointer data);
-static void OnConf_Clicked(GtkDialog *dialog, gint arg1, gpointer user_data);
-static void OnPluginPath_Changed(GtkWidget *wdg, gpointer data);
-static void OnConfConf_Pad1About(GtkWidget *widget, gpointer user_data);
-static void OnConfConf_Pad2About(GtkWidget *widget, gpointer user_data);
-static void OnConfConf_Pad1Conf(GtkWidget *widget, gpointer user_data);
-static void OnConfConf_Pad2Conf(GtkWidget *widget, gpointer user_data);
-static void OnNet_Conf(GtkWidget *widget, gpointer user_data);
-static void OnNet_About(GtkWidget *widget, gpointer user_data);
-static void on_configure_plugin(GtkWidget *widget, gpointer user_data);
-static void on_about_plugin(GtkWidget *widget, gpointer user_data);
-static void UpdatePluginsBIOS_UpdateGUI(GladeXML *xml);
-static void FindNetPlugin(GladeXML *xml);
+void OnBiosPath_Changed(GtkWidget *wdg, gpointer data);
+void OnConf_Clicked(GtkDialog *dialog, gint arg1, gpointer user_data);
+void OnPluginPath_Changed(GtkWidget *wdg, gpointer data);
+void OnConfConf_Pad1About(GtkWidget *widget, gpointer user_data);
+void OnConfConf_Pad2About(GtkWidget *widget, gpointer user_data);
+void OnConfConf_Pad1Conf(GtkWidget *widget, gpointer user_data);
+void OnConfConf_Pad2Conf(GtkWidget *widget, gpointer user_data);
+void OnNet_Conf(GtkWidget *widget, gpointer user_data);
+void OnNet_About(GtkWidget *widget, gpointer user_data);
+void on_configure_plugin(GtkWidget *widget, gpointer user_data);
+void on_about_plugin(GtkWidget *widget, gpointer user_data);
+void UpdatePluginsBIOS_UpdateGUI(GladeXML *xml);
+void FindNetPlugin(GladeXML *xml);
 
 PSEgetLibType		PSE_getLibType = NULL;
 PSEgetLibVersion	PSE_getLibVersion = NULL;
@@ -317,7 +317,7 @@ void OnConf_Pad() {
 	}
 }
 
-static int all_config_set() {
+int all_config_set() {
 	int retval;
 
 	if ((strlen(Config.Gpu) != 0) &&
@@ -357,7 +357,7 @@ static int all_config_set() {
 	g_free (filename); \
 }
 
-static void on_configure_plugin(GtkWidget *widget, gpointer user_data) {
+void on_configure_plugin(GtkWidget *widget, gpointer user_data) {
 	gint plugin_type = (int) user_data;
 
 	while (gtk_events_pending())
@@ -378,7 +378,7 @@ static void on_configure_plugin(GtkWidget *widget, gpointer user_data) {
 		ConfigurePlugins();
 }
 
-static void on_about_plugin(GtkWidget *widget, gpointer user_data) {
+void on_about_plugin(GtkWidget *widget, gpointer user_data) {
 	gint plugin_type = (int) user_data;
 
 	while (gtk_events_pending())
@@ -399,31 +399,31 @@ static void on_about_plugin(GtkWidget *widget, gpointer user_data) {
 		ConfigurePlugins();
 }
 
-static void OnConfConf_Pad1About(GtkWidget *widget, gpointer user_data) {
+void OnConfConf_Pad1About(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(PADabout, Pad1ConfS, Config.Pad1, "PADabout", ConfDlg);
 }
 
-static void OnConfConf_Pad2About(GtkWidget *widget, gpointer user_data) {
+void OnConfConf_Pad2About(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(PADabout, Pad2ConfS, Config.Pad2, "PADabout", ConfDlg);
 }
 
-static void OnConfConf_Pad1Conf(GtkWidget *widget, gpointer user_data) {
+void OnConfConf_Pad1Conf(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(PADabout, Pad1ConfS, Config.Pad1, "PADconfigure", ConfDlg);
 }
 
-static void OnConfConf_Pad2Conf(GtkWidget *widget, gpointer user_data) {
+void OnConfConf_Pad2Conf(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(PADabout, Pad2ConfS, Config.Pad2, "PADconfigure", ConfDlg);
 }
 
-static void OnNet_Conf(GtkWidget *widget, gpointer user_data) {
+void OnNet_Conf(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(NETconfigure, NetConfS, Config.Net, "NETconfigure", NetDlg);
 }
 
-static void OnNet_About(GtkWidget *widget, gpointer user_data) {
+void OnNet_About(GtkWidget *widget, gpointer user_data) {
 	ConfPlugin(NETabout, NetConfS, Config.Net, "NETabout", NetDlg);
 }
 
-static void OnPluginPath_Changed(GtkWidget *wdg, gpointer data) {
+void OnPluginPath_Changed(GtkWidget *wdg, gpointer data) {
 	gchar *path;
 
 	path = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (wdg));
@@ -434,7 +434,7 @@ static void OnPluginPath_Changed(GtkWidget *wdg, gpointer data) {
 	g_free(path);
 }
 
-static void OnBiosPath_Changed(GtkWidget *wdg, gpointer data) {
+void OnBiosPath_Changed(GtkWidget *wdg, gpointer data) {
 	gchar *foldername;
 
 	foldername = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (wdg));
@@ -675,7 +675,7 @@ void UpdatePluginsBIOS() {
 	add_bios_to_list(_("Simulate PSX BIOS"), "HLE");
 }
 
-static void UpdatePluginsBIOS_UpdateGUI(GladeXML *xml) {
+void UpdatePluginsBIOS_UpdateGUI(GladeXML *xml) {
 	// Populate the plugin combo boxes
 	ConfCreatePConf("Gpu", Gpu);
 	ConfCreatePConf("Spu", Spu);
@@ -685,7 +685,7 @@ static void UpdatePluginsBIOS_UpdateGUI(GladeXML *xml) {
 	ConfCreatePConf("Bios", Bios);
 }
 
-static void FindNetPlugin(GladeXML *xml) {
+void FindNetPlugin(GladeXML *xml) {
 	DIR *dir;
 	struct dirent *ent;
 	void *Handle;
@@ -754,7 +754,7 @@ char *psxtypes[] = {
 };
 
 // When the auto-detect CPU type is selected, disable the NTSC/PAL selection
-static void OnCpu_PsxAutoClicked (GtkWidget *widget, gpointer user_data) {
+void OnCpu_PsxAutoClicked (GtkWidget *widget, gpointer user_data) {
 	GtkWidget *combo;
 	GladeXML *xml = user_data;
 	combo = glade_xml_get_widget(xml, "GtkCombo_PsxType");
@@ -764,7 +764,7 @@ static void OnCpu_PsxAutoClicked (GtkWidget *widget, gpointer user_data) {
 }
 
 // When the interpreter core is deselected, disable the debugger checkbox
-static void OnCpu_CpuClicked(GtkWidget *widget, gpointer user_data) {
+void OnCpu_CpuClicked(GtkWidget *widget, gpointer user_data) {
 	GtkWidget *check;
 	GladeXML *xml = user_data;
 	check = glade_xml_get_widget(xml, "GtkCheckButton_Dbg");
