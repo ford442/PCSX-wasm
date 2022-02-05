@@ -72,8 +72,8 @@ unsigned long timeGetTime()
 long updated_display =-1;
 void FrameCap (void)
 {
- static unsigned long curticks, lastticks, _ticks_since_last_update;
- static unsigned int TicksToWait = 0;
+ unsigned long curticks, lastticks, _ticks_since_last_update;
+ unsigned int TicksToWait = 0;
  int overslept=0, tickstogo=0;
  updated_display = 0;
  BOOL Waiting = TRUE;
@@ -122,11 +122,11 @@ void FrameCap (void)
 
 void FrameSkip(void)
 {
- static int   iNumSkips=0,iAdditionalSkip=0;           // number of additional frames to skip
- static DWORD dwLastLace=0;                            // helper var for frame limitation
- static DWORD curticks, lastticks, _ticks_since_last_update;
+ int   iNumSkips=0,iAdditionalSkip=0;           // number of additional frames to skip
+ DWORD dwLastLace=0;                            // helper var for frame limitation
+ DWORD curticks, lastticks, _ticks_since_last_update;
  int tickstogo=0;
- static int overslept=0;
+ int overslept=0;
 
  if(!dwLaceCnt) return;                                // important: if no updatelace happened, we ignore it completely
 
@@ -240,11 +240,11 @@ void FrameSkip(void)
 
 void calcfps(void)
 {
- static unsigned long curticks,_ticks_since_last_update,lastticks;
- static long   fps_cnt = 0;
- static unsigned long  fps_tck = 1;
- static long          fpsskip_cnt = 0;
- static unsigned long fpsskip_tck = 1;
+ unsigned long curticks,_ticks_since_last_update,lastticks;
+ long   fps_cnt = 0;
+ unsigned long  fps_tck = 1;
+ long          fpsskip_cnt = 0;
+ unsigned long fpsskip_tck = 1;
 
   {
    curticks = timeGetTime();
@@ -286,8 +286,8 @@ void calcfps(void)
 
 void PCFrameCap (void)
 {
- static unsigned long curticks, lastticks, _ticks_since_last_update;
- static unsigned long TicksToWait = 0;
+ unsigned long curticks, lastticks, _ticks_since_last_update;
+ unsigned long TicksToWait = 0;
  BOOL Waiting = TRUE;
 
  while (Waiting)
@@ -306,9 +306,9 @@ void PCFrameCap (void)
 
 void PCcalcfps(void)
 {
- static unsigned long curticks,_ticks_since_last_update,lastticks;
- static long  fps_cnt = 0;
- static float fps_acc = 0;
+ unsigned long curticks,_ticks_since_last_update,lastticks;
+ long  fps_cnt = 0;
+ float fps_acc = 0;
  float CurrentFPS=0;
 
  curticks = timeGetTime();
