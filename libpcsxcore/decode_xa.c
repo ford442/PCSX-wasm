@@ -36,28 +36,28 @@
 //============================================
 
 #ifndef FIXED
-static double K0[4] = {
+double K0[4] = {
     0.0,
     0.9375,
     1.796875,
     1.53125
 };
 
-static double K1[4] = {
+double K1[4] = {
     0.0,
     0.0,
     -0.8125,
     -0.859375
 };
 #else
-static int K0[4] = {
+int K0[4] = {
 	0.0       * (1<<SHC),
 	0.9375    * (1<<SHC),
 	1.796875  * (1<<SHC),
 	1.53125   * (1<<SHC)
 };
  
-static int K1[4] = {
+int K1[4] = {
 	0.0       * (1<<SHC),
 	0.0       * (1<<SHC),
 	-0.8125   * (1<<SHC),
@@ -82,7 +82,7 @@ void ADPCM_InitDecode(ADPCM_Decode_t *decp) {
 #define IK1(fid)	(-K1[fid])
 #endif
 
-static __inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, u8 filter_range, const void *vblockp, short *destp, int inc ) {
+__inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, u8 filter_range, const void *vblockp, short *destp, int inc ) {
 	int i;
 	int range, filterid;
 	s32 fy0, fy1;
@@ -119,10 +119,10 @@ static __inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, u8 filter_range,
 	decp->y1 = fy1;
 }
 
-static int headtable[4] = {0,2,8,10};
+int headtable[4] = {0,2,8,10};
 
 //===========================================
-static void xa_decode_data( xa_decode_t *xdp, unsigned char *srcp ) {
+void xa_decode_data( xa_decode_t *xdp, unsigned char *srcp ) {
 	const u8    *sound_groupsp;
 	const u8    *sound_datap, *sound_datap2;
 	int         i, j, k, nbits;
@@ -296,7 +296,7 @@ u8  coding2;
 #define SUB_AUDIO   2
 
 //============================================
-static int parse_xa_audio_sector( xa_decode_t *xdp, 
+int parse_xa_audio_sector( xa_decode_t *xdp, 
 								  xa_subheader_t *subheadp,
 								  unsigned char *sectorp,
 								  int is_first_sector ) {
