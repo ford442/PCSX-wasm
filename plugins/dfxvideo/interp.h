@@ -37,85 +37,85 @@
 /***************************************************************************/
 /* interpolation */
 
-static unsigned interp_mask[2];
-static unsigned interp_bits_per_pixel;
+unsigned interp_mask[2];
+unsigned interp_bits_per_pixel;
 
 #define INTERP_16_MASK_1(v) (v & interp_mask[0])
 #define INTERP_16_MASK_2(v) (v & interp_mask[1])
 
-static __inline unsigned short interp_16_521(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_521(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*5 + INTERP_16_MASK_1(p2)*2 + INTERP_16_MASK_1(p3)*1) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*5 + INTERP_16_MASK_2(p2)*2 + INTERP_16_MASK_2(p3)*1) / 8);
 }
 
-static __inline unsigned short interp_16_332(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_332(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*3 + INTERP_16_MASK_1(p2)*3 + INTERP_16_MASK_1(p3)*2) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*3 + INTERP_16_MASK_2(p2)*3 + INTERP_16_MASK_2(p3)*2) / 8);
 }
 
-static __inline unsigned short interp_16_611(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_611(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*6 + INTERP_16_MASK_1(p2) + INTERP_16_MASK_1(p3)) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*6 + INTERP_16_MASK_2(p2) + INTERP_16_MASK_2(p3)) / 8);
 }
 
-static __inline unsigned short interp_16_71(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_71(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*7 + INTERP_16_MASK_1(p2)) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*7 + INTERP_16_MASK_2(p2)) / 8);
 }
 
-static __inline unsigned short interp_16_211(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_211(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*2 + INTERP_16_MASK_1(p2) + INTERP_16_MASK_1(p3)) / 4)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*2 + INTERP_16_MASK_2(p2) + INTERP_16_MASK_2(p3)) / 4);
 }
 
-static __inline unsigned short interp_16_772(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_772(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1(((INTERP_16_MASK_1(p1) + INTERP_16_MASK_1(p2))*7 + INTERP_16_MASK_1(p3)*2) / 16)
     | INTERP_16_MASK_2(((INTERP_16_MASK_2(p1) + INTERP_16_MASK_2(p2))*7 + INTERP_16_MASK_2(p3)*2) / 16);
 }
 
-static __inline unsigned short interp_16_11(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_11(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1) + INTERP_16_MASK_1(p2)) / 2)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1) + INTERP_16_MASK_2(p2)) / 2);
 }
 
-static __inline unsigned short interp_16_31(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_31(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*3 + INTERP_16_MASK_1(p2)) / 4)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*3 + INTERP_16_MASK_2(p2)) / 4);
 }
 
-static __inline unsigned short interp_16_1411(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_1411(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*14 + INTERP_16_MASK_1(p2) + INTERP_16_MASK_1(p3)) / 16)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*14 + INTERP_16_MASK_2(p2) + INTERP_16_MASK_2(p3)) / 16);
 }
 
-static __inline unsigned short interp_16_431(unsigned short p1, unsigned short p2, unsigned short p3)
+__inline unsigned short interp_16_431(unsigned short p1, unsigned short p2, unsigned short p3)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*4 + INTERP_16_MASK_1(p2)*3 + INTERP_16_MASK_1(p3)) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*4 + INTERP_16_MASK_2(p2)*3 + INTERP_16_MASK_2(p3)) / 8);
 }
 
-static __inline unsigned short interp_16_53(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_53(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*5 + INTERP_16_MASK_1(p2)*3) / 8)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*5 + INTERP_16_MASK_2(p2)*3) / 8);
 }
 
-static __inline unsigned short interp_16_151(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_151(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*15 + INTERP_16_MASK_1(p2)) / 16)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*15 + INTERP_16_MASK_2(p2)) / 16);
 }
 
-static __inline unsigned short interp_16_97(unsigned short p1, unsigned short p2)
+__inline unsigned short interp_16_97(unsigned short p1, unsigned short p2)
 {
   return INTERP_16_MASK_1((INTERP_16_MASK_1(p1)*9 + INTERP_16_MASK_1(p2)*7) / 16)
     | INTERP_16_MASK_2((INTERP_16_MASK_2(p1)*9 + INTERP_16_MASK_2(p2)*7) / 16);
@@ -124,79 +124,79 @@ static __inline unsigned short interp_16_97(unsigned short p1, unsigned short p2
 #define INTERP_32_MASK_1(v) (v & 0xFF00FF)
 #define INTERP_32_MASK_2(v) (v & 0x00FF00)
 
-static __inline unsigned int  interp_32_521(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_521(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*5 + INTERP_32_MASK_1(p2)*2 + INTERP_32_MASK_1(p3)*1) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*5 + INTERP_32_MASK_2(p2)*2 + INTERP_32_MASK_2(p3)*1) / 8);
 }
 
-static __inline unsigned int  interp_32_332(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_332(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*3 + INTERP_32_MASK_1(p2)*3 + INTERP_32_MASK_1(p3)*2) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*3 + INTERP_32_MASK_2(p2)*3 + INTERP_32_MASK_2(p3)*2) / 8);
 }
 
-static __inline unsigned int  interp_32_211(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_211(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*2 + INTERP_32_MASK_1(p2) + INTERP_32_MASK_1(p3)) / 4)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*2 + INTERP_32_MASK_2(p2) + INTERP_32_MASK_2(p3)) / 4);
 }
 
-static __inline unsigned int  interp_32_611(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_611(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*6 + INTERP_32_MASK_1(p2) + INTERP_32_MASK_1(p3)) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*6 + INTERP_32_MASK_2(p2) + INTERP_32_MASK_2(p3)) / 8);
 }
 
-static __inline unsigned int  interp_32_71(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_71(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*7 + INTERP_32_MASK_1(p2)) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*7 + INTERP_32_MASK_2(p2)) / 8);
 }
 
-static __inline unsigned int  interp_32_772(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_772(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1(((INTERP_32_MASK_1(p1) + INTERP_32_MASK_1(p2))*7 + INTERP_32_MASK_1(p3)*2) / 16)
     | INTERP_32_MASK_2(((INTERP_32_MASK_2(p1) + INTERP_32_MASK_2(p2))*7 + INTERP_32_MASK_2(p3)*2) / 16);
 }
 
-static __inline unsigned int  interp_32_11(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_11(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1) + INTERP_32_MASK_1(p2)) / 2)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1) + INTERP_32_MASK_2(p2)) / 2);
 }
 
-static __inline unsigned int  interp_32_31(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_31(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*3 + INTERP_32_MASK_1(p2)) / 4)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*3 + INTERP_32_MASK_2(p2)) / 4);
 }
 
-static __inline unsigned int  interp_32_1411(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_1411(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*14 + INTERP_32_MASK_1(p2) + INTERP_32_MASK_1(p3)) / 16)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*14 + INTERP_32_MASK_2(p2) + INTERP_32_MASK_2(p3)) / 16);
 }
 
-static __inline unsigned int  interp_32_431(unsigned int  p1, unsigned int  p2, unsigned int  p3)
+__inline unsigned int  interp_32_431(unsigned int  p1, unsigned int  p2, unsigned int  p3)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*4 + INTERP_32_MASK_1(p2)*3 + INTERP_32_MASK_1(p3)) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*4 + INTERP_32_MASK_2(p2)*3 + INTERP_32_MASK_2(p3)) / 8);
 }
 
-static __inline unsigned int  interp_32_53(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_53(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*5 + INTERP_32_MASK_1(p2)*3) / 8)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*5 + INTERP_32_MASK_2(p2)*3) / 8);
 }
 
-static __inline unsigned int  interp_32_151(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_151(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*15 + INTERP_32_MASK_1(p2)) / 16)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*15 + INTERP_32_MASK_2(p2)) / 16);
 }
 
-static __inline unsigned int  interp_32_97(unsigned int  p1, unsigned int  p2)
+__inline unsigned int  interp_32_97(unsigned int  p1, unsigned int  p2)
 {
   return INTERP_32_MASK_1((INTERP_32_MASK_1(p1)*9 + INTERP_32_MASK_1(p2)*7) / 16)
     | INTERP_32_MASK_2((INTERP_32_MASK_2(p1)*9 + INTERP_32_MASK_2(p2)*7) / 16);
@@ -209,7 +209,7 @@ static __inline unsigned int  interp_32_97(unsigned int  p1, unsigned int  p2)
 #define INTERP_U_LIMIT (0x07*4)
 #define INTERP_V_LIMIT (0x06*8)
 
-inline static int interp_16_diff(unsigned short p1, unsigned short p2)
+inline int interp_16_diff(unsigned short p1, unsigned short p2)
 {
   int r, g, b;
   int y, u, v;
@@ -243,7 +243,7 @@ inline static int interp_16_diff(unsigned short p1, unsigned short p2)
   return 0;
 }
 
-inline static int interp_32_diff(unsigned int  p1, unsigned int  p2)
+inline int interp_32_diff(unsigned int  p1, unsigned int  p2)
 {
   int r, g, b;
   int y, u, v;
@@ -273,7 +273,7 @@ inline static int interp_32_diff(unsigned int  p1, unsigned int  p2)
 
 #if 0
 
-static void interp_set(unsigned bits_per_pixel)
+void interp_set(unsigned bits_per_pixel)
 {
   interp_bits_per_pixel = bits_per_pixel;
 
