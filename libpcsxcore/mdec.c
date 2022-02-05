@@ -47,7 +47,7 @@
 #define	RLE_VAL(a)	(((int)(a) << (sizeof(int) * 8 - 10)) >> (sizeof(int) * 8 - 10))
 
 #if 0
-static void printmatrixu8(u8 *m) {
+void printmatrixu8(u8 *m) {
 	int i;
 	for(i = 0; i < DSIZE2; i++) {
 		printf("%3d ",m[i]);
@@ -56,12 +56,12 @@ static void printmatrixu8(u8 *m) {
 }
 #endif
 
-static inline void fillcol(int *blk, int val) {
+inline void fillcol(int *blk, int val) {
 	blk[0 * DSIZE] = blk[1 * DSIZE] = blk[2 * DSIZE] = blk[3 * DSIZE]
 		= blk[4 * DSIZE] = blk[5 * DSIZE] = blk[6 * DSIZE] = blk[7 * DSIZE] = val;
 }
 
-static inline void fillrow(int *blk, int val) {
+inline void fillrow(int *blk, int val) {
 	blk[0] = blk[1] = blk[2] = blk[3]
 		= blk[4] = blk[5] = blk[6] = blk[7] = val;
 }
@@ -206,9 +206,9 @@ struct {
     int rlsize;
 } mdec;
 
-static int iq_y[DSIZE2], iq_uv[DSIZE2];
+int iq_y[DSIZE2], iq_uv[DSIZE2];
 
-static int zscan[DSIZE2] = {
+int zscan[DSIZE2] = {
 	0 , 1 , 8 , 16, 9 , 2 , 3 , 10,
 	17, 24, 32, 25, 18, 11, 4 , 5 ,
 	12, 19, 26, 33, 40, 48, 41, 34,
@@ -219,7 +219,7 @@ static int zscan[DSIZE2] = {
 	53, 60, 61, 54, 47, 55, 62, 63
 };
 
-static int aanscales[DSIZE2] = {
+int aanscales[DSIZE2] = {
 	1048576, 1454417, 1370031, 1232995, 1048576,  823861, 567485, 289301,
 	1454417, 2017334, 1900287, 1710213, 1454417, 1142728, 787125, 401273,
 	1370031, 1900287, 1790031, 1610986, 1370031, 1076426, 741455, 377991,
@@ -230,7 +230,7 @@ static int aanscales[DSIZE2] = {
 	289301,  401273,  377991,  340183,  289301,  227303, 156569,  79818
 };
 
-static void iqtab_init(int *iqtab, unsigned char *iq_y) {
+void iqtab_init(int *iqtab, unsigned char *iq_y) {
 	int i;
 
 	for (i = 0; i < DSIZE2; i++) {
@@ -301,7 +301,7 @@ unsigned short *rl2blk(int *blk, unsigned short *mdec_rl) {
 #define CLAMP_SCALE8(a)   (CLAMP8(SCALE8(a)))
 #define CLAMP_SCALE5(a)   (CLAMP5(SCALE5(a)))
 
-static inline void putlinebw15(unsigned short *image, int *Yblk) {
+inline void putlinebw15(unsigned short *image, int *Yblk) {
 	int i;
 	int A = (mdec.reg0 & MDEC0_STP) ? 0x8000 : 0;
 
@@ -312,7 +312,7 @@ static inline void putlinebw15(unsigned short *image, int *Yblk) {
 	}
 }
 
-static void putquadrgb15(unsigned short *image, int *Yblk, int Cr, int Cb) {
+void putquadrgb15(unsigned short *image, int *Yblk, int Cr, int Cb) {
 	int Y, R, G, B;
 	int A = (mdec.reg0 & MDEC0_STP) ? 0x8000 : 0;
 	R = MULR(Cr);
@@ -330,7 +330,7 @@ static void putquadrgb15(unsigned short *image, int *Yblk, int Cr, int Cb) {
 	image[17] = MAKERGB15(CLAMP_SCALE5(Y + R), CLAMP_SCALE5(Y + G), CLAMP_SCALE5(Y + B), A);
 }
 
-static void yuv2rgb15(int *blk, unsigned short *image) {
+void yuv2rgb15(int *blk, unsigned short *image) {
 	int x, y;
 	int *Yblk = blk + DSIZE2 * 2;
 	int *Crblk = blk;
@@ -353,7 +353,7 @@ static void yuv2rgb15(int *blk, unsigned short *image) {
 	}
 }
 
-static inline void putlinebw24(unsigned char *image, int *Yblk) {
+inline void putlinebw24(unsigned char *image, int *Yblk) {
 	int i;
 	unsigned char Y;
 	for (i = 0; i < 8 * 3; i += 3, Yblk++) {
@@ -364,7 +364,7 @@ static inline void putlinebw24(unsigned char *image, int *Yblk) {
 	}
 }
 
-static void putquadrgb24(unsigned char *image, int *Yblk, int Cr, int Cb) {
+void putquadrgb24(unsigned char *image, int *Yblk, int Cr, int Cb) {
 	int Y, R, G, B;
 
 	R = MULR(Cr);
@@ -389,7 +389,7 @@ static void putquadrgb24(unsigned char *image, int *Yblk, int Cr, int Cb) {
 	image[17 * 3 + 2] = CLAMP_SCALE8(Y + B);
 }
 
-static void yuv2rgb24(int *blk, unsigned char *image) {
+void yuv2rgb24(int *blk, unsigned char *image) {
 	int x, y;
 	int *Yblk = blk + DSIZE2 * 2;
 	int *Crblk = blk;
