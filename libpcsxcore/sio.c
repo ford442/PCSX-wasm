@@ -47,28 +47,28 @@
 
 // *** FOR WORKS ON PADS AND MEMORY CARDS *****
 
-static unsigned char buf[256];
+unsigned char buf[256];
 unsigned char cardh[4] = {0x00, 0x00, 0x5a, 0x5d};
 
 // Transfer Ready and the Buffer is Empty
-// static unsigned short StatReg = 0x002b;
-static unsigned short StatReg = TX_RDY | TX_EMPTY;
-static unsigned short ModeReg;
-static unsigned short CtrlReg;
-static unsigned short BaudReg;
+// unsigned short StatReg = 0x002b;
+unsigned short StatReg = TX_RDY | TX_EMPTY;
+unsigned short ModeReg;
+unsigned short CtrlReg;
+unsigned short BaudReg;
 
-static unsigned int bufcount;
-static unsigned int parp;
-static unsigned int mcdst, rdwr;
-static unsigned char adrH, adrL;
-static unsigned int padst;
+unsigned int bufcount;
+unsigned int parp;
+unsigned int mcdst, rdwr;
+unsigned char adrH, adrL;
+unsigned int padst;
 
 char Mcd1Data[MCD_SIZE], Mcd2Data[MCD_SIZE];
 
 // clk cycle byte
 // 4us * 8bits = (PSXCLK / 1000000) * 32; (linuzappz)
 // TODO: add SioModePrescaler and BaudReg
-static inline void SIO_INT()
+inline void SIO_INT()
 {
 	if (!Config.Sio)
 	{
