@@ -475,16 +475,7 @@ void *MAINThread(void *arg)
      iSecureStart=0;                                   // reset secure
 
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
-#ifdef PTHREAD
-     printf("sleep!\n");
-    // usleep(PAUSE_L);                                  // else sleep for x ms (linux)
-nanosleep(&req,&rem);
-nanosleep(&req,&rem);
-if(dwNewChannel){
-iSecureStart=1; 
-}       
 
-#endif
 }
 
 if(lastch>=0){
@@ -614,10 +605,8 @@ goto GOON;
 
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
-                         printf("sleep\n");
                    //  usleep(1000L);
                     nanosleep(&req,&rem);
-
                        }
                 }
                else
