@@ -44,14 +44,14 @@ pcsx_worker.postMessage({cmd:"soundBytes",lBytes:$0});
 while(len>0){
 *p++=0;
 --len;
-}}
+}};
 static void InitSDL(){
 printf("spu initsdl\n");
 SDL_Init(SDL_INIT_AUDIO);
 printf("SDL-1.2 start\n");
-}
+};
 static void DestroySDL(){
-}
+};
 static void eSetupSound(void){
 SDL_AudioSpec spec;
 printf("setupsound\n");
@@ -80,14 +80,14 @@ return;
 iReadPos=0;
 iWritePos=0;
 SDL_PauseAudio(0);
-}
+};
 static void RemoveSound(void){
 if(pSndBuffer==NULL)return;
 SDL_CloseAudio();
 DestroySDL();
 free(pSndBuffer);
 pSndBuffer=NULL;
-}
+};
 static unsigned long eSoundGetBytesBuffered(void){
 static int size;
 if(pSndBuffer==NULL){
@@ -101,7 +101,7 @@ if(size<iBufSize/2){
 return SOUNDSIZE;
 }
 return 0;
-}
+};
 static void eSoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
 long old_lBytes=lBytes;
@@ -122,6 +122,7 @@ iWritePos=0;
 }
 lBytes-=sizeof(short);
 }};
+
 extern "C" {
 void SetupSound(){
 eSetupSound();
