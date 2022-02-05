@@ -53,7 +53,7 @@ printf("SDL-1.2 start\n");
 }
 static void DestroySDL(){
 }
-void SetupSound(void){
+static void eSetupSound(void){
 SDL_AudioSpec spec;
 printf("setupsound\n");
 if(pSndBuffer!=NULL){
@@ -89,7 +89,7 @@ DestroySDL();
 free(pSndBuffer);
 pSndBuffer=NULL;
 }
-static unsigned long SoundGetBytesBuffered(void){
+static unsigned long eSoundGetBytesBuffered(void){
 static int size;
 if(pSndBuffer==NULL){
 return SOUNDSIZE;
@@ -103,7 +103,7 @@ return SOUNDSIZE;
 }
 return 0;
 }
-void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
+static void eSoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
 long old_lBytes=lBytes;
 if(pSndBuffer==NULL){
@@ -122,4 +122,14 @@ if(iWritePos>=iBufSize){
 iWritePos=0;
 }
 lBytes-=sizeof(short);
+}}
+extern "C"{
+void SetupSound(){
+eSetupSound();
+}
+void SoundGetBytesBuffered(){
+eSoundGetBytesBuffered();
+}
+void SoundFeedStreamData(){
+eSoundFeedStreamData();
 }}
