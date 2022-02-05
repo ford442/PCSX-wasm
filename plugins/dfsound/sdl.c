@@ -19,7 +19,6 @@
 #include "stdafx.h"
 #include "externals.h"
 #include <emscripten.h>
-#include <emscripten/html5.h>
 #include <SDL/SDL.h>
 
 #define BUFFER_SIZE		(22050+4096)
@@ -122,8 +121,8 @@ if(iWritePos>=iBufSize){
 iWritePos=0;
 }
 lBytes-=sizeof(short);
-}}
-extern "C"{
+}};
+extern "C" {
 void SetupSound(){
 eSetupSound();
 }
