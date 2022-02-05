@@ -72,8 +72,6 @@ InitSDLJoy();
 return 0;
 };}
 int main(){
-W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
-H=W*0.75;
 if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)<0){
 printf("(x) Failed to Init SDL!!!\n");
 }else{
