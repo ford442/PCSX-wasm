@@ -274,7 +274,7 @@ void psxDelayTest(int reg, u32 bpc) {
 	psxBranchTest();
 }
 
-__inline void doBranch(u32 tar) {
+__inline static void doBranch(u32 tar) {
 	u32 *code;
 	u32 tmp;
 
