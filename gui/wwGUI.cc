@@ -7,11 +7,10 @@ extern "C" {
 #include "../plugins/sdlinput/pad.h"
 void SetupSound(void);
 }
-static int W,H;
 unsigned char psxVub[2*1024*1024];
 unsigned short *psxVuw;
-static SDL_Surface *sdl_display;
-static SDL_Surface *sdl_ximage;
+SDL_Surface *sdl_display;
+SDL_Surface *sdl_ximage;
 SDL_Rect srcrect;
 SDL_Rect dstrect;
 int iDisStereo=0;
@@ -54,8 +53,8 @@ BlitSDL32(sdl_ximage,x,y,sx,sy,rgb24);
 SDL_Flip(sdl_ximage);
 dstrect.x=0;
 dstrect.y=0;
-dstrect.w=W;
-dstrect.h=H;
+dstrect.w=640;
+dstrect.h=480;
 srcrect.x=0;
 srcrect.y=0;
 srcrect.w=dx;
