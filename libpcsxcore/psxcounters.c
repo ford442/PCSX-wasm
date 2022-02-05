@@ -59,30 +59,30 @@ enum
 };
 
 #define CounterQuantity           ( 4 )
-//static const u32 CounterQuantity  = 4;
+//const u32 CounterQuantity  = 4;
 
-static const u32 CountToOverflow  = 0;
-static const u32 CountToTarget    = 1;
+const u32 CountToOverflow  = 0;
+const u32 CountToTarget    = 1;
 
-static const u32 FrameRate[]      = { 60, 50 };
-static const u32 VBlankStart[]    = { 240, 256 };
-static const u32 HSyncTotal[]     = { 262, 312 };
-static const u32 SpuUpdInterval[] = { 23, 22 };
+const u32 FrameRate[]      = { 60, 50 };
+const u32 VBlankStart[]    = { 240, 256 };
+const u32 HSyncTotal[]     = { 262, 312 };
+const u32 SpuUpdInterval[] = { 23, 22 };
 
-static const s32 VerboseLevel     = 0;
+const s32 VerboseLevel     = 0;
 
 /******************************************************************************/
 
-static Rcnt rcnts[ CounterQuantity ];
+Rcnt rcnts[ CounterQuantity ];
 
-static u32 hSyncCount = 0;
-static u32 spuSyncCount = 0;
+u32 hSyncCount = 0;
+u32 spuSyncCount = 0;
 
 u32 psxNextCounter = 0, psxNextsCounter = 0;
 
 /******************************************************************************/
 
-static inline
+inline
 void setIrq( u32 irq )
 {
     psxHu32ref(0x1070) |= SWAPu32(irq);
@@ -103,7 +103,7 @@ void verboseLog( s32 level, const char *str, ... )
 
 /******************************************************************************/
 
-static inline
+inline
 void _psxRcntWcount( u32 index, u32 value )
 {
     if( value > 0xffff )
@@ -128,7 +128,7 @@ void _psxRcntWcount( u32 index, u32 value )
     }
 }
 
-static inline
+inline
 u32 _psxRcntRcount( u32 index )
 {
     u32 count;
