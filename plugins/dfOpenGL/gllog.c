@@ -4,10 +4,10 @@
 void gllog(int level, char *fmt,...)
 {
 #ifndef _COMMENTLOG
-	static FILE *out=NULL;
-	static char tmpbuf[200], tmpbufold[200];
+	FILE *out=NULL;
+	char tmpbuf[200], tmpbufold[200];
 
-	static int repeatcount=0;
+	int repeatcount=0;
 
 	if(out==NULL)
 	{
