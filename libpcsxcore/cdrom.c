@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 Ryan Schultz, PCSX-df Team, PCSX team              *
+ *   Copyright (C) 2007 PCSX-df Team                                       *
+ *   Copyright (C) 2009 Wei Mingzhi                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,1122 +18,1002 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02111-1307 USA.           *
  ***************************************************************************/
 
-/* 
-* Handles all CD-ROM registers and functions.
-*/
-
+#include "psxcommon.h"
+#include "plugins.h"
 #include "cdrom.h"
-#include "ppf.h"
+#include "cdriso.h"
 
-cdrStruct cdr;
+#if 0
+#ifdef _WIN32
+#include <process.h>
+#include <windows.h>
+#else
+#include <pthread.h>
+#include <sys/time.h>
+#endif
+#endif
 
-/* CD-ROM magic numbers */
-#define CdlSync        0
-#define CdlNop         1
-#define CdlSetloc      2
-#define CdlPlay        3
-#define CdlForward     4
-#define CdlBackward    5
-#define CdlReadN       6
-#define CdlStandby     7
-#define CdlStop        8
-#define CdlPause       9
-#define CdlInit        10
-#define CdlMute        11
-#define CdlDemute      12
-#define CdlSetfilter   13
-#define CdlSetmode     14
-#define CdlGetmode     15
-#define CdlGetlocL     16
-#define CdlGetlocP     17
-#define CdlReadT       18
-#define CdlGetTN       19
-#define CdlGetTD       20
-#define CdlSeekL       21
-#define CdlSeekP       22
-#define CdlSetclock    23
-#define CdlGetclock    24
-#define CdlTest        25
-#define CdlID          26
-#define CdlReadS       27
-#define CdlReset       28
-#define CdlReadToc     30
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+#include <sys/time.h>
 
-#define AUTOPAUSE      249
-#define READ_ACK       250
-#define READ           251
-#define REPPLAY_ACK    252
-#define REPPLAY        253
-#define ASYNC          254
-/* don't set 255, it's reserved */
+FILE *cdHandle = NULL;
+FILE *cddaHandle = NULL;
+FILE *subHandle = NULL;
 
-char *CmdName[0x100]= {
-    "CdlSync",     "CdlNop",       "CdlSetloc",  "CdlPlay",
-    "CdlForward",  "CdlBackward",  "CdlReadN",   "CdlStandby",
-    "CdlStop",     "CdlPause",     "CdlInit",    "CdlMute",
-    "CdlDemute",   "CdlSetfilter", "CdlSetmode", "CdlGetmode",
-    "CdlGetlocL",  "CdlGetlocP",   "CdlReadT",   "CdlGetTN",
-    "CdlGetTD",    "CdlSeekL",     "CdlSeekP",   "CdlSetclock",
-    "CdlGetclock", "CdlTest",      "CdlID",      "CdlReadS",
-    "CdlReset",    NULL,           "CDlReadToc", NULL
+boolean subChanMixed = FALSE;
+boolean subChanRaw = FALSE;
+
+unsigned char cdbuffer[DATA_SIZE];
+unsigned char subbuffer[SUB_FRAMESIZE];
+
+unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
+
+#define CDDA_FRAMETIME			(1000 * (sizeof(sndbuffer) / CD_FRAMESIZE_RAW) / 75)
+#if 0
+#ifdef _WIN32
+HANDLE threadid;
+#else
+pthread_t threadid;
+#endif
+#endif
+
+unsigned int initial_offset = 0;
+
+volatile boolean playing = FALSE;
+boolean cddaBigEndian = FALSE;
+volatile unsigned int cddaCurOffset = 0;
+
+char* CALLBACK CDR__getDriveLetter(void);
+long CALLBACK CDR__configure(void);
+long CALLBACK CDR__test(void);
+void CALLBACK CDR__about(void);
+long CALLBACK CDR__setfilename(char *filename);
+long CALLBACK CDR__getStatus(struct CdrStat *stat);
+
+extern void *hCDRDriver;
+
+struct trackinfo {
+	enum {DATA, CDDA} type;
+	char start[3];		// MSF-format
+	char length[3];		// MSF-format
 };
 
-unsigned char Test04[] = { 0 };
-unsigned char Test05[] = { 0 };
-unsigned char Test20[] = { 0x98, 0x06, 0x10, 0xC3 };
-unsigned char Test22[] = { 0x66, 0x6F, 0x72, 0x20, 0x45, 0x75, 0x72, 0x6F };
-unsigned char Test23[] = { 0x43, 0x58, 0x44, 0x32, 0x39 ,0x34, 0x30, 0x51 };
+#define MAXTRACKS 100 /* How many tracks can a CD hold? */
 
-// 1x = 75 sectors per second
-// PSXCLK = 1 sec in the ps
-// so (PSXCLK / 75) = cdr read time (linuzappz)
-#define cdReadTime (PSXCLK / 75)
+int numtracks = 0;
+struct trackinfo ti[MAXTRACKS];
 
-struct CdrStat stat;
-struct SubQ *subq;
-
-#define CDR_INT(eCycle) { \
-	psxRegs.interrupt |= 0x4; \
-	psxRegs.intCycle[2 + 1] = eCycle; \
-	psxRegs.intCycle[2] = psxRegs.cycle; }
-
-#define CDREAD_INT(eCycle) { \
-	psxRegs.interrupt |= 0x40000; \
-	psxRegs.intCycle[2 + 16 + 1] = eCycle; \
-	psxRegs.intCycle[2 + 16] = psxRegs.cycle; }
-
-#define StartReading(type, eCycle) { \
-   	cdr.Reading = type; \
-  	cdr.FirstSector = 1; \
-  	cdr.Readed = 0xff; \
-	AddIrqQueue(READ_ACK, eCycle); \
+// get a sector from a msf-array
+unsigned int msf2sec(char *msf) {
+	return ((msf[0] * 60 + msf[1]) * 75) + msf[2];
 }
 
-#define StopReading() { \
-	if (cdr.Reading) { \
-		cdr.Reading = 0; \
-		psxRegs.interrupt &= ~0x40000; \
-	} \
-	cdr.StatP &= ~0x20;\
+void sec2msf(unsigned int s, char *msf) {
+	msf[0] = s / 75 / 60;
+	s = s - msf[0] * 75 * 60;
+	msf[1] = s / 75;
+	s = s - msf[1] * 75;
+	msf[2] = s;
 }
 
-#define StopCdda() { \
-	if (cdr.Play) { \
-		if (!Config.Cdda) CDR_stop(); \
-		cdr.StatP &= ~0x80; \
-		cdr.Play = FALSE; \
-	} \
-}
-
-#define SetResultSize(size) { \
-    cdr.ResultP = 0; \
-	cdr.ResultC = size; \
-	cdr.ResultReady = 1; \
-}
-
-void ReadTrack() {
-	cdr.Prev[0] = itob(cdr.SetSector[0]);
-	cdr.Prev[1] = itob(cdr.SetSector[1]);
-	cdr.Prev[2] = itob(cdr.SetSector[2]);
-
-#ifdef CDR_LOG
-	CDR_LOG("ReadTrack() Log: KEY *** %x:%x:%x\n", cdr.Prev[0], cdr.Prev[1], cdr.Prev[2]);
-#endif
-	cdr.RErr = CDR_readTrack(cdr.Prev);
-}
-
-// cdr.Stat:
-#define NoIntr		0
-#define DataReady	1
-#define Complete	2
-#define Acknowledge	3
-#define DataEnd		4
-#define DiskError	5
-
-void AddIrqQueue(unsigned char irq, unsigned long ecycle) {
-	cdr.Irq = irq;
-	if (cdr.Stat) {
-		cdr.eCycle = ecycle;
-	} else {
-		CDR_INT(ecycle);
-	}
-}
-
-void cdrInterrupt() {
-	int i;
-	unsigned char Irq = cdr.Irq;
-
-	if (cdr.Stat) {
-		CDR_INT(0x1000);
-		return;
-	}
-
-	cdr.Irq = 0xff;
-	cdr.Ctrl &= ~0x80;
-
-	switch (Irq) {
-		case CdlSync:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Acknowledge; 
-			break;
-
-		case CdlNop:
-			SetResultSize(1);
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Acknowledge;
-			i = stat.Status;
-			if (CDR_getStatus(&stat) != -1) {
-				if (stat.Type == 0xff) cdr.Stat = DiskError;
-				if (stat.Status & 0x10) {
-					cdr.Stat = DiskError;
-					cdr.Result[0] |= 0x11;
-					cdr.Result[0] &= ~0x02;
-				}
-				else if (i & 0x10) {
-					cdr.StatP |= 0x2;
-					cdr.Result[0] |= 0x2;
-					CheckCdrom();
-				}
-			}
-			break;
-
-		case CdlSetloc:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Acknowledge;
-			break;
-
-		case CdlPlay:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Acknowledge;
-			cdr.StatP |= 0x80;
-//			if ((cdr.Mode & 0x5) == 0x5) AddIrqQueue(REPPLAY, cdReadTime);
-			break;
-
-    	case CdlForward:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-    	case CdlBackward:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-    	case CdlStandby:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Complete;
-			break;
-
-		case CdlStop:
-			cdr.CmdProcess = 0;
-			SetResultSize(1);
-			cdr.StatP &= ~0x2;
-			cdr.Result[0] = cdr.StatP;
-			cdr.Stat = Complete;
-//			cdr.Stat = Acknowledge;
-
-			// check case open/close -shalma
-			i = stat.Status;
-			if (CDR_getStatus(&stat) != -1) {
-				if (stat.Type == 0xff) cdr.Stat = DiskError;
-				if (stat.Status & 0x10) {
-					cdr.Stat = DiskError;
-					cdr.Result[0] |= 0x11;
-					cdr.Result[0] &= ~0x02;
-				}
-				else if (i & 0x10) {
-					cdr.StatP |= 0x2;
-					cdr.Result[0] |= 0x2;
-					CheckCdrom();
-				}
-			}
-			break;
-
-		case CdlPause:
-			SetResultSize(1);
-			cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			AddIrqQueue(CdlPause + 0x20, 0x1000);
-			cdr.Ctrl |= 0x80;
-			break;
-
-		case CdlPause + 0x20:
-			SetResultSize(1);
-        	cdr.StatP &= ~0x20;
-			cdr.StatP |= 0x2;
-			cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-    	case CdlInit:
-			SetResultSize(1);
-        	cdr.StatP = 0x2;
-			cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-//			if (!cdr.Init) {
-				AddIrqQueue(CdlInit + 0x20, 0x1000);
-//			}
-        	break;
-
-		case CdlInit + 0x20:
-			SetResultSize(1);
-			cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			cdr.Init = 1;
-			break;
-
-    	case CdlMute:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			break;
-
-    	case CdlDemute:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			break;
-
-    	case CdlSetfilter:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge; 
-        	break;
-
-		case CdlSetmode:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-        	break;
-
-    	case CdlGetmode:
-			SetResultSize(6);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Result[1] = cdr.Mode;
-        	cdr.Result[2] = cdr.File;
-        	cdr.Result[3] = cdr.Channel;
-        	cdr.Result[4] = 0;
-        	cdr.Result[5] = 0;
-        	cdr.Stat = Acknowledge;
-        	break;
-
-    	case CdlGetlocL:
-			SetResultSize(8);
-//        	for (i = 0; i < 8; i++)
-//				cdr.Result[i] = itob(cdr.Transfer[i]);
-        	for (i = 0; i < 8; i++)
-				cdr.Result[i] = cdr.Transfer[i];
-        	cdr.Stat = Acknowledge;
-        	break;
-
-		case CdlGetlocP:
-			SetResultSize(8);
-			subq = (struct SubQ *)CDR_getBufferSub();
-
-			if (subq != NULL) {
-				cdr.Result[0] = subq->TrackNumber;
-				cdr.Result[1] = subq->IndexNumber;
-				memcpy(cdr.Result + 2, subq->TrackRelativeAddress, 3);
-				memcpy(cdr.Result + 5, subq->AbsoluteAddress, 3);
-
-				// subQ integrity check
-				if (calcCrc((u8 *)subq + 12, 10) != (((u16)subq->CRC[0] << 8) | subq->CRC[1])) {
-					memset(cdr.Result + 2, 0, 3 + 3); // CRC wrong, wipe out time data
-				}
-			} else {
-				cdr.Result[0] = 1;
-				cdr.Result[1] = 1;
-
-				cdr.Result[2] = btoi(cdr.Prev[0]);
-				cdr.Result[3] = btoi(cdr.Prev[1]) - 2;
-				cdr.Result[4] = cdr.Prev[2];
-
-				// m:s adjustment
-				if ((s8)cdr.Result[3] < 0) {
-					cdr.Result[3] += 60;
-					cdr.Result[2] -= 1;
-				}
-
-				cdr.Result[2] = itob(cdr.Result[2]);
-				cdr.Result[3] = itob(cdr.Result[3]);
-
-				memcpy(cdr.Result + 5, cdr.Prev, 3);
-			}
-
-			cdr.Stat = Acknowledge;
-			break;
-
-    	case CdlGetTN:
-			cdr.CmdProcess = 0;
-			SetResultSize(3);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	if (CDR_getTN(cdr.ResultTN) == -1) {
-				cdr.Stat = DiskError;
-				cdr.Result[0] |= 0x01;
-        	} else {
-        		cdr.Stat = Acknowledge;
-        	    cdr.Result[1] = itob(cdr.ResultTN[0]);
-        	    cdr.Result[2] = itob(cdr.ResultTN[1]);
-        	}
-        	break;
-
-    	case CdlGetTD:
-			cdr.CmdProcess = 0;
-			cdr.Track = btoi(cdr.Param[0]);
-			SetResultSize(4);
-			cdr.StatP |= 0x2;
-			if (CDR_getTD(cdr.Track, cdr.ResultTD) == -1) {
-				cdr.Stat = DiskError;
-				cdr.Result[0] |= 0x01;
-			} else {
-				cdr.Stat = Acknowledge;
-				cdr.Result[0] = cdr.StatP;
-				cdr.Result[1] = itob(cdr.ResultTD[2]);
-				cdr.Result[2] = itob(cdr.ResultTD[1]);
-				cdr.Result[3] = itob(cdr.ResultTD[0]);
-			}
-			break;
-
-    	case CdlSeekL:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-			cdr.StatP |= 0x40;
-        	cdr.Stat = Acknowledge;
-			cdr.Seeked = TRUE;
-			AddIrqQueue(CdlSeekL + 0x20, 0x1000);
-			break;
-
-    	case CdlSeekL + 0x20:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.StatP &= ~0x40;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-    	case CdlSeekP:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-			cdr.StatP |= 0x40;
-        	cdr.Stat = Acknowledge;
-			AddIrqQueue(CdlSeekP + 0x20, 0x1000);
-			break;
-
-    	case CdlSeekP + 0x20:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-			cdr.StatP &= ~0x40;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-		case CdlTest:
-        	cdr.Stat = Acknowledge;
-        	switch (cdr.Param[0]) {
-        	    case 0x20: // System Controller ROM Version
-					SetResultSize(4);
-					memcpy(cdr.Result, Test20, 4);
-					break;
-				case 0x22:
-					SetResultSize(8);
-					memcpy(cdr.Result, Test22, 4);
-					break;
-				case 0x23: case 0x24:
-					SetResultSize(8);
-					memcpy(cdr.Result, Test23, 4);
-					break;
-        	}
-			break;
-
-    	case CdlID:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			AddIrqQueue(CdlID + 0x20, 0x1000);
-			break;
-
-		case CdlID + 0x20:
-			SetResultSize(8);
-        	if (CDR_getStatus(&stat) == -1) {
-        		cdr.Result[0] = 0x00; // 0x08 and cdr.Result[1]|0x10 : audio cd, enters cd player
-                cdr.Result[1] = 0x00; // 0x80 leads to the menu in the bios, else loads CD
-        	}
-        	else {
-                if (stat.Type == 2) {
-                	cdr.Result[0] = 0x08;
-                    cdr.Result[1] = 0x10;
-	        	}
-	        	else {
-                    cdr.Result[0] = 0x00;
-                    cdr.Result[1] = 0x00;
-	        	}
-        	}
-			cdr.Result[1] |= 0x80;
-			cdr.Result[2] = 0x00;
-			cdr.Result[3] = 0x00;
-			strncpy((char *)&cdr.Result[4], "PCSX", 4);
-			cdr.Stat = Complete;
-			break;
-
-		case CdlReset:
-			SetResultSize(1);
-        	cdr.StatP = 0x2;
-			cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			break;
-
-    	case CdlReadToc:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Acknowledge;
-			AddIrqQueue(CdlReadToc + 0x20, 0x1000);
-			break;
-
-    	case CdlReadToc + 0x20:
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-        	cdr.Stat = Complete;
-			break;
-
-		case AUTOPAUSE:
-			cdr.OCUP = 0;
-/*			SetResultSize(1);
-			StopCdda();
-			StopReading();
-			cdr.OCUP = 0;
-        	cdr.StatP&=~0x20;
-			cdr.StatP|= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-    		cdr.Stat = DataEnd;
-*/			AddIrqQueue(CdlPause, 0x800);
-			break;
-
-		case READ_ACK:
-			if (!cdr.Reading) return;
-
-			SetResultSize(1);
-			cdr.StatP |= 0x2;
-        	cdr.Result[0] = cdr.StatP;
-			if (!cdr.Seeked) {
-				cdr.Seeked = TRUE;
-				cdr.StatP |= 0x40;
-			}
-			cdr.StatP |= 0x20;
-        	cdr.Stat = Acknowledge;
-
-//			CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
-			CDREAD_INT(0x80000);
-			break;
-
-		case REPPLAY_ACK:
-			cdr.Stat = Acknowledge;
-			cdr.Result[0] = cdr.StatP;
-			SetResultSize(1);
-			AddIrqQueue(REPPLAY, cdReadTime);
-			break;
-
-		case REPPLAY: 
-			if ((cdr.Mode & 5) != 5) break;
-/*			if (CDR_getStatus(&stat) == -1) {
-				cdr.Result[0] = 0;
-				cdr.Result[1] = 0;
-				cdr.Result[2] = 0;
-				cdr.Result[3] = 0;
-				cdr.Result[4] = 0;
-				cdr.Result[5] = 0;
-				cdr.Result[6] = 0;
-				cdr.Result[7] = 0;
-			} else memcpy(cdr.Result, &stat.Track, 8);
-			cdr.Stat = 1;
-			SetResultSize(8);
-			AddIrqQueue(REPPLAY_ACK, cdReadTime);
-*/			break;
-
-		case 0xff:
-			return;
-
-		default:
-			cdr.Stat = Complete;
-			break;
-	}
-
-	if (cdr.Stat != NoIntr && cdr.Reg2 != 0x18) {
-		psxHu32ref(0x1070) |= SWAP32((u32)0x4);
-	}
-
-#ifdef CDR_LOG
-	CDR_LOG("cdrInterrupt() Log: CDR Interrupt IRQ %x\n", Irq);
-#endif
-}
-
-void cdrReadInterrupt() {
-	u8 *buf;
-
-	if (!cdr.Reading)
-		return;
-
-	if (cdr.Stat) {
-		CDREAD_INT(0x1000);
-		return;
-	}
-
-#ifdef CDR_LOG
-	CDR_LOG("cdrReadInterrupt() Log: KEY END");
-#endif
-
-    cdr.OCUP = 1;
-	SetResultSize(1);
-	cdr.StatP |= 0x22;
-	cdr.StatP &= ~0x40;
-    cdr.Result[0] = cdr.StatP;
-
-	ReadTrack();
-
-	buf = CDR_getBuffer();
-	if (buf == NULL)
-		cdr.RErr = -1;
-
-	if (cdr.RErr == -1) {
-#ifdef CDR_LOG
-		fprintf(emuLog, "cdrReadInterrupt() Log: err\n");
-#endif
-		memset(cdr.Transfer, 0, DATA_SIZE);
-		cdr.Stat = DiskError;
-		cdr.Result[0] |= 0x01;
-		CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
-		return;
-	}
-
-	memcpy(cdr.Transfer, buf, DATA_SIZE);
-	CheckPPFCache(cdr.Transfer, cdr.Prev[0], cdr.Prev[1], cdr.Prev[2]);
-
-    cdr.Stat = DataReady;
-
-#ifdef CDR_LOG
-	fprintf(emuLog, "cdrReadInterrupt() Log: cdr.Transfer %x:%x:%x\n", cdr.Transfer[0], cdr.Transfer[1], cdr.Transfer[2]);
-#endif
-
-	if ((!cdr.Muted) && (cdr.Mode & 0x40) && (!Config.Xa) && (cdr.FirstSector != -1)) { // CD-XA
-		if ((cdr.Transfer[4 + 2] & 0x4) &&
-			((cdr.Mode & 0x8) ? (cdr.Transfer[4 + 1] == cdr.Channel) : 1) &&
-			(cdr.Transfer[4 + 0] == cdr.File)) {
-			int ret = xa_decode_sector(&cdr.Xa, cdr.Transfer+4, cdr.FirstSector);
-
-			if (!ret) {
-				SPU_playADPCMchannel(&cdr.Xa);
-				cdr.FirstSector = 0;
-			}
-			else cdr.FirstSector = -1;
-		}
-	}
-
-	cdr.SetSector[2]++;
-    if (cdr.SetSector[2] == 75) {
-        cdr.SetSector[2] = 0;
-        cdr.SetSector[1]++;
-        if (cdr.SetSector[1] == 60) {
-            cdr.SetSector[1] = 0;
-            cdr.SetSector[0]++;
-        }
-    }
-
-    cdr.Readed = 0;
-
-	if ((cdr.Transfer[4 + 2] & 0x80) && (cdr.Mode & 0x2)) { // EOF
-#ifdef CDR_LOG
-		CDR_LOG("cdrReadInterrupt() Log: Autopausing read\n");
-#endif
-//		AddIrqQueue(AUTOPAUSE, 0x1000);
-		AddIrqQueue(CdlPause, 0x1000);
+// divide a string of xx:yy:zz into m, s, f
+void tok2msf(char *time, char *msf) {
+	char *token;
+
+	token = strtok(time, ":");
+	if (token) {
+		msf[0] = atoi(token);
 	}
 	else {
-		CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
+		msf[0] = 0;
 	}
-	psxHu32ref(0x1070) |= SWAP32((u32)0x4);
-}
 
-/*
-cdrRead0:
-	bit 0 - 0 REG1 command send / 1 REG1 data read
-	bit 1 - 0 data transfer finish / 1 data transfer ready/in progress
-	bit 2 - unknown
-	bit 3 - unknown
-	bit 4 - unknown
-	bit 5 - 1 result ready
-	bit 6 - 1 dma ready
-	bit 7 - 1 command being processed
-*/
+	token = strtok(NULL, ":");
+	if (token) {
+		msf[1] = atoi(token);
+	}
+	else {
+		msf[1] = 0;
+	}
 
-unsigned char cdrRead0(void) {
-	if (cdr.ResultReady)
-		cdr.Ctrl |= 0x20;
-	else
-		cdr.Ctrl &= ~0x20;
-
-	if (cdr.OCUP)
-		cdr.Ctrl |= 0x40;
-//  else
-//		cdr.Ctrl &= ~0x40;
-
-	// What means the 0x10 and the 0x08 bits? I only saw it used by the bios
-	cdr.Ctrl |= 0x18;
-
-#ifdef CDR_LOG
-	CDR_LOG("cdrRead0() Log: CD0 Read: %x\n", cdr.Ctrl);
-#endif
-
-	return psxHu8(0x1800) = cdr.Ctrl;
-}
-
-/*
-cdrWrite0:
-	0 - to send a command / 1 - to get the result
-*/
-
-void cdrWrite0(unsigned char rt) {
-#ifdef CDR_LOG
-	CDR_LOG("cdrWrite0() Log: CD0 write: %x\n", rt);
-#endif
-	cdr.Ctrl = rt | (cdr.Ctrl & ~0x3);
-
-    if (rt == 0) {
-		cdr.ParamP = 0;
-		cdr.ParamC = 0;
-		cdr.ResultReady = 0;
+	token = strtok(NULL, ":");
+	if (token) {
+		msf[2] = atoi(token);
+	}
+	else {
+		msf[2] = 0;
 	}
 }
 
-unsigned char cdrRead1(void) {
-    if (cdr.ResultReady) { // && cdr.Ctrl & 0x1) {
-		psxHu8(0x1801) = cdr.Result[cdr.ResultP++];
-		if (cdr.ResultP == cdr.ResultC)
-			cdr.ResultReady = 0;
-	} else {
-		psxHu8(0x1801) = 0;
+#ifndef _WIN32
+long GetTickCount(void) {
+	time_t		initial_time = 0;
+	struct timeval		now;
+
+	gettimeofday(&now, NULL);
+
+	if (initial_time == 0) {
+		initial_time = now.tv_sec;
 	}
-#ifdef CDR_LOG
-	CDR_LOG("cdrRead1() Log: CD1 Read: %x\n", psxHu8(0x1801));
-#endif
-	return psxHu8(0x1801);
+
+	return (now.tv_sec - initial_time) * 1000L + now.tv_usec / 1000L;
 }
-
-void cdrWrite1(unsigned char rt) {
-	int i;
-
-#ifdef CDR_LOG
-	CDR_LOG("cdrWrite1() Log: CD1 write: %x (%s)\n", rt, CmdName[rt]);
-#endif
-//	psxHu8(0x1801) = rt;
-    cdr.Cmd = rt;
-	cdr.OCUP = 0;
-
-#ifdef CDRCMD_DEBUG
-	SysPrintf("cdrWrite1() Log: CD1 write: %x (%s)", rt, CmdName[rt]);
-	if (cdr.ParamC) {
-		SysPrintf(" Param[%d] = {", cdr.ParamC);
-		for (i = 0; i < cdr.ParamC; i++)
-			SysPrintf(" %x,", cdr.Param[i]);
-		SysPrintf("}\n");
-	} else {
-		SysPrintf("\n");
-	}
 #endif
 
-	if (cdr.Ctrl & 0x1) return;
+// this thread plays audio data
+#ifdef ____EMSCRIPTEN__
 
-    switch (cdr.Cmd) {
-    	case CdlSync:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
+void playcdda()
+{
+	
+	long			t, d, i, s;
+	unsigned char	tmp;
+	 
 
-    	case CdlNop:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
 
-    	case CdlSetloc:
-			StopReading();
-			cdr.Seeked = FALSE;
-        	for (i = 0; i < 3; i++)
-				cdr.SetSector[i] = btoi(cdr.Param[i]);
-        	cdr.SetSector[3] = 0;
-/*        	if ((cdr.SetSector[0] | cdr.SetSector[1] | cdr.SetSector[2]) == 0) {
-				*(u32 *)cdr.SetSector = *(u32 *)cdr.SetSectorSeek;
-			}*/
-			cdr.Ctrl |= 0x80;
-        	cdr.Stat = NoIntr;
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
+		t = GetTickCount() + CDDA_FRAMETIME;
 
-    	case CdlPlay:
-        	if (!cdr.SetSector[0] & !cdr.SetSector[1] & !cdr.SetSector[2]) {
-            	if (CDR_getTN(cdr.ResultTN) != -1) {
-	                if (cdr.CurTrack > cdr.ResultTN[1])
-						cdr.CurTrack = cdr.ResultTN[1];
-                    if (CDR_getTD((unsigned char)(cdr.CurTrack), cdr.ResultTD) != -1) {
-		               	int tmp = cdr.ResultTD[2];
-                        cdr.ResultTD[2] = cdr.ResultTD[0];
-						cdr.ResultTD[0] = tmp;
-	                    if (!Config.Cdda) CDR_play(cdr.ResultTD);
-					}
-                }
-			} else if (!Config.Cdda) {
-				CDR_play(cdr.SetSector);
+		if (subChanMixed) {
+			printf("subChanMixed\n");
+			s = 0;
+
+			for (i = 0; i < sizeof(sndbuffer) / CD_FRAMESIZE_RAW; i++) {
+				// read one sector
+				d = fread(sndbuffer + CD_FRAMESIZE_RAW * i, 1, CD_FRAMESIZE_RAW, cddaHandle);
+				if (d < CD_FRAMESIZE_RAW) {
+					break;
+				}
+
+				s += d;
+
+				// skip the subchannel data
+				fseek(cddaHandle, SUB_FRAMESIZE, SEEK_CUR);
 			}
-    		cdr.Play = TRUE;
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-    		break;
-
-    	case CdlForward:
-        	if (cdr.CurTrack < 0xaa)
-				cdr.CurTrack++;
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlBackward:
-        	if (cdr.CurTrack > 1)
-				cdr.CurTrack--;
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlReadN:
-			cdr.Irq = 0;
-			StopReading();
-			cdr.Ctrl|= 0x80;
-        	cdr.Stat = NoIntr; 
-			StartReading(1, 0x1000);
-        	break;
-
-    	case CdlStandby:
-			StopCdda();
-			StopReading();
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr;
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlStop:
-			StopCdda();
-			StopReading();
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr;
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlPause:
-			StopCdda();
-			StopReading();
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr;
-    		AddIrqQueue(cdr.Cmd, 0x80000);
-        	break;
-
-		case CdlReset:
-    	case CdlInit:
-			StopCdda();
-			StopReading();
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlMute:
-        	cdr.Muted = TRUE;
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlDemute:
-        	cdr.Muted = FALSE;
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlSetfilter:
-        	cdr.File = cdr.Param[0];
-        	cdr.Channel = cdr.Param[1];
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlSetmode:
-#ifdef CDR_LOG
-			CDR_LOG("cdrWrite1() Log: Setmode %x\n", cdr.Param[0]);
-#endif 
-        	cdr.Mode = cdr.Param[0];
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlGetmode:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlGetlocL:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlGetlocP:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-			AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlGetTN:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlGetTD:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlSeekL:
-//			((u32 *)cdr.SetSectorSeek)[0] = ((u32 *)cdr.SetSector)[0];
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlSeekP:
-//        	((u32 *)cdr.SetSectorSeek)[0] = ((u32 *)cdr.SetSector)[0];
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlTest:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlID:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	case CdlReadS:
-			cdr.Irq = 0;
-			StopReading();
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-			StartReading(2, 0x1000);
-        	break;
-
-    	case CdlReadToc:
-			cdr.Ctrl |= 0x80;
-    		cdr.Stat = NoIntr; 
-    		AddIrqQueue(cdr.Cmd, 0x1000);
-        	break;
-
-    	default:
-#ifdef CDR_LOG
-			CDR_LOG("cdrWrite1() Log: Unknown command: %x\n", cdr.Cmd);
-#endif
-			return;
-    }
-	if (cdr.Stat != NoIntr) {
-		psxHu32ref(0x1070) |= SWAP32((u32)0x4);
-	}
-}
-
-unsigned char cdrRead2(void) {
-	unsigned char ret;
-
-	if (cdr.Readed == 0) {
-		ret = 0;
-	} else {
-		ret = *cdr.pTransfer++;
-	}
-
-#ifdef CDR_LOG
-	CDR_LOG("cdrRead2() Log: CD2 Read: %x\n", ret);
-#endif
-	return ret;
-}
-
-void cdrWrite2(unsigned char rt) {
-#ifdef CDR_LOG
-	CDR_LOG("cdrWrite2() Log: CD2 write: %x\n", rt);
-#endif
-    if (cdr.Ctrl & 0x1) {
-		switch (rt) {
-			case 0x07:
-	    		cdr.ParamP = 0;
-				cdr.ParamC = 0;
-				cdr.ResultReady = 1; //0;
-				cdr.Ctrl &= ~3; //cdr.Ctrl = 0;
-				break;
-
-			default:
-				cdr.Reg2 = rt;
-				break;
 		}
-    } else if (!(cdr.Ctrl & 0x1) && cdr.ParamP < 8) {
-		cdr.Param[cdr.ParamP++] = rt;
-		cdr.ParamC++;
-	}
-}
+		else {
+			s = fread(sndbuffer, 1, sizeof(sndbuffer), cddaHandle);
+			printf("read s %ld\n",s);
+		}
 
-unsigned char cdrRead3(void) {
-	if (cdr.Stat) {
-		if (cdr.Ctrl & 0x1)
-			psxHu8(0x1803) = cdr.Stat | 0xE0;
-		else
-			psxHu8(0x1803) = 0xff;
-	} else {
-		psxHu8(0x1803) = 0;
-	}
-#ifdef CDR_LOG
-	CDR_LOG("cdrRead3() Log: CD3 Read: %x\n", psxHu8(0x1803));
-#endif
-	return psxHu8(0x1803);
-}
-
-void cdrWrite3(unsigned char rt) {
-#ifdef CDR_LOG
-	CDR_LOG("cdrWrite3() Log: CD3 write: %x\n", rt);
-#endif
-    if (rt == 0x07 && cdr.Ctrl & 0x1) {
-		cdr.Stat = 0;
-
-		if (cdr.Irq == 0xff) {
-			cdr.Irq = 0;
+		if (s == 0) {
+			playing = FALSE;
+			fclose(cddaHandle);
+			cddaHandle = NULL;
+			initial_offset = 0;
+			printf("end playcdda\n");
 			return;
 		}
-		if (cdr.Irq)
-			CDR_INT(cdr.eCycle);
-		if (cdr.Reading && !cdr.ResultReady) 
-            CDREAD_INT((cdr.Mode & 0x80) ? (cdReadTime / 2) : cdReadTime);
 
+		if (!cdr.Muted && playing) {
+			if (cddaBigEndian) {
+				for (i = 0; i < s / 2; i++) {
+					tmp = sndbuffer[i * 2];
+					sndbuffer[i * 2] = sndbuffer[i * 2 + 1];
+					sndbuffer[i * 2 + 1] = tmp;
+				}
+			}
+
+			SPU_playCDDAchannel((short *)sndbuffer, s);
+		}
+
+		cddaCurOffset += s;
+
+
+		d = t - (long)GetTickCount();
+		if (d <= 0) {
+			d = 1;
+		}
+		else if (d > CDDA_FRAMETIME) {
+			d = CDDA_FRAMETIME;
+		}
+
+		if(playing){
+			printf("playcdda %ld\n", d);
+			EM_ASM_( {setTimeout("_playcdda()", $0);}, d);
+		}
+
+}
+
+// stop the CDDA playback
+void stopCDDA() {
+	printf("stopCDDA\n");
+	if (!playing) {
 		return;
 	}
-	if (rt == 0x80 && !(cdr.Ctrl & 0x1) && cdr.Readed == 0) {
-		cdr.Readed = 1;
-		cdr.pTransfer = cdr.Transfer;
 
-		switch (cdr.Mode & 0x30) {
-			case 0x10:
-			case 0x00:
-				cdr.pTransfer += 12;
-				break;
-			default:
-				break;
+	playing = FALSE;
+
+	if (cddaHandle != NULL) {
+		fclose(cddaHandle);
+		cddaHandle = NULL;
+	}
+
+	initial_offset = 0;
+
+}
+
+// start the CDDA playback
+void startCDDA(unsigned int offset) {
+	printf("startCDDA\n");
+	if (playing) {
+		if (initial_offset == offset) {
+			return;
+		}
+		stopCDDA();
+	}
+
+	cddaHandle = fopen(GetIsoFile(), "rb");
+	if (cddaHandle == NULL) {
+		return;
+	}
+
+	initial_offset = offset;
+	cddaCurOffset = initial_offset;
+	fseek(cddaHandle, initial_offset, SEEK_SET);
+
+	playing = TRUE;
+	playcdda();
+
+}
+
+#else
+
+
+#ifdef _WIN32
+void playthread(void *param)
+#else
+void *playthread(void *param)
+#endif
+{
+#if 0	
+	long			d, t, i, s;
+	unsigned char	tmp;
+
+	t = GetTickCount();
+
+	while (playing) {
+		d = t - (long)GetTickCount();
+		if (d <= 0) {
+			d = 1;
+		}
+		else if (d > CDDA_FRAMETIME) {
+			d = CDDA_FRAMETIME;
+		}
+#ifdef _WIN32
+		Sleep(d);
+#else
+		printf("sleep\n");
+		usleep(d * 1000);
+#endif
+
+		t = GetTickCount() + CDDA_FRAMETIME;
+
+		if (subChanMixed) {
+			s = 0;
+
+			for (i = 0; i < sizeof(sndbuffer) / CD_FRAMESIZE_RAW; i++) {
+				// read one sector
+				d = fread(sndbuffer + CD_FRAMESIZE_RAW * i, 1, CD_FRAMESIZE_RAW, cddaHandle);
+				if (d < CD_FRAMESIZE_RAW) {
+					break;
+				}
+
+				s += d;
+
+				// skip the subchannel data
+				fseek(cddaHandle, SUB_FRAMESIZE, SEEK_CUR);
+			}
+		}
+		else {
+			s = fread(sndbuffer, 1, sizeof(sndbuffer), cddaHandle);
+		}
+
+		if (s == 0) {
+			playing = FALSE;
+			fclose(cddaHandle);
+			cddaHandle = NULL;
+			initial_offset = 0;
+			break;
+		}
+
+		if (!cdr.Muted && playing) {
+			if (cddaBigEndian) {
+				for (i = 0; i < s / 2; i++) {
+					tmp = sndbuffer[i * 2];
+					sndbuffer[i * 2] = sndbuffer[i * 2 + 1];
+					sndbuffer[i * 2 + 1] = tmp;
+				}
+			}
+
+			SPU_playCDDAchannel((short *)sndbuffer, s);
+		}
+
+		cddaCurOffset += s;
+	}
+
+#ifdef _WIN32
+	_endthread();
+#else
+	pthread_exit(0);
+	return NULL;
+#endif
+#endif
+return NULL;
+}
+
+// stop the CDDA playback
+void stopCDDA() {
+#if 0
+	if (!playing) {
+		return;
+	}
+
+	playing = FALSE;
+#ifdef _WIN32
+	WaitForSingleObject(threadid, INFINITE);
+#else
+	pthread_join(threadid, NULL);
+#endif
+
+	if (cddaHandle != NULL) {
+		fclose(cddaHandle);
+		cddaHandle = NULL;
+	}
+
+	initial_offset = 0;
+#endif
+}
+
+// start the CDDA playback
+void startCDDA(unsigned int offset) {
+	printf("startCDDA\n");
+#if 0	
+	if (playing) {
+		if (initial_offset == offset) {
+			return;
+		}
+		stopCDDA();
+	}
+
+	cddaHandle = fopen(GetIsoFile(), "rb");
+	if (cddaHandle == NULL) {
+		return;
+	}
+
+	initial_offset = offset;
+	cddaCurOffset = initial_offset;
+	fseek(cddaHandle, initial_offset, SEEK_SET);
+
+	playing = TRUE;
+
+#ifdef _WIN32
+	threadid = (HANDLE)_beginthread(playthread, 0, NULL);
+#else
+	pthread_create(&threadid, NULL, playthread, NULL);
+#endif
+
+#endif
+}
+#endif
+// this function tries to get the .toc file of the given .bin
+// the necessary data is put into the ti (trackinformation)-array
+int parsetoc(const char *isofile) {
+	char			tocname[MAXPATHLEN];
+	FILE			*fi;
+	char			linebuf[256], dummy[256], name[256];
+	char			*token;
+	char			time[20], time2[20];
+	unsigned int	t;
+
+	numtracks = 0;
+
+	// copy name of the iso and change extension from .bin to .toc
+	strncpy(tocname, isofile, sizeof(tocname));
+	tocname[MAXPATHLEN - 1] = '\0';
+	if (strlen(tocname) >= 4) {
+		strcpy(tocname + strlen(tocname) - 4, ".toc");
+	}
+	else {
+		return -1;
+	}
+
+	if ((fi = fopen(tocname, "r")) == NULL) {
+		// try changing extension to .cue (to satisfy some stupid tutorials)
+		strcpy(tocname + strlen(tocname) - 4, ".cue");
+		if ((fi = fopen(tocname, "r")) == NULL) {
+			// if filename is image.toc.bin, try removing .bin (for Brasero)
+			strcpy(tocname, isofile);
+			t = strlen(tocname);
+			if (t >= 8 && strcmp(tocname + t - 8, ".toc.bin") == 0) {
+				tocname[t - 4] = '\0';
+				if ((fi = fopen(tocname, "r")) == NULL) {
+					return -1;
+				}
+			}
+			else {
+				return -1;
+			}
 		}
 	}
-}
 
-void psxDma3(u32 madr, u32 bcr, u32 chcr) {
-	u32 cdsize;
-	u8 *ptr;
+	memset(&ti, 0, sizeof(ti));
+	cddaBigEndian = TRUE; // cdrdao uses big-endian for CD Audio
 
-#ifdef CDR_LOG
-	CDR_LOG("psxDma3() Log: *** DMA 3 *** %x addr = %x size = %x\n", chcr, madr, bcr);
-#endif
+	// parse the .toc file
+	while (fgets(linebuf, sizeof(linebuf), fi) != NULL) {
+		// search for tracks
+		strncpy(dummy, linebuf, sizeof(linebuf));
+		token = strtok(dummy, " ");
 
-	switch (chcr) {
-		case 0x11000000:
-		case 0x11400100:
-			if (cdr.Readed == 0) {
-#ifdef CDR_LOG
-				CDR_LOG("psxDma3() Log: *** DMA 3 *** NOT READY\n");
-#endif
-				break;
+		if (token == NULL) continue;
+
+		if (!strcmp(token, "TRACK")) {
+			// get type of track
+			token = strtok(NULL, " ");
+			numtracks++;
+
+			if (!strncmp(token, "MODE2_RAW", 9)) {
+				ti[numtracks].type = DATA;
+				sec2msf(2 * 75, ti[numtracks].start); // assume data track on 0:2:0
+
+				// check if this image contains mixed subchannel data
+				token = strtok(NULL, " ");
+				if (token != NULL && !strncmp(token, "RW_RAW", 6)) {
+					subChanMixed = TRUE;
+					subChanRaw = TRUE;
+				}
 			}
-
-			cdsize = (bcr & 0xffff) * 4;
-
-			ptr = (u8 *)PSXM(madr);
-			if (ptr == NULL) {
-#ifdef CPU_LOG
-				CDR_LOG("psxDma3() Log: *** DMA 3 *** NULL Pointer!\n");
-#endif
-				break;
+			else if (!strncmp(token, "AUDIO", 5)) {
+				ti[numtracks].type = CDDA;
 			}
-			memcpy(ptr, cdr.pTransfer, cdsize);
-			psxCpu->Clear(madr, cdsize / 4);
-			cdr.pTransfer += cdsize;
-			break;
-		default:
-#ifdef CDR_LOG
-			CDR_LOG("psxDma3() Log: Unknown cddma %x\n", chcr);
-#endif
-			break;
+		}
+		else if (!strcmp(token, "DATAFILE")) {
+			if (ti[numtracks].type == CDDA) {
+				sscanf(linebuf, "DATAFILE \"%[^\"]\" #%d %8s", name, &t, time2);
+				t /= CD_FRAMESIZE_RAW + (subChanMixed ? SUB_FRAMESIZE : 0);
+				t += 2 * 75;
+				sec2msf(t, (char *)&ti[numtracks].start);
+				tok2msf((char *)&time2, (char *)&ti[numtracks].length);
+			}
+			else {
+				sscanf(linebuf, "DATAFILE \"%[^\"]\" %8s", name, time);
+				tok2msf((char *)&time, (char *)&ti[numtracks].length);
+			}
+		}
+		else if (!strcmp(token, "FILE")) {
+			sscanf(linebuf, "FILE \"%[^\"]\" #%d %8s %8s", name, &t, time, time2);
+			tok2msf((char *)&time, (char *)&ti[numtracks].start);
+			t /= CD_FRAMESIZE_RAW + (subChanMixed ? SUB_FRAMESIZE : 0);
+			t += msf2sec(ti[numtracks].start) + 2 * 75;
+			sec2msf(t, (char *)&ti[numtracks].start);
+			tok2msf((char *)&time2, (char *)&ti[numtracks].length);
+		}
 	}
 
-	HW_DMA3_CHCR &= SWAP32(~0x01000000);
-	DMA_INTERRUPT(3);
-}
-
-void cdrReset() {
-	memset(&cdr, 0, sizeof(cdr));
-	cdr.CurTrack = 1;
-	cdr.File = 1;
-	cdr.Channel = 1;
-}
-
-int cdrFreeze(gzFile f, int Mode) {
-	uintptr_t tmp;
-
-	gzfreeze(&cdr, sizeof(cdr));
-
-	if (Mode == 1)
-		tmp = cdr.pTransfer - cdr.Transfer;
-
-	gzfreeze(&tmp, sizeof(tmp));
-
-	if (Mode == 0)
-		cdr.pTransfer = cdr.Transfer + tmp;
+	fclose(fi);
 
 	return 0;
+}
+
+// this function tries to get the .cue file of the given .bin
+// the necessary data is put into the ti (trackinformation)-array
+int parsecue(const char *isofile) {
+	char			cuename[MAXPATHLEN];
+	FILE			*fi;
+	char			*token;
+	char			time[20];
+	char			*tmp;
+	char			linebuf[256], dummy[256];
+	unsigned int	t;
+
+	numtracks = 0;
+
+	// copy name of the iso and change extension from .bin to .cue
+	strncpy(cuename, isofile, sizeof(cuename));
+	cuename[MAXPATHLEN - 1] = '\0';
+	if (strlen(cuename) >= 4) {
+		strcpy(cuename + strlen(cuename) - 4, ".cue");
+	}
+	else {
+		return -1;
+	}
+
+	if ((fi = fopen(cuename, "r")) == NULL) {
+		return -1;
+	}
+
+	// Some stupid tutorials wrongly tell users to use cdrdao to rip a
+	// "bin/cue" image, which is in fact a "bin/toc" image. So let's check
+	// that...
+	if (fgets(linebuf, sizeof(linebuf), fi) != NULL) {
+		if (!strncmp(linebuf, "CD_ROM_XA", 9)) {
+			// Don't proceed further, as this is actually a .toc file rather
+			// than a .cue file.
+			fclose(fi);
+			return parsetoc(isofile);
+		}
+		fseek(fi, 0, SEEK_SET);
+	}
+
+	memset(&ti, 0, sizeof(ti));
+
+	while (fgets(linebuf, sizeof(linebuf), fi) != NULL) {
+		strncpy(dummy, linebuf, sizeof(linebuf));
+		token = strtok(dummy, " ");
+
+		if (token == NULL) {
+			continue;
+		}
+
+		if (!strcmp(token, "TRACK")){
+			numtracks++;
+
+			if (strstr(linebuf, "AUDIO") != NULL) {
+				ti[numtracks].type = CDDA;
+			}
+			else if (strstr(linebuf, "MODE1/2352") != NULL || strstr(linebuf, "MODE2/2352") != NULL) {
+				ti[numtracks].type = DATA;
+			}
+		}
+		else if (!strcmp(token, "INDEX")) {
+			tmp = strstr(linebuf, "INDEX");
+			if (tmp != NULL) {
+				tmp += strlen("INDEX") + 3; // 3 - space + numeric index
+				while (*tmp == ' ') tmp++;
+				if (*tmp != '\n') sscanf(tmp, "%8s", time);
+			}
+
+			tok2msf((char *)&time, (char *)&ti[numtracks].start);
+
+			t = msf2sec(ti[numtracks].start) + 2 * 75;
+			sec2msf(t, ti[numtracks].start);
+
+			// If we've already seen another track, this is its end
+			if (numtracks > 1) {
+				t = msf2sec(ti[numtracks].start) - msf2sec(ti[numtracks - 1].start);
+				sec2msf(t, ti[numtracks - 1].length);
+			}
+		}
+	}
+
+	fclose(fi);
+
+	// Fill out the last track's end based on size
+	if (numtracks >= 1) {
+		fseek(cdHandle, 0, SEEK_END);
+		t = ftell(cdHandle) / 2352 - msf2sec(ti[numtracks].start) + 2 * 75;
+		sec2msf(t, ti[numtracks].length);
+	}
+
+	return 0;
+}
+
+// this function tries to get the .ccd file of the given .img
+// the necessary data is put into the ti (trackinformation)-array
+int parseccd(const char *isofile) {
+	char			ccdname[MAXPATHLEN];
+	FILE			*fi;
+	char			linebuf[256];
+	unsigned int	t;
+
+	numtracks = 0;
+
+	// copy name of the iso and change extension from .img to .ccd
+	strncpy(ccdname, isofile, sizeof(ccdname));
+	ccdname[MAXPATHLEN - 1] = '\0';
+	if (strlen(ccdname) >= 4) {
+		strcpy(ccdname + strlen(ccdname) - 4, ".ccd");
+	}
+	else {
+		return -1;
+	}
+
+	if ((fi = fopen(ccdname, "r")) == NULL) {
+		return -1;
+	}
+
+	memset(&ti, 0, sizeof(ti));
+
+	while (fgets(linebuf, sizeof(linebuf), fi) != NULL) {
+		if (!strncmp(linebuf, "[TRACK", 6)){
+			numtracks++;
+		}
+		else if (!strncmp(linebuf, "MODE=", 5)) {
+			sscanf(linebuf, "MODE=%d", &t);
+			ti[numtracks].type = ((t == 0) ? CDDA : DATA);
+		}
+		else if (!strncmp(linebuf, "INDEX 1=", 8)) {
+			sscanf(linebuf, "INDEX 1=%d", &t);
+			sec2msf(t + 2 * 75, ti[numtracks].start);
+
+			// If we've already seen another track, this is its end
+			if (numtracks > 1) {
+				t = msf2sec(ti[numtracks].start) - msf2sec(ti[numtracks - 1].start);
+				sec2msf(t, ti[numtracks - 1].length);
+			}
+		}
+	}
+
+	fclose(fi);
+
+	// Fill out the last track's end based on size
+	if (numtracks >= 1) {
+		fseek(cdHandle, 0, SEEK_END);
+		t = ftell(cdHandle) / 2352 - msf2sec(ti[numtracks].start) + 2 * 75;
+		sec2msf(t, ti[numtracks].length);
+	}
+
+	return 0;
+}
+
+// this function tries to get the .mds file of the given .mdf
+// the necessary data is put into the ti (trackinformation)-array
+int parsemds(const char *isofile) {
+	char			mdsname[MAXPATHLEN];
+	FILE			*fi;
+	unsigned int	offset, extra_offset, l, i;
+	unsigned short	s;
+
+	numtracks = 0;
+
+	// copy name of the iso and change extension from .mdf to .mds
+	strncpy(mdsname, isofile, sizeof(mdsname));
+	mdsname[MAXPATHLEN - 1] = '\0';
+	if (strlen(mdsname) >= 4) {
+		strcpy(mdsname + strlen(mdsname) - 4, ".mds");
+	}
+	else {
+		return -1;
+	}
+
+	if ((fi = fopen(mdsname, "rb")) == NULL) {
+		return -1;
+	}
+
+	memset(&ti, 0, sizeof(ti));
+
+	// check if it's a valid mds file
+	fread(&i, 1, sizeof(unsigned int), fi);
+	i = SWAP32(i);
+	if (i != 0x4944454D) {
+		// not an valid mds file
+		fclose(fi);
+		return -1;
+	}
+
+	// get offset to session block
+	fseek(fi, 0x50, SEEK_SET);
+	fread(&offset, 1, sizeof(unsigned int), fi);
+	offset = SWAP32(offset);
+
+	// get total number of tracks
+	offset += 14;
+	fseek(fi, offset, SEEK_SET);
+	fread(&s, 1, sizeof(unsigned short), fi);
+	s = SWAP16(s);
+	numtracks = s;
+
+	// get offset to track blocks
+	fseek(fi, 4, SEEK_CUR);
+	fread(&offset, 1, sizeof(unsigned int), fi);
+	offset = SWAP32(offset);
+
+	// skip lead-in data
+	while (1) {
+		fseek(fi, offset + 4, SEEK_SET);
+		if (fgetc(fi) < 0xA0) {
+			break;
+		}
+		offset += 0x50;
+	}
+
+	// check if the image contains mixed subchannel data
+	fseek(fi, offset + 1, SEEK_SET);
+	subChanMixed = (fgetc(fi) ? TRUE : FALSE);
+
+	// read track data
+	for (i = 1; i <= numtracks; i++) {
+		fseek(fi, offset, SEEK_SET);
+
+		// get the track type
+		ti[i].type = ((fgetc(fi) == 0xA9) ? CDDA : DATA);
+		fseek(fi, 8, SEEK_CUR);
+
+		// get the track starting point
+		ti[i].start[0] = fgetc(fi);
+		ti[i].start[1] = fgetc(fi);
+		ti[i].start[2] = fgetc(fi);
+
+		if (i > 1) {
+			l = msf2sec(ti[i].start);
+			sec2msf(l - 2 * 75, ti[i].start); // ???
+		}
+
+		// get the track length
+		fread(&extra_offset, 1, sizeof(unsigned int), fi);
+		extra_offset = SWAP32(extra_offset);
+
+		fseek(fi, extra_offset + 4, SEEK_SET);
+		fread(&l, 1, sizeof(unsigned int), fi);
+		l = SWAP32(l);
+		sec2msf(l, ti[i].length);
+
+		offset += 0x50;
+	}
+
+	fclose(fi);
+	return 0;
+}
+
+// this function tries to get the .sub file of the given .img
+int opensubfile(const char *isoname) {
+	char		subname[MAXPATHLEN];
+
+	// copy name of the iso and change extension from .img to .sub
+	strncpy(subname, isoname, sizeof(subname));
+	subname[MAXPATHLEN - 1] = '\0';
+	if (strlen(subname) >= 4) {
+		strcpy(subname + strlen(subname) - 4, ".sub");
+	}
+	else {
+		return -1;
+	}
+
+	subHandle = fopen(subname, "rb");
+	if (subHandle == NULL) {
+		return -1;
+	}
+
+	return 0;
+}
+
+long CALLBACK ISOinit(void) {
+	assert(cdHandle == NULL);
+	assert(subHandle == NULL);
+
+	return 0; // do nothing
+}
+
+long CALLBACK ISOshutdown(void) {
+	if (cdHandle != NULL) {
+		fclose(cdHandle);
+		cdHandle = NULL;
+	}
+	if (subHandle != NULL) {
+		fclose(subHandle);
+		subHandle = NULL;
+	}
+	stopCDDA();
+	return 0;
+}
+
+void PrintTracks(void) {
+	int i;
+
+	for (i = 1; i <= numtracks; i++) {
+		SysPrintf(_("Track %.2d (%s) - Start %.2d:%.2d:%.2d, Length %.2d:%.2d:%.2d\n"),
+			i, (ti[i].type == DATA ? "DATA" : "AUDIO"),
+			ti[i].start[0], ti[i].start[1], ti[i].start[2],
+			ti[i].length[0], ti[i].length[1], ti[i].length[2]);
+	}
+}
+
+// This function is invoked by the front-end when opening an ISO
+// file for playback
+long CALLBACK ISOopen(void) {
+	if (cdHandle != NULL) {
+		return 0; // it's already open
+	}
+
+	cdHandle = fopen(GetIsoFile(), "rb");
+	if (cdHandle == NULL) {
+		return -1;
+	}
+
+	SysPrintf(_("Loaded CD Image: %s"), GetIsoFile());
+
+	cddaBigEndian = FALSE;
+	subChanMixed = FALSE;
+	subChanRaw = FALSE;
+
+	if (parsecue(GetIsoFile()) == 0) {
+		SysPrintf("[+cue]");
+	}
+	else if (parsetoc(GetIsoFile()) == 0) {
+		SysPrintf("[+toc]");
+	}
+	else if (parseccd(GetIsoFile()) == 0) {
+		SysPrintf("[+ccd]");
+	}
+	else if (parsemds(GetIsoFile()) == 0) {
+		SysPrintf("[+mds]");
+	}
+
+	if (!subChanMixed && opensubfile(GetIsoFile()) == 0) {
+		SysPrintf("[+sub]");
+	}
+
+	SysPrintf(".\n");
+
+	PrintTracks();
+
+	return 0;
+}
+
+long CALLBACK ISOclose(void) {
+	if (cdHandle != NULL) {
+		fclose(cdHandle);
+		cdHandle = NULL;
+	}
+	if (subHandle != NULL) {
+		fclose(subHandle);
+		subHandle = NULL;
+	}
+	stopCDDA();
+	return 0;
+}
+
+// return Starting and Ending Track
+// buffer:
+//  byte 0 - start track
+//  byte 1 - end track
+long CALLBACK ISOgetTN(unsigned char *buffer) {
+	buffer[0] = 1;
+
+	if (numtracks > 0) {
+		buffer[1] = numtracks;
+	}
+	else {
+		buffer[1] = 1;
+	}
+
+	return 0;
+}
+
+// return Track Time
+// buffer:
+//  byte 0 - frame
+//  byte 1 - second
+//  byte 2 - minute
+long CALLBACK ISOgetTD(unsigned char track, unsigned char *buffer) {
+	if (numtracks > 0 && track <= numtracks) {
+		buffer[2] = ti[track].start[0];
+		buffer[1] = ti[track].start[1];
+		buffer[0] = ti[track].start[2];
+	}
+	else {
+		buffer[2] = 0;
+		buffer[1] = 2;
+		buffer[0] = 0;
+	}
+
+	return 0;
+}
+
+// decode 'raw' subchannel data ripped by cdrdao
+void DecodeRawSubData(void) {
+	unsigned char subQData[12];
+	int i;
+
+	memset(subQData, 0, sizeof(subQData));
+
+	for (i = 0; i < 8 * 12; i++) {
+		if (subbuffer[i] & (1 << 6)) { // only subchannel Q is needed
+			subQData[i >> 3] |= (1 << (7 - (i & 7)));
+		}
+	}
+
+	memcpy(&subbuffer[12], subQData, 12);
+}
+
+// read track
+// time: byte 0 - minute; byte 1 - second; byte 2 - frame
+// uses bcd format
+long CALLBACK ISOreadTrack(unsigned char *time) {
+	if (cdHandle == NULL) {
+		return -1;
+	}
+
+	if (subChanMixed) {
+		fseek(cdHandle, MSF2SECT(btoi(time[0]), btoi(time[1]), btoi(time[2])) * (CD_FRAMESIZE_RAW + SUB_FRAMESIZE) + 12, SEEK_SET);
+		fread(cdbuffer, 1, DATA_SIZE, cdHandle);
+		fread(subbuffer, 1, SUB_FRAMESIZE, cdHandle);
+
+		if (subChanRaw) DecodeRawSubData();
+	}
+	else {
+		fseek(cdHandle, MSF2SECT(btoi(time[0]), btoi(time[1]), btoi(time[2])) * CD_FRAMESIZE_RAW + 12, SEEK_SET);
+		fread(cdbuffer, 1, DATA_SIZE, cdHandle);
+
+		if (subHandle != NULL) {
+			fseek(subHandle, MSF2SECT(btoi(time[0]), btoi(time[1]), btoi(time[2])) * SUB_FRAMESIZE, SEEK_SET);
+			fread(subbuffer, 1, SUB_FRAMESIZE, subHandle);
+
+			if (subChanRaw) DecodeRawSubData();
+		}
+	}
+
+	return 0;
+}
+
+// return readed track
+unsigned char * CALLBACK ISOgetBuffer(void) {
+	return cdbuffer;
+}
+
+// plays cdda audio
+// sector: byte 0 - minute; byte 1 - second; byte 2 - frame
+// does NOT uses bcd format
+long CALLBACK ISOplay(unsigned char *time) {
+	if (SPU_playCDDAchannel != NULL) {
+		if (subChanMixed) {
+			startCDDA(MSF2SECT(time[0], time[1], time[2]) * (CD_FRAMESIZE_RAW + SUB_FRAMESIZE));
+		}
+		else {
+			startCDDA(MSF2SECT(time[0], time[1], time[2]) * CD_FRAMESIZE_RAW);
+		}
+	}
+	return 0;
+}
+
+// stops cdda audio
+long CALLBACK ISOstop(void) {
+	stopCDDA();
+	return 0;
+}
+
+// gets subchannel data
+unsigned char* CALLBACK ISOgetBufferSub(void) {
+	if (subHandle != NULL || subChanMixed) {
+		return subbuffer;
+	}
+
+	return NULL;
+}
+
+long CALLBACK ISOgetStatus(struct CdrStat *stat) {
+	int sec;
+
+	CDR__getStatus(stat);
+
+	if (playing) {
+		stat->Type = 0x02;
+		stat->Status |= 0x80;
+		sec = cddaCurOffset / CD_FRAMESIZE_RAW;
+		sec2msf(sec, (char *)stat->Time);
+	}
+	else {
+		stat->Type = 0x01;
+	}
+
+	return 0;
+}
+
+void cdrIsoInit(void) {
+	CDR_init = ISOinit;
+	CDR_shutdown = ISOshutdown;
+	CDR_open = ISOopen;
+	CDR_close = ISOclose;
+	CDR_getTN = ISOgetTN;
+	CDR_getTD = ISOgetTD;
+	CDR_readTrack = ISOreadTrack;
+	CDR_getBuffer = ISOgetBuffer;
+	CDR_play = ISOplay;
+	CDR_stop = ISOstop;
+	CDR_getBufferSub = ISOgetBufferSub;
+	CDR_getStatus = ISOgetStatus;
+
+	CDR_getDriveLetter = CDR__getDriveLetter;
+	CDR_configure = CDR__configure;
+	CDR_test = CDR__test;
+	CDR_about = CDR__about;
+	CDR_setfilename = CDR__setfilename;
+
+	numtracks = 0;
+}
+
+int cdrIsoActive(void) {
+	return (cdHandle != NULL);
 }
