@@ -1075,7 +1075,7 @@ v->m 1020 511 1 1
 readdatamem 0x00008000 1
 */
 
-   static int iCheat=0;
+   int iCheat=0;
    col+=iCheat;
    if(iCheat==1) iCheat=0; else iCheat=1;
   }
@@ -1186,16 +1186,16 @@ typedef struct SOFTVTAG
  int32_t R,G,B;
 } soft_vertex;
 
-static soft_vertex vtx[4];
-static soft_vertex * left_array[4], * right_array[4];
-static int left_section, right_section;
-static int left_section_height, right_section_height;
-static int left_x, delta_left_x, right_x, delta_right_x;
-static int left_u, delta_left_u, left_v, delta_left_v;
-static int right_u, delta_right_u, right_v, delta_right_v;
-static int left_R, delta_left_R, right_R, delta_right_R;
-static int left_G, delta_left_G, right_G, delta_right_G;
-static int left_B, delta_left_B, right_B, delta_right_B;
+soft_vertex vtx[4];
+soft_vertex * left_array[4], * right_array[4];
+int left_section, right_section;
+int left_section_height, right_section_height;
+int left_x, delta_left_x, right_x, delta_right_x;
+int left_u, delta_left_u, left_v, delta_left_v;
+int right_u, delta_right_u, right_v, delta_right_v;
+int left_R, delta_left_R, right_R, delta_right_R;
+int left_G, delta_left_G, right_G, delta_right_G;
+int left_B, delta_left_B, right_B, delta_right_B;
 
 #ifdef USE_NASM
 
