@@ -24,9 +24,9 @@
 #define BUFFER_SIZE		(22050+4096)
 
 short *pSndBuffer=NULL;
-static int iBufSize=0;
+int iBufSize=0;
 volatile int iReadPos=0,iWritePos=0;
-static void SOUND_FillAudio(void *unused,Uint8 *stream,int len){
+void SOUND_FillAudio(void *unused,Uint8 *stream,int len){
 short *p=(short *)stream;
 int lBytes=0;
 len /= sizeof(short);
@@ -45,12 +45,12 @@ while(len>0){
 *p++=0;
 --len;
 }};
-static void InitSDL(){
+void InitSDL(){
 printf("spu initsdl\n");
 SDL_Init(SDL_INIT_AUDIO);
 printf("SDL-1.2 start\n");
 };
-static void DestroySDL(){
+void DestroySDL(){
 };
 void SetupSound(void){
 SDL_AudioSpec spec;
@@ -81,7 +81,7 @@ iReadPos=0;
 iWritePos=0;
 SDL_PauseAudio(0);
 };
-static void RemoveSound(void){
+void RemoveSound(void){
 if(pSndBuffer==NULL)return;
 SDL_CloseAudio();
 DestroySDL();
@@ -89,7 +89,7 @@ free(pSndBuffer);
 pSndBuffer=NULL;
 };
 unsigned long SoundGetBytesBuffered(void){
-static int size;
+int size;
 if(pSndBuffer==NULL){
 return SOUNDSIZE;
 }
