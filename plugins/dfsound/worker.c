@@ -25,12 +25,11 @@
 #define BUFFER_SIZE		44100
 
 void SetupSound(void) {
-
 }
 
 void RemoveSound(void) {
-
 }
+
 int SoundGetBytesBuffered_value=0;
 unsigned int ccc=0;
 double in_buffer=0;
@@ -41,10 +40,10 @@ unsigned long SoundGetBytesBuffered(void) {
 		printf("lBytes %d\n", SoundGetBytesBuffered_value);
 		ccc=0;
 	}*/	
-	if(SoundGetBytesBuffered_value>22050){
-		return SOUNDSIZE;
-	}
-	return 0;
+if(SoundGetBytesBuffered_value>22050){
+return SOUNDSIZE;
+}
+return 0;
 	/*if(ccc==1){		
 		printf("sound buffer cleared\n");
 	}
@@ -68,23 +67,22 @@ unsigned long SoundGetBytesBuffered(void) {
 	
 }
 
-void SoundFeedStreamData(unsigned char *pSound, long lBytes) {
-	double now = emscripten_get_now();
-	in_buffer = in_buffer -(now - last_time);
-	last_time = now;
-	if(in_buffer<0) in_buffer=0;
-	in_buffer+= (lBytes/(4*44.1));
-
+void SoundFeedStreamData(unsigned char *pSound,long lBytes){
+double now=emscripten_get_now();
+in_buffer=in_buffer-(now-last_time);
+last_time=now;
+if(in_buffer<0){
+in_buffer=0;
+}
+in_buffer+=(lBytes/(4*44.1));
 	//SoundGetBytesBuffered_value = SOUNDSIZE;
 	//printf("soundfeedstream %ld\n", lBytes);
 	//ccc+=100;
-	if(lBytes>4800){
-		printf("lBytes>4800 %ld\n", lBytes);
-		lBytes=4800;
-	}
-	SoundGetBytesBuffered_value+=lBytes;
-	EM_ASM_({
-		 SendSound($0, $1);
-		}, pSound, lBytes);
-	
+if(lBytes>4800){
+lBytes=4800;
+}
+SoundGetBytesBuffered_value+=lBytes;
+EM_ASM_({
+SendSound($0,$1);
+},pSound,lBytes);	
 }
