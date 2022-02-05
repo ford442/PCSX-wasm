@@ -38,7 +38,7 @@ unsigned long gpuDisp;
 int StatesC = 0;
 int ShowPic = 0;
 
-static short modctrl = 0, modalt = 0;
+short modctrl = 0, modalt = 0;
 
 /* Handle keyboard keystrokes */
 void PADhandleKey(int key)
