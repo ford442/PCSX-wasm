@@ -31,8 +31,8 @@
 
 #define MAX_MEMCARD_BLOCKS 15
 
-static gboolean quit;
-static unsigned int currentIcon;
+gboolean quit;
+unsigned int currentIcon;
 
 McdBlock Blocks[2][MAX_MEMCARD_BLOCKS];	// Assuming 2 cards, 15 blocks?
 int IconC[2][MAX_MEMCARD_BLOCKS];
@@ -47,7 +47,7 @@ enum {
 
 GtkWidget *GtkCList_McdList1, *GtkCList_McdList2;
 
-static void AddColumns(GtkTreeView *treeview) {
+void AddColumns(GtkTreeView *treeview) {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
@@ -82,7 +82,7 @@ static void AddColumns(GtkTreeView *treeview) {
 	gtk_tree_view_append_column(treeview, column);
 }
 
-static GdkPixbuf *SetIcon(GtkWidget *dialog, short *icon, int i) {
+GdkPixbuf *SetIcon(GtkWidget *dialog, short *icon, int i) {
 	GdkPixmap *pixmap;
 	GdkImage  *image;
 	GdkVisual *visual;
@@ -123,7 +123,7 @@ static GdkPixbuf *SetIcon(GtkWidget *dialog, short *icon, int i) {
 	return pixbuf;
 }
 
-static void LoadListItems(int mcd, GtkWidget *widget) {
+void LoadListItems(int mcd, GtkWidget *widget) {
 	int i;
 	GladeXML *xml;
 	GtkWidget *List;
@@ -186,7 +186,7 @@ static void LoadListItems(int mcd, GtkWidget *widget) {
 	gtk_widget_show(List);
 }
 
-static void UpdateFilenameButtons(GtkWidget *widget) {
+void UpdateFilenameButtons(GtkWidget *widget) {
 	int i;
 	GladeXML *xml;
 	GtkWidget *dialog;
@@ -211,7 +211,7 @@ static void UpdateFilenameButtons(GtkWidget *widget) {
 	}
 }
 
-static void LoadMcdDlg(GtkWidget *widget) {
+void LoadMcdDlg(GtkWidget *widget) {
 	int i;
 
 	for (i = 0; i < MAX_MEMCARD_BLOCKS; i++) {
@@ -225,9 +225,9 @@ static void LoadMcdDlg(GtkWidget *widget) {
 	UpdateFilenameButtons(widget);
 }
 
-static void OnTreeSelectionChanged(GtkTreeSelection *selection, gpointer user_data);
+void OnTreeSelectionChanged(GtkTreeSelection *selection, gpointer user_data);
 
-static void UpdateListItems(int mcd, GtkWidget *widget) {
+void UpdateListItems(int mcd, GtkWidget *widget) {
 	GladeXML *xml;
 	GtkWidget *List;
 	GtkWidget *dialog;
@@ -294,7 +294,7 @@ static void UpdateListItems(int mcd, GtkWidget *widget) {
 	OnTreeSelectionChanged(gtk_tree_view_get_selection(GTK_TREE_VIEW(List)), (gpointer)mcd);
 }
 
-static void UpdateMcdDlg(GtkWidget *widget) {
+void UpdateMcdDlg(GtkWidget *widget) {
 	int i;
 
 	for (i = 0; i < MAX_MEMCARD_BLOCKS; i++) {
@@ -308,13 +308,13 @@ static void UpdateMcdDlg(GtkWidget *widget) {
 	UpdateFilenameButtons(widget);
 }
 
-static void OnMcd_Close(GtkDialog *dialog, gint arg1, gpointer user_data) {
+void OnMcd_Close(GtkDialog *dialog, gint arg1, gpointer user_data) {
 	quit = TRUE;
 	SaveConfig();
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static void OnMcd_FileChange(GtkWidget *widget, gpointer user_data) {
+void OnMcd_FileChange(GtkWidget *widget, gpointer user_data) {
 	gint memcard = (int)user_data;
 	gchar *filename;
 	GtkWidget *chooser;
@@ -351,7 +351,7 @@ static void OnMcd_FileChange(GtkWidget *widget, gpointer user_data) {
 }
 
 // format a memory card
-static void OnMcd_Format(GtkWidget *widget, gpointer user_data) {
+void OnMcd_Format(GtkWidget *widget, gpointer user_data) {
 	GladeXML *xml;
 	GtkWidget *message_dialog;
 	gint result;
@@ -385,7 +385,7 @@ static void OnMcd_Format(GtkWidget *widget, gpointer user_data) {
 }
 
 // create a new, formatted memory card
-static void OnMcd_New(GtkWidget *widget, gpointer user_data) {
+void OnMcd_New(GtkWidget *widget, gpointer user_data) {
 	GtkWidget *chooser;
 	gchar *path;
 
@@ -423,9 +423,9 @@ static void OnMcd_New(GtkWidget *widget, gpointer user_data) {
 	g_free(path);
 }
 
-static int copy = 0, copymcd = 0;
+int copy = 0, copymcd = 0;
 
-static int GetFreeMemcardSlot(int target_card) {
+int GetFreeMemcardSlot(int target_card) {
 	McdBlock *Info;
 	gboolean found = FALSE;
 
@@ -459,14 +459,14 @@ static int GetFreeMemcardSlot(int target_card) {
 	return -1;
 }
 
-static void CopyMemcardData(char *from, char *to, gint *i, gchar *str) {
+void CopyMemcardData(char *from, char *to, gint *i, gchar *str) {
 	memcpy(to + (*i + 1) * 128, from + (copy + 1) * 128, 128);
 	SaveMcd((char *)str, to, (*i + 1) * 128, 128);
 	memcpy(to + (*i + 1) * 1024 * 8, from + (copy+1) * 1024 * 8, 1024 * 8);
 	SaveMcd((char *)str, to, (*i + 1) * 1024 * 8, 1024 * 8);
 }
 
-static void OnMcd_CopyTo(GtkWidget *widget, gpointer user_data) {
+void OnMcd_CopyTo(GtkWidget *widget, gpointer user_data) {
 	gint mcd = (gint)user_data;
 
 	GtkTreeIter iter;
@@ -521,7 +521,7 @@ static void OnMcd_CopyTo(GtkWidget *widget, gpointer user_data) {
 	UpdateMcdDlg(widget);
 }
 
-static void OnMemcardDelete(GtkWidget *widget, gpointer user_data) {
+void OnMemcardDelete(GtkWidget *widget, gpointer user_data) {
 	McdBlock *Info;
 	int i, xor = 0, j;
 	char *data, *ptr;
@@ -577,7 +577,7 @@ static void OnMemcardDelete(GtkWidget *widget, gpointer user_data) {
 	}
 }
 
-static void OnTreeSelectionChanged(GtkTreeSelection *selection, gpointer user_data) {
+void OnTreeSelectionChanged(GtkTreeSelection *selection, gpointer user_data) {
 	GladeXML *xml;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
