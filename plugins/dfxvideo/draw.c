@@ -62,13 +62,13 @@ int xv_vsync = 0;
 int finalw,finalh;
 #include <time.h>
 
-static SDL_Surface *sdl_display;
-static SDL_Surface *sdl_ximage;
+SDL_Surface *sdl_display;
+SDL_Surface *sdl_ximage;
 
 char *               Xpixels;
 char *               pCaptionText;
 
-static int fx=0;
+int fx=0;
 
 // close display
 
@@ -80,7 +80,7 @@ void DestroyDisplay(void)
 
 }
 
-static int depth=32;
+int depth=32;
 int root_window_id=0;
 // Create display
 SDL_Rect srcrect;
