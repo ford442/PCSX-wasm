@@ -33,7 +33,7 @@
 #include "../libpcsxcore/sio.h"
 
 #include "Linux.h"
-static void CreateMemcard(char *filename, char *conf_mcd)
+void CreateMemcard(char *filename, char *conf_mcd)
 {
     struct stat buf;
     strcpy(conf_mcd, getenv("HOME"));
