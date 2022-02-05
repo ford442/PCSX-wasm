@@ -44,8 +44,8 @@ uint32_t * CDDAEnd   = NULL;
 int             iLeftXAVol  = 32767;
 int             iRightXAVol = 32767;
 
-static int gauss_ptr = 0;
-static int gauss_window[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int gauss_ptr = 0;
+int gauss_window[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 #define gvall0 gauss_window[gauss_ptr]
 #define gvall(x) gauss_window[(gauss_ptr+x)&3]
@@ -137,11 +137,11 @@ INLINE void FeedXA(xa_decode_t *xap)
  //----------------------------------------------------//
  if(iXAPitch)                                          // pitch change option?
   {
-   static DWORD dwLT=0;
-   static DWORD dwFPS=0;
-   static int   iFPSCnt=0;
-   static int   iLastSize=0;
-   static DWORD dwL1=0;
+   DWORD dwLT=0;
+   DWORD dwFPS=0;
+   int   iFPSCnt=0;
+   int   iLastSize=0;
+   DWORD dwL1=0;
    DWORD dw=timeGetTime_spu(),dw1,dw2;
 
    iPlace=iSize;
