@@ -34,23 +34,23 @@
 #define N_(x) (x)
 #endif
 #if defined (USEMACOSX)
-static char * libraryName     = N_("Mac OS X Sound");
+char * libraryName     = N_("Mac OS X Sound");
 #elif defined (USEALSA)
-static char * libraryName     = N_("ALSA Sound");
+char * libraryName     = N_("ALSA Sound");
 #elif defined (USEOSS)
-static char * libraryName     = N_("OSS Sound");
+char * libraryName     = N_("OSS Sound");
 #elif defined (USESDLSOUND)
-static char * libraryName     = N_("SDL Sound");
+char * libraryName     = N_("SDL Sound");
 #elif defined (USEPULSEAUDIO)
-static char * libraryName     = N_("PulseAudio Sound");
+char * libraryName     = N_("PulseAudio Sound");
 #else
-static char * libraryName     = N_("NULL Sound");
+char * libraryName     = N_("NULL Sound");
 #endif
 
 struct timespec rem;
 struct timespec req={0,1000000};
 
-static char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
+char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 
 // globals
 
@@ -92,7 +92,7 @@ int             bThreadEnded=0;
 int             bSpuInit=0;
 int             bSPUIsOpen=0;
 #ifdef PTHREAD
-static pthread_t thread = (pthread_t)-1;               // thread id (linux)
+pthread_t thread = (pthread_t)-1;               // thread id (linux)
 #endif
 
 unsigned long dwNewChannel=0;                          // flags for faster testing, if new channel starts
@@ -102,7 +102,7 @@ void (CALLBACK *cddavCallback)(unsigned short,unsigned short)=0;
 
 // certain globals (were local before, but with the new timeproc I need em global)
 
-static const int f[5][2] = {   {    0,  0  },
+const int f[5][2] = {   {    0,  0  },
                         {   60,  0  },
                         {  115, -52 },
                         {   98, -55 },
@@ -114,8 +114,8 @@ int iCycle = 0;
 short * pS;
 
 int lastch=-1;             // last channel processed on spu irq in timer mode
-static int lastns=0;       // last ns pos
-static int iSecureStart=0; // secure start counter
+int lastns=0;       // last ns pos
+int iSecureStart=0; // secure start counter
 
 ////////////////////////////////////////////////////////////////////////
 // CODE AREA
@@ -441,7 +441,7 @@ INLINE int iGetInterpolationVal(int ch)
 
 ////////////////////////////////////////////////////////////////////////
 
-static void *MAINThread(void *arg)
+void *MAINThread(void *arg)
 {
  int s_1,s_2,fa,ns;
 #ifndef _MACOSX
