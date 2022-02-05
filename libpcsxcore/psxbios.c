@@ -236,30 +236,30 @@ typedef struct {
 	u32  mcfile;
 } FileDesc;
 
-static u32 *jmp_int = NULL;
-static int *pad_buf = NULL;
-static char *pad_buf1 = NULL, *pad_buf2 = NULL;
-static int pad_buf1len, pad_buf2len;
+u32 *jmp_int = NULL;
+int *pad_buf = NULL;
+char *pad_buf1 = NULL, *pad_buf2 = NULL;
+int pad_buf1len, pad_buf2len;
 
-static u32 regs[35];
-static EvCB *Event;
-static EvCB *HwEV; // 0xf0
-static EvCB *EvEV; // 0xf1
-static EvCB *RcEV; // 0xf2
-static EvCB *UeEV; // 0xf3
-static EvCB *SwEV; // 0xf4
-static EvCB *ThEV; // 0xff
-static u32 *heap_addr = NULL;
-static u32 *heap_end = NULL;
-static u32 SysIntRP[8];
-static int CardState = -1;
-static TCB Thread[8];
-static int CurThread = 0;
-static FileDesc FDesc[32];
+u32 regs[35];
+EvCB *Event;
+EvCB *HwEV; // 0xf0
+EvCB *EvEV; // 0xf1
+EvCB *RcEV; // 0xf2
+EvCB *UeEV; // 0xf3
+EvCB *SwEV; // 0xf4
+EvCB *ThEV; // 0xff
+u32 *heap_addr = NULL;
+u32 *heap_end = NULL;
+u32 SysIntRP[8];
+int CardState = -1;
+TCB Thread[8];
+int CurThread = 0;
+FileDesc FDesc[32];
 
 boolean hleSoftCall = FALSE;
 
-static inline void softCall(u32 pc) {
+inline void softCall(u32 pc) {
 	pc0 = pc;
 	ra = 0x80001000;
 
@@ -270,7 +270,7 @@ static inline void softCall(u32 pc) {
 	hleSoftCall = FALSE;
 }
 
-static inline void softCall2(u32 pc) {
+inline void softCall2(u32 pc) {
 	u32 sra = ra;
 	pc0 = pc;
 	ra = 0x80001000;
@@ -283,7 +283,7 @@ static inline void softCall2(u32 pc) {
 	hleSoftCall = FALSE;
 }
 
-static inline void DeliverEvent(u32 ev, u32 spec) {
+inline void DeliverEvent(u32 ev, u32 spec) {
 	if (Event[ev][spec].status != EvStACTIVE) return;
 
 //	Event[ev][spec].status = EvStALREADY;
@@ -292,14 +292,14 @@ static inline void DeliverEvent(u32 ev, u32 spec) {
 	} else Event[ev][spec].status = EvStALREADY;
 }
 
-static inline void SaveRegs() {
+inline void SaveRegs() {
 	memcpy(regs, psxRegs.GPR.r, 32*4);
 	regs[32] = psxRegs.GPR.n.lo;
 	regs[33] = psxRegs.GPR.n.hi;
 	regs[34] = psxRegs.pc;
 }
 
-static inline void LoadRegs() {
+inline void LoadRegs() {
 	memcpy(psxRegs.GPR.r, regs, 32*4);
 	psxRegs.GPR.n.lo = regs[32];
 	psxRegs.GPR.n.hi = regs[33];
@@ -693,9 +693,9 @@ void psxBios_srand() { // 0x30
 	pc0 = ra;
 }
 
-static u32 qscmpfunc, qswidth;
+u32 qscmpfunc, qswidth;
 
-static inline int qscmp(char *a, char *b) {
+inline int qscmp(char *a, char *b) {
 	u32 sa0 = a0;
 
 	a0 = sa0 + (a - (char *)PSXM(sa0));
@@ -707,7 +707,7 @@ static inline int qscmp(char *a, char *b) {
 	return (s32)v0;
 }
 
-static inline void qexchange(char *i, char *j) {
+inline void qexchange(char *i, char *j) {
 	char t;
 	int n = qswidth;
 
@@ -718,7 +718,7 @@ static inline void qexchange(char *i, char *j) {
 	} while (--n);
 }
 
-static inline void q3exchange(char *i, char *j, char *k) {
+inline void q3exchange(char *i, char *j, char *k) {
 	char t;
 	int n = qswidth;
 
@@ -730,7 +730,7 @@ static inline void q3exchange(char *i, char *j, char *k) {
 	} while (--n);
 }
 
-static void qsort_main(char *a, char *l) {
+void qsort_main(char *a, char *l) {
 	char *i, *j, *lp, *hp;
 	int c;
 	unsigned int n;
