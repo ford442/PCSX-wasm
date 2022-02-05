@@ -197,8 +197,8 @@ ExecCfg(args);
 void ReadGPUConfig(void){
 W=EM_ASM_INT({return parseInt(window.innerHeight,10);});
 H=W*0.75;
-iResX=H;
-iResY=W;
+iResX=W;
+iResY=H;
 iWinSize=MAKELONG(iResX,iResY);
 iColDepth=32;
 iWindowMode=1;
