@@ -38,32 +38,32 @@
 #endif
 #include <sys/time.h>
 
-FILE *cdHandle = NULL;
-FILE *cddaHandle = NULL;
-FILE *subHandle = NULL;
+static FILE *cdHandle = NULL;
+static FILE *cddaHandle = NULL;
+static FILE *subHandle = NULL;
 
-boolean subChanMixed = FALSE;
-boolean subChanRaw = FALSE;
+static boolean subChanMixed = FALSE;
+static boolean subChanRaw = FALSE;
 
-unsigned char cdbuffer[DATA_SIZE];
-unsigned char subbuffer[SUB_FRAMESIZE];
+static unsigned char cdbuffer[DATA_SIZE];
+static unsigned char subbuffer[SUB_FRAMESIZE];
 
-unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
+static unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
 
 #define CDDA_FRAMETIME			(1000 * (sizeof(sndbuffer) / CD_FRAMESIZE_RAW) / 75)
 #if 0
 #ifdef _WIN32
-HANDLE threadid;
+static HANDLE threadid;
 #else
-pthread_t threadid;
+static pthread_t threadid;
 #endif
 #endif
 
-unsigned int initial_offset = 0;
+static unsigned int initial_offset = 0;
 
-volatile boolean playing = FALSE;
-boolean cddaBigEndian = FALSE;
-volatile unsigned int cddaCurOffset = 0;
+static volatile boolean playing = FALSE;
+static boolean cddaBigEndian = FALSE;
+static volatile unsigned int cddaCurOffset = 0;
 
 char* CALLBACK CDR__getDriveLetter(void);
 long CALLBACK CDR__configure(void);
@@ -82,15 +82,15 @@ struct trackinfo {
 
 #define MAXTRACKS 100 /* How many tracks can a CD hold? */
 
-int numtracks = 0;
-struct trackinfo ti[MAXTRACKS];
+static int numtracks = 0;
+static struct trackinfo ti[MAXTRACKS];
 
 // get a sector from a msf-array
-unsigned int msf2sec(char *msf) {
+static unsigned int msf2sec(char *msf) {
 	return ((msf[0] * 60 + msf[1]) * 75) + msf[2];
 }
 
-void sec2msf(unsigned int s, char *msf) {
+static void sec2msf(unsigned int s, char *msf) {
 	msf[0] = s / 75 / 60;
 	s = s - msf[0] * 75 * 60;
 	msf[1] = s / 75;
@@ -99,7 +99,7 @@ void sec2msf(unsigned int s, char *msf) {
 }
 
 // divide a string of xx:yy:zz into m, s, f
-void tok2msf(char *time, char *msf) {
+static void tok2msf(char *time, char *msf) {
 	char *token;
 
 	token = strtok(time, ":");
@@ -128,8 +128,8 @@ void tok2msf(char *time, char *msf) {
 }
 
 #ifndef _WIN32
-long GetTickCount(void) {
-	time_t		initial_time = 0;
+static long GetTickCount(void) {
+	static time_t		initial_time = 0;
 	struct timeval		now;
 
 	gettimeofday(&now, NULL);
@@ -217,7 +217,7 @@ void playcdda()
 }
 
 // stop the CDDA playback
-void stopCDDA() {
+static void stopCDDA() {
 	printf("stopCDDA\n");
 	if (!playing) {
 		return;
@@ -235,7 +235,7 @@ void stopCDDA() {
 }
 
 // start the CDDA playback
-void startCDDA(unsigned int offset) {
+static void startCDDA(unsigned int offset) {
 	printf("startCDDA\n");
 	if (playing) {
 		if (initial_offset == offset) {
@@ -262,9 +262,9 @@ void startCDDA(unsigned int offset) {
 
 
 #ifdef _WIN32
-void playthread(void *param)
+static void playthread(void *param)
 #else
-void *playthread(void *param)
+static void *playthread(void *param)
 #endif
 {
 #if 0	
@@ -344,7 +344,7 @@ return NULL;
 }
 
 // stop the CDDA playback
-void stopCDDA() {
+static void stopCDDA() {
 #if 0
 	if (!playing) {
 		return;
@@ -367,7 +367,7 @@ void stopCDDA() {
 }
 
 // start the CDDA playback
-void startCDDA(unsigned int offset) {
+static void startCDDA(unsigned int offset) {
 	printf("startCDDA\n");
 #if 0	
 	if (playing) {
@@ -399,7 +399,7 @@ void startCDDA(unsigned int offset) {
 #endif
 // this function tries to get the .toc file of the given .bin
 // the necessary data is put into the ti (trackinformation)-array
-int parsetoc(const char *isofile) {
+static int parsetoc(const char *isofile) {
 	char			tocname[MAXPATHLEN];
 	FILE			*fi;
 	char			linebuf[256], dummy[256], name[256];
@@ -499,7 +499,7 @@ int parsetoc(const char *isofile) {
 
 // this function tries to get the .cue file of the given .bin
 // the necessary data is put into the ti (trackinformation)-array
-int parsecue(const char *isofile) {
+static int parsecue(const char *isofile) {
 	char			cuename[MAXPATHLEN];
 	FILE			*fi;
 	char			*token;
@@ -592,7 +592,7 @@ int parsecue(const char *isofile) {
 
 // this function tries to get the .ccd file of the given .img
 // the necessary data is put into the ti (trackinformation)-array
-int parseccd(const char *isofile) {
+static int parseccd(const char *isofile) {
 	char			ccdname[MAXPATHLEN];
 	FILE			*fi;
 	char			linebuf[256];
@@ -650,7 +650,7 @@ int parseccd(const char *isofile) {
 
 // this function tries to get the .mds file of the given .mdf
 // the necessary data is put into the ti (trackinformation)-array
-int parsemds(const char *isofile) {
+static int parsemds(const char *isofile) {
 	char			mdsname[MAXPATHLEN];
 	FILE			*fi;
 	unsigned int	offset, extra_offset, l, i;
@@ -748,7 +748,7 @@ int parsemds(const char *isofile) {
 }
 
 // this function tries to get the .sub file of the given .img
-int opensubfile(const char *isoname) {
+static int opensubfile(const char *isoname) {
 	char		subname[MAXPATHLEN];
 
 	// copy name of the iso and change extension from .img to .sub
@@ -769,14 +769,14 @@ int opensubfile(const char *isoname) {
 	return 0;
 }
 
-long CALLBACK ISOinit(void) {
+static long CALLBACK ISOinit(void) {
 	assert(cdHandle == NULL);
 	assert(subHandle == NULL);
 
 	return 0; // do nothing
 }
 
-long CALLBACK ISOshutdown(void) {
+static long CALLBACK ISOshutdown(void) {
 	if (cdHandle != NULL) {
 		fclose(cdHandle);
 		cdHandle = NULL;
@@ -789,7 +789,7 @@ long CALLBACK ISOshutdown(void) {
 	return 0;
 }
 
-void PrintTracks(void) {
+static void PrintTracks(void) {
 	int i;
 
 	for (i = 1; i <= numtracks; i++) {
@@ -802,7 +802,7 @@ void PrintTracks(void) {
 
 // This function is invoked by the front-end when opening an ISO
 // file for playback
-long CALLBACK ISOopen(void) {
+static long CALLBACK ISOopen(void) {
 	if (cdHandle != NULL) {
 		return 0; // it's already open
 	}
@@ -842,7 +842,7 @@ long CALLBACK ISOopen(void) {
 	return 0;
 }
 
-long CALLBACK ISOclose(void) {
+static long CALLBACK ISOclose(void) {
 	if (cdHandle != NULL) {
 		fclose(cdHandle);
 		cdHandle = NULL;
@@ -859,7 +859,7 @@ long CALLBACK ISOclose(void) {
 // buffer:
 //  byte 0 - start track
 //  byte 1 - end track
-long CALLBACK ISOgetTN(unsigned char *buffer) {
+static long CALLBACK ISOgetTN(unsigned char *buffer) {
 	buffer[0] = 1;
 
 	if (numtracks > 0) {
@@ -877,7 +877,7 @@ long CALLBACK ISOgetTN(unsigned char *buffer) {
 //  byte 0 - frame
 //  byte 1 - second
 //  byte 2 - minute
-long CALLBACK ISOgetTD(unsigned char track, unsigned char *buffer) {
+static long CALLBACK ISOgetTD(unsigned char track, unsigned char *buffer) {
 	if (numtracks > 0 && track <= numtracks) {
 		buffer[2] = ti[track].start[0];
 		buffer[1] = ti[track].start[1];
@@ -893,7 +893,7 @@ long CALLBACK ISOgetTD(unsigned char track, unsigned char *buffer) {
 }
 
 // decode 'raw' subchannel data ripped by cdrdao
-void DecodeRawSubData(void) {
+static void DecodeRawSubData(void) {
 	unsigned char subQData[12];
 	int i;
 
@@ -911,7 +911,7 @@ void DecodeRawSubData(void) {
 // read track
 // time: byte 0 - minute; byte 1 - second; byte 2 - frame
 // uses bcd format
-long CALLBACK ISOreadTrack(unsigned char *time) {
+static long CALLBACK ISOreadTrack(unsigned char *time) {
 	if (cdHandle == NULL) {
 		return -1;
 	}
@@ -939,14 +939,14 @@ long CALLBACK ISOreadTrack(unsigned char *time) {
 }
 
 // return readed track
-unsigned char * CALLBACK ISOgetBuffer(void) {
+static unsigned char * CALLBACK ISOgetBuffer(void) {
 	return cdbuffer;
 }
 
 // plays cdda audio
 // sector: byte 0 - minute; byte 1 - second; byte 2 - frame
 // does NOT uses bcd format
-long CALLBACK ISOplay(unsigned char *time) {
+static long CALLBACK ISOplay(unsigned char *time) {
 	if (SPU_playCDDAchannel != NULL) {
 		if (subChanMixed) {
 			startCDDA(MSF2SECT(time[0], time[1], time[2]) * (CD_FRAMESIZE_RAW + SUB_FRAMESIZE));
@@ -959,13 +959,13 @@ long CALLBACK ISOplay(unsigned char *time) {
 }
 
 // stops cdda audio
-long CALLBACK ISOstop(void) {
+static long CALLBACK ISOstop(void) {
 	stopCDDA();
 	return 0;
 }
 
 // gets subchannel data
-unsigned char* CALLBACK ISOgetBufferSub(void) {
+static unsigned char* CALLBACK ISOgetBufferSub(void) {
 	if (subHandle != NULL || subChanMixed) {
 		return subbuffer;
 	}
@@ -973,7 +973,7 @@ unsigned char* CALLBACK ISOgetBufferSub(void) {
 	return NULL;
 }
 
-long CALLBACK ISOgetStatus(struct CdrStat *stat) {
+static long CALLBACK ISOgetStatus(struct CdrStat *stat) {
 	int sec;
 
 	CDR__getStatus(stat);
