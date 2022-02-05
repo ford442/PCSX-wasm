@@ -168,7 +168,7 @@
 
 #define gteop (psxRegs.code & 0x1ffffff)
 
-static inline s64 BOUNDS(s64 n_value, s64 n_max, int n_maxflag, s64 n_min, int n_minflag) {
+inline s64 BOUNDS(s64 n_value, s64 n_max, int n_maxflag, s64 n_min, int n_minflag) {
 	if (n_value > n_max) {
 		gteFLAG |= n_maxflag;
 	} else if (n_value < n_min) {
@@ -177,7 +177,7 @@ static inline s64 BOUNDS(s64 n_value, s64 n_max, int n_maxflag, s64 n_min, int n
 	return n_value;
 }
 
-static inline s32 LIM(s32 value, s32 max, s32 min, u32 flag) {
+inline s32 LIM(s32 value, s32 max, s32 min, u32 flag) {
 	s32 ret = value;
 	if (value > max) {
 		gteFLAG |= flag;
@@ -200,7 +200,7 @@ static inline s32 LIM(s32 value, s32 max, s32 min, u32 flag) {
 #define limC3(a) LIM((a), 0x00ff, 0x0000, (1 << 19))
 #define limD(a) LIM((a), 0xffff, 0x0000, (1 << 31) | (1 << 18))
 
-static inline u32 limE(u32 result) {
+inline u32 limE(u32 result) {
 	if (result > 0x1ffff) {
 		gteFLAG |= (1 << 31) | (1 << 17);
 		return 0x1ffff;
@@ -215,7 +215,7 @@ static inline u32 limE(u32 result) {
 
 #include "gte_divider.h"
 
-static inline u32 MFC2(int reg) {
+inline u32 MFC2(int reg) {
 	switch (reg) {
 		case 1:
 		case 3:
@@ -252,7 +252,7 @@ static inline u32 MFC2(int reg) {
 	return psxRegs.CP2D.r[reg];
 }
 
-static inline void MTC2(u32 value, int reg) {
+inline void MTC2(u32 value, int reg) {
 	switch (reg) {
 		case 15:
 			gteSXY0 = gteSXY1;
@@ -299,7 +299,7 @@ static inline void MTC2(u32 value, int reg) {
 	}
 }
 
-static inline void CTC2(u32 value, int reg) {
+inline void CTC2(u32 value, int reg) {
 	switch (reg) {
 		case 4:
 		case 12:
