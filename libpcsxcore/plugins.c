@@ -24,8 +24,8 @@
 #include "plugins.h"
 #include "cdriso.h"
 
-static char IsoFile[MAXPATHLEN] = "";
-static s64 cdOpenCaseTime = 0;
+char IsoFile[MAXPATHLEN] = "";
+s64 cdOpenCaseTime = 0;
 
 CDRinit               CDR_init;
 CDRshutdown           CDR_shutdown;
@@ -86,7 +86,7 @@ SIO1registerCallback  SIO1_registerCallback;
 
 #endif
 
-static const char *err;
+const char *err;
 
 #define CheckErr(func) { \
 	err = SysLibError(); \
@@ -132,12 +132,12 @@ long CALLBACK SPU__configure(void) { return 0; }
 void CALLBACK SPU__about(void) {}
 long CALLBACK SPU__test(void) { return 0; }
 
-static unsigned char buf[256];
+unsigned char buf[256];
 unsigned char stdpar[10] = { 0x00, 0x41, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 unsigned char mousepar[8] = { 0x00, 0x12, 0x5a, 0xff, 0xff, 0xff, 0xff };
 unsigned char analogpar[9] = { 0x00, 0xff, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-static int bufcount, bufc;
+int bufcount, bufc;
 
 PadDataS padd1, padd2;
 
