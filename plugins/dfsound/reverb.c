@@ -171,7 +171,7 @@ INLINE int MixREVERBLeft(int ns)
  else
  if(iUseReverb==2)
   {
-   static int iCnt=0;                                  // this func will be called with 44.1 khz
+   int iCnt=0;                                  // this func will be called with 44.1 khz
 
    if(!rvb.StartAddr)                                  // reverb is off
     {
