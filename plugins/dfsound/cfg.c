@@ -66,7 +66,7 @@ exit(0);
 // READ LINUX CONFIG FILE
 /////////////////////////////////////////////////////////
 
-static void ReadConfigFile(void){
+void ReadConfigFile(void){
 FILE *in;char t[256];int len;
 char * pB, * p;
 strcpy(t,"dfsound.cfg");
