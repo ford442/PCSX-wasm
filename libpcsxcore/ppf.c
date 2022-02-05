@@ -35,12 +35,12 @@ typedef struct tagPPF_CACHE {
 	struct tagPPF_DATA	*pNext;
 } PPF_CACHE;
 
-static PPF_CACHE		*ppfCache = NULL;
-static PPF_DATA			*ppfHead = NULL, *ppfLast = NULL;
-static int				iPPFNum = 0;
+PPF_CACHE		*ppfCache = NULL;
+PPF_DATA			*ppfHead = NULL, *ppfLast = NULL;
+int				iPPFNum = 0;
 
 // using a linked data list, and address array
-static void FillPPFCache() {
+void FillPPFCache() {
 	PPF_DATA		*p;
 	PPF_CACHE		*pc;
 	s32				lastaddr;
@@ -130,7 +130,7 @@ void CheckPPFCache(unsigned char *pB, unsigned char m, unsigned char s, unsigned
 	}
 }
 
-static void AddToPPF(s32 ladr, s32 pos, s32 anz, unsigned char *ppfmem) {
+void AddToPPF(s32 ladr, s32 pos, s32 anz, unsigned char *ppfmem) {
 	if (ppfHead == NULL) {
 		ppfHead = (PPF_DATA *)malloc(sizeof(PPF_DATA) + anz);
 		ppfHead->addr = ladr;
