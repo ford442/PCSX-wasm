@@ -103,7 +103,7 @@ return SOUNDSIZE;
 }
 return 0;
 }
-static void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
+void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
 long old_lBytes=lBytes;
 if(pSndBuffer==NULL){
