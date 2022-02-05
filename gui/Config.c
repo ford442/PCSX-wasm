@@ -25,7 +25,7 @@
 #include "Linux.h"
 
 /* TODO escaping/unescaping would be nice, as would maxchars */
-static void GetValue(char *src, char *name, char *outvar) {
+void GetValue(char *src, char *name, char *outvar) {
 	char *tmp;
 
 	*outvar = 0;
@@ -42,7 +42,7 @@ static void GetValue(char *src, char *name, char *outvar) {
 	return;
 }
 
-static long GetValuel(char *src, char *name) {
+long GetValuel(char *src, char *name) {
 	char *tmp = strstr(src, name);
 	if (tmp != NULL) {
 		tmp += strlen(name);
@@ -52,7 +52,7 @@ static long GetValuel(char *src, char *name) {
 	return 0;
 }
 
-static boolean GetValueb(char *src, char *name) {
+boolean GetValueb(char *src, char *name) {
 	char *tmp = strstr(src, name);
 	if (tmp != NULL) {
 		tmp += strlen(name);
