@@ -480,9 +480,6 @@ static void *MAINThread(void *arg)
     // usleep(PAUSE_L);                                  // else sleep for x ms (linux)
 nanosleep(&req,&rem);
 nanosleep(&req,&rem);
-nanosleep(&req,&rem);
-nanosleep(&req,&rem);
-nanosleep(&req,&rem);
 if(dwNewChannel){
 iSecureStart=1; 
 }       
