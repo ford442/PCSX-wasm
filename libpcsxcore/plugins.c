@@ -132,13 +132,13 @@ long CALLBACK SPU__configure(void) { return 0; }
 void CALLBACK SPU__about(void) {}
 long CALLBACK SPU__test(void) { return 0; }
 
-unsigned char buf[256];
+static unsigned char buf[256];
 unsigned char stdpar[10] = { 0x00, 0x41, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 unsigned char mousepar[8] = { 0x00, 0x12, 0x5a, 0xff, 0xff, 0xff, 0xff };
 unsigned char analogpar[9] = { 0x00, 0xff, 0x5a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-int bufcount, bufc;
-
+int bufc;
+static int bufcount;
 PadDataS padd1, padd2;
 
 unsigned char _PADstartPoll(PadDataS *pad) {
