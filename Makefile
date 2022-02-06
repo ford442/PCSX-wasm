@@ -1,7 +1,7 @@
 CC=emcc
 CXX=em++
-CFLAGS= --closure 0 -sFULL_ES2=1 -sFULL_ES3=0 -sOFFSCREEN_FRAMEBUFFER=1 -sGL_TESTING=1 -D USESDLSOUND -Wpointer-sign -sFORCE_FILESYSTEM=1 -lidbfs.js \
--sELIMINATE_DUPLICATE_FUNCTIONS=1 -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -ffast-math \
+CFLAGS= --closure 0 -sFULL_ES2=1 -sFULL_ES3=1 -sOFFSCREEN_FRAMEBUFFER=1 -sGL_TESTING=1 -D USESDLSOUND -Wpointer-sign -sFORCE_FILESYSTEM=1 -lidbfs.js \
+-sELIMINATE_DUPLICATE_FUNCTIONS=1 -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1400mb -sMALLOC="emmalloc" -ffast-math \
 -sUSE_SDL=1 -sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -O2 -Wno-unused-result -s USE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
@@ -24,7 +24,7 @@ WORKER_FLAGS= --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap',
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
-UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" --extern-pre-js setUp.js
+UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
 
 
 ALL: pcsx_worker.js pcsx_ww.js
