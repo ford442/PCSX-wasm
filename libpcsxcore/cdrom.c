@@ -89,7 +89,7 @@ unsigned char Test23[] = { 0x43, 0x58, 0x44, 0x32, 0x39 ,0x34, 0x30, 0x51 };
 #define cdReadTime (PSXCLK / 75)
 
 static struct CdrStat stat;
-static struct SubQ *subq;
+struct SubQ *subq;
 
 #define CDR_INT(eCycle) { \
 	psxRegs.interrupt |= 0x4; \
@@ -130,7 +130,7 @@ static struct SubQ *subq;
 	cdr.ResultReady = 1; \
 }
 
-static void ReadTrack() {
+void ReadTrack() {
 	cdr.Prev[0] = itob(cdr.SetSector[0]);
 	cdr.Prev[1] = itob(cdr.SetSector[1]);
 	cdr.Prev[2] = itob(cdr.SetSector[2]);
