@@ -24,7 +24,7 @@ WORKER_FLAGS= --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap',
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
-UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
+UI_FLAGS= -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" --extern-post-js js/setUp.js
 
 
 ALL: pcsx_worker.js pcsx_ww.js
