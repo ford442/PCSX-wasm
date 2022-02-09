@@ -18,8 +18,9 @@
 
 #include "stdafx.h"
 #include "externals.h"
+#include <emscripten/html5.h>
 #include <emscripten.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #define BUFFER_SIZE		(22050+4096)
 // #define BUFFER_SIZE		44100
