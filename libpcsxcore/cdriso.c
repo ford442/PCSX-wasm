@@ -208,12 +208,10 @@ void playcdda()
 			d = CDDA_FRAMETIME;
 		}
 
-		if(playing){
-			printf("playcdda %ld\n", d);
-			EM_ASM_( {setTimeout("_playcdda()", $0);}, d);
-		}
-
-}
+if(playing){
+printf("playcdda %ld\n",d);
+EM_ASM({setTimeout("_playcdda()",$0);},d);
+}}
 
 // stop the CDDA playback
 void stopCDDA() {
