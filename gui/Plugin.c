@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <signal.h>
 
 #include "Linux.h"
