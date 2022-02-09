@@ -77,7 +77,8 @@ printf("(x) Failed to Init SDL!!!\n");
 }else{
 printf("sdl init ok\n");
 sdl_display=SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
-sdl_ximage=SDL_CreateRGBSurface(SDL_HWSURFACE,640,480,32,0x00ff0000,0x0000ff00, 0x000000ff, 0);
+// sdl_ximage=SDL_CreateRGBSurface(SDL_HWSURFACE,640,480,32,0x00ff0000,0x0000ff00, 0x000000ff, 0);
+sdl_ximage=SDL_CreateRGBSurface(SDL_HWSURFACE,640,480,32,0x000000ff,0x0000ff00, 0x00ff0000, 0xff000000);
 }
 psxVuw=(unsigned short *)psxVub;
 SetupSound();
