@@ -59,15 +59,7 @@ void CreateDisplay(void)
 #include <emscripten.h>
 void DoBufferSwap(void)
 {  
-   EM_ASM({render($0,$1,$2,$3,$4,$5,$6);},
-   PSXDisplay.DisplayPosition.x,
-   PSXDisplay.DisplayPosition.y,
-   PreviousPSXDisplay.Range.x1,
-   PreviousPSXDisplay.DisplayMode.y,
-   PSXDisplay.DisplayMode.x,
-   PSXDisplay.DisplayMode.y,
-   PSXDisplay.RGB24
-   );
+EM_ASM({render($0,$1,$2,$3,$4,$5,$6);},PSXDisplay.DisplayPosition.x,PSXDisplay.DisplayPosition.y,PreviousPSXDisplay.Range.x1,PreviousPSXDisplay.DisplayMode.y,PSXDisplay.DisplayMode.x,PSXDisplay.DisplayMode.y,PSXDisplay.RGB24);
 }
 
 void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
@@ -80,12 +72,12 @@ void DoClearFrontBuffer(void)                          // CLEAR DX BUFFER
 
 unsigned long ulInitDisplay(void)
 {
- return (unsigned long) 1;
+return (unsigned long) 1;
 }
 
 void CloseDisplay(void)
 {
- DestroyDisplay();
+DestroyDisplay();
 }
 extern unsigned long SoundGetBytesBuffered_value;
 int isMute=0;
