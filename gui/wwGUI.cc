@@ -50,7 +50,7 @@ EM_ASM_({ my_SDL_UnlockSurface($0);},surface);
 extern "C" {
 void render(int x,int y,int sx,int sy,int dx,int dy,int rgb24){
 BlitSDL32(sdl_ximage,x,y,sx,sy,rgb24);
-SDL_Flip(sdl_ximage);
+// SDL_Flip(sdl_ximage);
 dstrect.x=0;
 dstrect.y=0;
 dstrect.w=640;
@@ -60,7 +60,7 @@ srcrect.y=0;
 srcrect.w=dx;
 srcrect.h=dy;
 SDL_BlitScaled(sdl_ximage,&srcrect,sdl_display,&dstrect);
-SDL_Flip(sdl_display);
+// SDL_Flip(sdl_display);
 }
 void *var_ptrs[]={psxVub,&(g.PadState[0]),&(g.PadState[1])};
 void *get_ptr(int i){
@@ -79,9 +79,9 @@ printf("sdl init ok\n");
 SDL_Window* sdl_window=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
 SDL_Renderer sdl_surface=SDL_CreateRenderer(sdl_window,-1,SDL_RENDERER_ACCELERATED);
 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"linear");
-// SDL_RenderSetLogicalSize(sdl_surface,640,480);
+SDL_RenderSetLogicalSize(sdl_surface,640,480);
 // sdl_display=SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
-sdl_ximage=SDL_CreateRGBSurface(SDL_HWSURFACE,640,480,32,0x00ff0000,0x0000ff00, 0x000000ff, 0);
+sdl_ximage=SDL_CreateRGBSurface(0,640,480,32,0x00ff0000,0x0000ff00, 0x000000ff, 0);
 }
 psxVuw=(unsigned short *)psxVub;
 SetupSound();
