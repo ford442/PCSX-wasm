@@ -49,13 +49,13 @@ while(len>0){
 void InitSDL(){
 printf("spu initsdl\n");
 SDL_Init(SDL_INIT_AUDIO);
-printf("SDL-1.2 start\n");
+printf("SDL-2.0 start\n");
 };
 void DestroySDL(){
 };
 void SetupSound(void){
 SDL_AudioSpec spec;
-printf("setupsound\n");
+printf("set up sound\n");
 if(pSndBuffer!=NULL){
 return;
 }
@@ -103,6 +103,7 @@ return SOUNDSIZE;
 }
 return 0;
 };
+
 void SoundFeedStreamData(unsigned char *pSound, long lBytes){	
 short *p=(short *)pSound;
 long old_lBytes=lBytes;
@@ -111,7 +112,7 @@ return;
 }
 while(lBytes>0){
 if(((iWritePos+1)%iBufSize)==iReadPos){
-EM_ASM_({
+EM_ASM({
 pcsx_worker.postMessage({cmd:"soundBytes",lBytes:$0});
 },old_lBytes-lBytes);
 break;
@@ -123,5 +124,3 @@ iWritePos=0;
 }
 lBytes-=sizeof(short);
 }};
-
-
