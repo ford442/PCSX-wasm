@@ -44,31 +44,22 @@ int            iFVDisplay = 0;
 PSXPoint_t     ptCursorPoint[8];
 unsigned short usCursorActive = 0;
 char *               pCaptionText;
-//unsigned int   LUT16to32[65536];
-//unsigned int   RGBtoYUV[65536];
 
 void DestroyDisplay(void)
 {
-
-
 }
 
 static int depth=32;
 int root_window_id=0;
 
-
-// Create display
-
 void CreateDisplay(void)
 {
 }
 
-
 #include <emscripten.h>
 void DoBufferSwap(void)
 {  
-   // printf("%d %d %d %d\n", PSXDisplay.DisplayPosition.x, PSXDisplay.DisplayPosition.y, PreviousPSXDisplay.Range.x1, PreviousPSXDisplay.DisplayMode.y);
-   EM_ASM_({render($0,$1,$2,$3,$4,$5,$6);},
+   EM_ASM({render($0,$1,$2,$3,$4,$5,$6);},
    PSXDisplay.DisplayPosition.x,
    PSXDisplay.DisplayPosition.y,
    PreviousPSXDisplay.Range.x1,
@@ -81,7 +72,6 @@ void DoBufferSwap(void)
 
 void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
 {
-
 }
 
 void DoClearFrontBuffer(void)                          // CLEAR DX BUFFER
@@ -89,7 +79,7 @@ void DoClearFrontBuffer(void)                          // CLEAR DX BUFFER
 }
 
 unsigned long ulInitDisplay(void)
-{                                   // x stuff
+{
  return (unsigned long) 1;
 }
 
@@ -115,7 +105,6 @@ void * get_ptr(int i){
     if(i==-2) return get_PadState_ptr();
     return params_ptrs[i];
 }
-
 
 void ShowGpuPic(void)
 {
