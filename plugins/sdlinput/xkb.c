@@ -29,8 +29,8 @@ void DestroyKeyboard() {
 void CheckKeyboard() {
 	uint8_t					i, j, found;
 	SDL_Event evt;
-	SDLKey				Key;
-	
+	// SDLKey				Key;
+	uint16_t Key;
 	while (SDL_PollEvent(&evt)) {	
 		switch (evt.type) {
 			case SDL_KEYDOWN:
