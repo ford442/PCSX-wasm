@@ -1,5 +1,5 @@
 var Module;
-let vram_dels,vram_ptr,soundbuffer_ptr,isMute_ptr,render,vram_arr,vram_src,SendSound,pSound_arr,ls,padStatus1,isoDB,i;
+let vram_dels,vram_ptr,soundbuffer_ptr,isMute_ptr,render,vram_arr,vram_src,SendSound,pSound_arr,ls,padStatus1,isoDB,i,data;
 if(!Module)Module={};
 Module.setStatus=function(s){postMessage({cmd:"print",txt:s});};
 function cout_print(s){postMessage({cmd:"print",txt:s});}
@@ -98,14 +98,14 @@ txt:s
 });};
 setTimeout("Module.setStatus('Open an iso file using the above button(worker ready!).')",1);
 }
-var pre_onmessage=function(event){
+let pre_onmessage=function(event){
 if(event.data.cmd!='soundBytes'){
 event_history.push(event);
 cout_print("push event"+event.data.cmd);
 }}
 self.onmessage=pre_onmessage;
-var main_onmessage=function(event){
-var data=event.data;
+let main_onmessage=function(event){
+data=event.data;
 switch(data.cmd){
 case "padStatus":
 Module.HEAPU8.set(data.states,padStatus1);
