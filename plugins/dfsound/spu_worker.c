@@ -71,7 +71,7 @@ int             iSoundDebugMode=0;
 int             iRecordMode=0;
 int             iUseReverb=2;
 int             iUseInterpolation=2;
-int             iDisStereo=1;
+int             iDisStereo=0;
 
 // MAIN infos struct for each channel
 
