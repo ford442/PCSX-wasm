@@ -25,7 +25,6 @@
 #include "interp.h"
 #include "swap.h"
 
-// misc globals
 int            iResX;
 int            iResY;
 long           lLowerpart;
@@ -44,11 +43,7 @@ int            iFVDisplay = 0;
 PSXPoint_t     ptCursorPoint[8];
 unsigned short usCursorActive = 0;
 
-//unsigned int   LUT16to32[65536];
-//unsigned int   RGBtoYUV[65536];
-
-#include <SDL/SDL.h>
-
+#include <SDL2/SDL.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
@@ -70,38 +65,25 @@ char *               pCaptionText;
 
 int fx=0;
 
-// close display
-
-void DestroyDisplay(void)
-{
+void DestroyDisplay(void){
   SDL_FreeSurface(sdl_ximage);
   SDL_FreeSurface(sdl_display);
   SDL_Quit();
-
 }
-
 int depth=32;
 int root_window_id=0;
-// Create display
 SDL_Rect srcrect;
 SDL_Rect dstrect;
-void CreateDisplay(void)
-{
-if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)<0)
-   {
-	  printf ("(x) Failed to Init SDL!!!\n");	  
-   }
-else {
-  printf("gpu sdl init ok\n");
-  sdl_display = SDL_SetVideoMode(iResX,iResY, depth,SDL_HWSURFACE);
-  sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
-}
- 
-}
+void CreateDisplay(void){
+SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);	
+// sdl_display = SDL_SetVideoMode(iResX,iResY, depth,SDL_HWSURFACE);
+sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+SDL_Window* sdl_display=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
+SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"linear");
+SDL_RenderSetLogicalSize(sdlRenderer,640,480);
+}}
 
-
-void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y)
-{
+void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y){
  unsigned char *pD;
  unsigned int startxy;
  uint32_t lu, lr, lg, lb;
@@ -109,99 +91,46 @@ void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y)
  unsigned short row, column;
  unsigned short dx = PreviousPSXDisplay.Range.x1;
  unsigned short dy = PreviousPSXDisplay.DisplayMode.y;
-
  int32_t lPitch = surface->pitch;//PSXDisplay.DisplayMode.x << 2;
-
  uint32_t *destpix;
-/*
- if (PreviousPSXDisplay.Range.y0) // centering needed?
-  {
-   memset(surf, 0, (PreviousPSXDisplay.Range.y0 >> 1) * lPitch);
 
-   dy -= PreviousPSXDisplay.Range.y0;
-   surf += (PreviousPSXDisplay.Range.y0 >> 1) * lPitch;
-
-   memset(surf + dy * lPitch,
-          0, ((PreviousPSXDisplay.Range.y0 + 1) >> 1) * lPitch);
-  }
-  
-
- if (PreviousPSXDisplay.Range.x0)
-  {
-   for (column = 0; column < dy; column++)
-    {
-     destpix = (uint32_t *)(surf + (column * lPitch));
-     memset(destpix, 0, PreviousPSXDisplay.Range.x0 << 2);
-    }
-   surf += PreviousPSXDisplay.Range.x0 << 2;
-  }
-  */
  if (SDL_MUSTLOCK(surface)) SDL_LockSurface(surface);
- if (PSXDisplay.RGB24)
-  {
-  //printf("blt 1\n");
-   for (column = 0; column < dy; column++)
-    {      
+ if (PSXDisplay.RGB24){
+   for (column = 0; column < dy; column++){      
      startxy = ((1024) * (column + y)) + x;
-     //pD = (unsigned char *)&psxVuw[startxy];
      pD = &psxVub[startxy*2];
      destpix = (uint32_t *)(surface->pixels + (column * lPitch));
-     for (row = 0; row < dx; row++)
-      {      
+     for (row = 0; row < dx; row++){      
        lr = pD[0];
        lg = pD[1];
        lb = pD[2];
-       destpix[row] = 
-          0xff000000 | (lb << 16) | (lg << 8) | (lr);
+       destpix[row] = 0xff000000 | (lb << 16) | (lg << 8) | (lr);
        pD += 3;
-      }
-    }
-  }
- else
-  {
-    //printf("blt 2\n");
-   for (column = 0;column<dy;column++)
-    {
-    //printf("blt column %d\n",column);
+      }}}else{
+   for (column = 0;column<dy;column++){
      startxy = (1024 * (column + y)) + x;
-    //printf("blt startxy %d\n", startxy);
      destpix = (uint32_t *)(surface->pixels + (column * lPitch));
-     for (row = 0; row < dx; row++)
-      {
-       //printf("blt row %d\n", row);
+     for (row = 0; row < dx; row++){
        s = GETLE16(&psxVuw[startxy++]);
-      //printf("blt s %d\n", s);
-      destpix[row] = 
-          (((s << 3) & 0xf8) | ((s << 6) & 0xf800) | ((s << 9) & 0xf80000)) | 0xff000000;
-      //printf("blt d %x\n", destpix[row]);
-      }
-    }
-  }
+      destpix[row] = (((s << 3) & 0xf8) | ((s << 6) & 0xf800) | ((s << 9) & 0xf80000)) | 0xff000000;
+      }}}
   if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface);
-    //printf("blt 3\n");
 }
 extern time_t tStart;
 
-//Note: dest x,y,w,h are both input and output variables
-inline void MaintainAspect(unsigned int *dx,unsigned int *dy,unsigned int *dw,unsigned int *dh)
-{
-	//Currently just 4/3 aspect ratio
+inline void MaintainAspect(unsigned int *dx,unsigned int *dy,unsigned int *dw,unsigned int *dh){
 	int t;
-
 	if (*dw * 3 > *dh * 4) {
-		t = *dh * 4.0f / 3;	//new width aspect
-		*dx = (*dw - t) / 2;	//centering
+		t = *dh * 4.0f / 3;
+		*dx = (*dw - t) / 2;
 		*dw = t;
 	} else {
 		t = *dw * 3.0f / 4;
 		*dy = (*dh - t) / 2;
 		*dh = t;
-	}
-}
+	}}
 
-
-void DoBufferSwap(void)
-{  
+void DoBufferSwap(void){  
   BlitSDL32(sdl_ximage, PSXDisplay.DisplayPosition.x, PSXDisplay.DisplayPosition.y);
   SDL_Flip(sdl_ximage);
   dstrect.x=0;
@@ -216,33 +145,23 @@ void DoBufferSwap(void)
   SDL_Flip(sdl_display);
 }
 
-void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
-{
-
+void DoClearScreenBuffer(void){
 }
 
-void DoClearFrontBuffer(void)                          // CLEAR DX BUFFER
-{
+void DoClearFrontBuffer(void){
 }
 
-unsigned long ulInitDisplay(void)
-{
- CreateDisplay();                                      // x stuff
- return (unsigned long) 1;
+unsigned long ulInitDisplay(void){
+CreateDisplay();
+return (unsigned long) 1;
 }
 
-void CloseDisplay(void)
-{
- DestroyDisplay();
+void CloseDisplay(void){
+DestroyDisplay();
 }
 
-
-
-
-void ShowGpuPic(void)
-{
+void ShowGpuPic(void){
 }
 
-void ShowTextGpuPic(void)
-{
+void ShowTextGpuPic(void){
 }
