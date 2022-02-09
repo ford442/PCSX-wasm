@@ -42,9 +42,9 @@ destpix[row]=(((s<<3)&0xf8)|((s<<6)&0xf800)|((s<<9)&0xf80000))|0xff000000;
 }}}}
 
 void BlitSDL32(SDL_Surface *surface,int x,int y,int sx,int sy,int rgb24){
-EM_ASM_({ my_SDL_LockSurface($0);},surface);
+EM_ASM({ my_SDL_LockSurface($0);},surface);
 Blit32((uint32_t *)surface->pixels,x,y,sx,sy,rgb24,surface->pitch>>2);
-EM_ASM_({ my_SDL_UnlockSurface($0);},surface);
+EM_ASM({ my_SDL_UnlockSurface($0);},surface);
 }
 
 extern "C" {
