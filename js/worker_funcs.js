@@ -10,13 +10,13 @@ cout_print(prefix);
 cout_print(String(evt.target.error));
 }}
 Module['print']=cout_print;
-let vram_ptr,soundbuffer_ptr,isMute_ptr;
-let vram_dels=0,
+var vram_ptr,soundbuffer_ptr,isMute_ptr;
+var vram_dels=0,
 vram_cres=0;
-let vram_arrs=[];
-let render=function (x,y,sx,sy,dx,dy,rgb24) {
-let vram_arr;
-let vram_src=Module.HEAPU8.subarray(vram_ptr,vram_ptr + 1024 * 2048);
+var vram_arrs=[];
+var render=function (x,y,sx,sy,dx,dy,rgb24) {
+var vram_arr;
+var vram_src=Module.HEAPU8.subarray(vram_ptr,vram_ptr + 1024 * 2048);
 while (vram_arrs.length > 10) {
 vram_arrs.pop();
 vram_dels++;
@@ -30,10 +30,10 @@ vram_arr=new Uint8Array(vram_src);
 }
 postMessage({cmd: "render",x: x,y: y,sx: sx,sy: sy,dx: dx,dy: dy,rgb24: rgb24,vram: vram_arr},[vram_arr.buffer]);
 }
-let pSound_arrs=[];
-let SendSound=function (pSound_ptr,lBytes) {
-let pSound_arr;
-let pSound_src=Module.HEAPU8.subarray(pSound_ptr,pSound_ptr + lBytes);
+var pSound_arrs=[];
+var SendSound=function (pSound_ptr,lBytes) {
+var pSound_arr;
+var pSound_src=Module.HEAPU8.subarray(pSound_ptr,pSound_ptr + lBytes);
 while (pSound_arrs.length > 30) {
 pSound_arrs.pop();
 }
@@ -52,12 +52,12 @@ lBytes: lBytes
 function pcsx_mainloop() {
 _one_iter();
 }
-let pcsx_init=Module.cwrap("pcsx_init","number",["string"]);
-let ls=Module.cwrap("ls","null",["string"]);
-let padStatus1;
-let isoDB;
-let readfile_and_run=function (iso_name,blob) {
-let run_arr=function (arr) {
+var pcsx_init=Module.cwrap("pcsx_init","number",["string"]);
+var ls=Module.cwrap("ls","null",["string"]);
+var padStatus1;
+var isoDB;
+var readfile_and_run=function (iso_name,blob) {
+var run_arr=function (arr) {
 FS.createDataFile("/",iso_name,arr,true,true);
 Module.setStatus('Running!');
 pcsx_init("/" + iso_name);
@@ -69,7 +69,7 @@ cout_print("before mainloop\n");
 pcsx_mainloop();
 }
 cout_print("readfile and run ");
-let reader=new FileReader();
+var reader=new FileReader();
 Module.setStatus("reading file");
 reader.onprogress=function (e) {
 if (e.lengthComputable) {
@@ -84,8 +84,8 @@ run_arr(new Uint8Array(this.result));
 }
 reader.readAsArrayBuffer(blob);
 }
-let event_history=[];
-let clear_event_history=function () {
+var event_history=[];
+var clear_event_history=function () {
 self.onmessage=main_onmessage;
 for (var i in event_history) {
 main_onmessage(event_history[i]);
