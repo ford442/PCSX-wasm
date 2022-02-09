@@ -94,7 +94,8 @@ if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)<0)
 else {
   printf("gpu sdl init ok\n");
   sdl_display = SDL_SetVideoMode(iResX,iResY, depth,SDL_HWSURFACE);
-  sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+ //  sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
+  sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x000000ff,0x0000ff00,0x00ff0000,0xff000000);
 }
  
 }
