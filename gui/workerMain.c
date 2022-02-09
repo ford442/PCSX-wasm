@@ -75,9 +75,7 @@ void one_iter()
     //setIrq( 0x01 );
     psxHu32ref(0x1070) |= 1;
     GPUupdateLace0();
-    EM_ASM({setTimeout("pcsx_mainloop()",$0);
-    },
-            updated_display / 1000);
+    EM_ASM({setTimeout("pcsx_mainloop()",$0);},updated_display/1000);
 }
 
 int pcsx_init(const char *isofilename)
