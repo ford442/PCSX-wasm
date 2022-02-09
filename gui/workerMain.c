@@ -75,9 +75,7 @@ void one_iter()
     //setIrq( 0x01 );
     psxHu32ref(0x1070) |= 1;
     GPUupdateLace0();
-    EM_ASM_({
-
-        setTimeout("pcsx_mainloop()", $0);
+    EM_ASM({setTimeout("pcsx_mainloop()",$0);
     },
             updated_display / 1000);
 }
@@ -100,20 +98,14 @@ int pcsx_init(const char *isofilename)
     strcpy(Config.Pad2, "./libDFInput.so");
     strcpy(Config.Bios, "HLE");
     Config.HLE = TRUE;
-
-    // create & load default memcards if they don't exist
     CreateMemcard("card1.mcd", Config.Mcd1);
     CreateMemcard("card2.mcd", Config.Mcd2);
 
     LoadMcds(Config.Mcd1, Config.Mcd2);
-    // switch to plugin dotdir
-    // this lets plugins work without modification!
-    //chdir(plugin_default_dir);
 
     if (SysInit() == -1)
         return 1;
 
-    // the following only occurs if the gui isn't started
     if (LoadPlugins() == -1)
     {
         printf("Error Failed loading plugins!");
@@ -136,9 +128,7 @@ int pcsx_init(const char *isofilename)
     return 0;
 }
 
-int SysInit()
-{
-
+int SysInit(){
     if (EmuInit() == -1)
     {
         printf(_("PSX emulator couldn't be initialized.\n"));
@@ -156,7 +146,6 @@ void SysReset()
 void SysClose()
 {
     EmuShutdown();
-    //ReleasePlugins();
 }
 
 void SysUpdate()
@@ -178,19 +167,14 @@ void ls(const char *dirname)
             printf("%s\n", ent->d_name);
         }
         closedir(dir);
-    }
-    else
-    {
-        /* could not open directory */
+    }    else    {
         printf("cannot open %s\n", dirname);
         return;
     }
 }
-int main(int argc, char *argv[])
-{
-    EM_ASM({ 
-        FS.mkdir('/home/web_user/.pcsx'); 
-        clear_event_history();  
+int main(int argc, char *argv[]){
+EM_ASM({FS.mkdir('/home/web_user/.pcsx'); 
+clear_event_history();  
 });
-    emscripten_exit_with_live_runtime();
+emscripten_exit_with_live_runtime();
 }
