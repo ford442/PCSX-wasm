@@ -214,15 +214,12 @@ void CALLBACK SPUupdate(void)
 }
 
 // XA AUDIO
-
 void CALLBACK SPUplayADPCMchannel(xa_decode_t *xap)
 {
  if(!xap)       return;
  if(!xap->freq) return;                                // no xa freq ? bye
  //printf("adpcm %p %d\n", xap, sizeof(*xap));
- EM_ASM_({
-     SPUplayADPCMchannel($0);
-     }, xap );
+ EM_ASM_({SPUplayADPCMchannel($0);},xap);
  //FeedXA(xap);                                          // call main XA feeder
 }
 
