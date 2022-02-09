@@ -82,7 +82,5 @@ if(lBytes>4800){
 lBytes=4800;
 }
 SoundGetBytesBuffered_value+=lBytes;
-EM_ASM_({
-SendSound($0,$1);
-},pSound,lBytes);	
+EM_ASM({SendSound($0,$1);},pSound,lBytes);
 }
