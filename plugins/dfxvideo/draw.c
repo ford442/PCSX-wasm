@@ -76,11 +76,10 @@ SDL_Rect srcrect;
 SDL_Rect dstrect;
 void CreateDisplay(void){
 SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);	
-// sdl_display = SDL_SetVideoMode(iResX,iResY, depth,SDL_HWSURFACE);
-sdl_ximage= SDL_CreateRGBSurface(SDL_HWSURFACE,iResX,iResY,depth,0x00ff0000,0x0000ff00,0x000000ff,0);
-SDL_Window* sdl_display=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
+SDL_Window* sdl_window=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
+SDL_Renderer sdl_surface=SDL_CreateRenderer(sdl_window,-1,SDL_RENDERER_ACCELERATED);
 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"linear");
-SDL_RenderSetLogicalSize(sdlRenderer,640,480);
+SDL_RenderSetLogicalSize(sdl_surface,640,480);
 }}
 
 void BlitSDL32(SDL_Surface *surface, int32_t x, int32_t y){
@@ -132,7 +131,9 @@ inline void MaintainAspect(unsigned int *dx,unsigned int *dy,unsigned int *dw,un
 
 void DoBufferSwap(void){  
   BlitSDL32(sdl_ximage, PSXDisplay.DisplayPosition.x, PSXDisplay.DisplayPosition.y);
-  SDL_Flip(sdl_ximage);
+  // SDL_Flip(sdl_ximage);
+	//         SDL_RenderPresent(sdl_ximage);
+
   dstrect.x=0;
   dstrect.y=0;
   dstrect.w=iResX;
@@ -142,7 +143,9 @@ void DoBufferSwap(void){
   srcrect.w=PSXDisplay.DisplayMode.x;
   srcrect.h=PSXDisplay.DisplayMode.y;
   SDL_BlitScaled(sdl_ximage, &srcrect, sdl_display, &dstrect);
-  SDL_Flip(sdl_display);
+ //  SDL_Flip(sdl_display);
+	//        SDL_RenderPresent(renderer);
+
 }
 
 void DoClearScreenBuffer(void){
