@@ -76,9 +76,10 @@ if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK)<0){
 printf("(x) Failed to Init SDL!!!\n");
 }else{
 printf("sdl init ok\n");
-SDL_Window* sdl_display=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
+SDL_Window* sdl_window=SDL_CreateWindow("PCSX",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_OPENGL);  
+SDL_Renderer sdl_surface=SDL_CreateRenderer(sdl_window,-1,SDL_RENDERER_ACCELERATED);
 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,"linear");
-// SDL_RenderSetLogicalSize(sdlRenderer,640,480);
+// SDL_RenderSetLogicalSize(sdl_surface,640,480);
 // sdl_display=SDL_SetVideoMode(640,480,32,SDL_HWSURFACE);
 sdl_ximage=SDL_CreateRGBSurface(SDL_HWSURFACE,640,480,32,0x00ff0000,0x0000ff00, 0x000000ff, 0);
 }
