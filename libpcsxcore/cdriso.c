@@ -282,7 +282,10 @@ void *playthread(void *param)
 		Sleep(d);
 #else
 		printf("sleep\n");
+		for(int ii=0;ii<d;ii++){
 		nanosleep(&req,&rem);
+		}
+		
 		// nanosleep(&req,&rem);
 		// nanosleep(&req,&rem);
 		// nanosleep(&req,&rem);
