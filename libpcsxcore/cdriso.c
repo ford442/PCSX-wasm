@@ -43,10 +43,9 @@ FILE *subHandle = NULL;
 boolean subChanMixed = FALSE;
 boolean subChanRaw = FALSE;
 
-unsigned char cdbuffer[DATA_SIZE];
-unsigned char subbuffer[SUB_FRAMESIZE];
-
-unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
+static unsigned char cdbuffer[DATA_SIZE];
+static unsigned char subbuffer[SUB_FRAMESIZE];
+static unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
 
 #define CDDA_FRAMETIME			(1000 * (sizeof(sndbuffer) / CD_FRAMESIZE_RAW) / 75)
 #if 0
@@ -155,7 +154,7 @@ void playcdda()
 		t = GetTickCount() + CDDA_FRAMETIME;
 
 		if (subChanMixed) {
-			printf("subChanMixed\n");
+			// printf("subChanMixed\n");
 			s = 0;
 
 			for (i = 0; i < sizeof(sndbuffer) / CD_FRAMESIZE_RAW; i++) {
@@ -173,7 +172,7 @@ void playcdda()
 		}
 		else {
 			s = fread(sndbuffer, 1, sizeof(sndbuffer), cddaHandle);
-			printf("read s %ld\n",s);
+			// printf("read s %ld\n",s);
 		}
 
 		if (s == 0) {
@@ -181,7 +180,7 @@ void playcdda()
 			fclose(cddaHandle);
 			cddaHandle = NULL;
 			initial_offset = 0;
-			printf("end playcdda\n");
+			// printf("end playcdda\n");
 			return;
 		}
 
@@ -209,13 +208,13 @@ void playcdda()
 		}
 
 if(playing){
-printf("playcdda %ld\n",d);
+// printf("playcdda %ld\n",d);
 EM_ASM({setTimeout("_playcdda()",$0);},d);
 }}
 
 // stop the CDDA playback
 void stopCDDA() {
-	printf("stopCDDA\n");
+	// printf("stopCDDA\n");
 	if (!playing) {
 		return;
 	}
@@ -281,14 +280,11 @@ void *playthread(void *param)
 #ifdef _WIN32
 		Sleep(d);
 #else
-		printf("sleep\n");
-		for(int ii=0;ii<d;ii++){
-		nanosleep(&req,&rem);
-		}
+		// printf("sleep\n");
+	// 	for(int ii=0;ii<d;ii++){
+		// nanosleep(&req,&rem);
+	// 	}
 		
-		// nanosleep(&req,&rem);
-		// nanosleep(&req,&rem);
-		// nanosleep(&req,&rem);
 		// usleep(d * 1000);
 #endif
 
