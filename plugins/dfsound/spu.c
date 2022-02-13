@@ -67,12 +67,12 @@ unsigned char * pMixIrq=0;
 
 int             iVolume=2;
 int             iXAPitch=0;
-int             iUseTimer=1;
+int             iUseTimer=2;
 int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
 int             iUseReverb=2;
-int             iUseInterpolation=2;
+int             iUseInterpolation=1;
 int             iDisStereo=0;
 
 // MAIN infos struct for each channel
