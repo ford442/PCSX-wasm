@@ -108,212 +108,129 @@ const int f[5][2] = {   {    0,  0  },
 int SSumR[NSSIZE];
 int SSumL[NSSIZE];
 int iFMod[NSSIZE];
-int iCycle = 0;
+int iCycle=0;
 short * pS;
 
 int lastch=-1;             // last channel processed on spu irq in timer mode
 int lastns=0;       // last ns pos
 int iSecureStart=0; // secure start counter
 
-////////////////////////////////////////////////////////////////////////
-// CODE AREA
-////////////////////////////////////////////////////////////////////////
-
-// dirty inline func includes
-
 #include "reverb.c"
 #include "adsr.c"
-
-////////////////////////////////////////////////////////////////////////
-// helpers for simple interpolation
-
-//
-// easy interpolation on upsampling, no special filter, just "Pete's common sense" tm
-//
-// instead of having n equal sample values in a row like:
-//       ____
-//           |____
-//
-// we compare the current delta change with the next delta change.
-//
-// if curr_delta is positive,
-//
-//  - and next delta is smaller (or changing direction):
-//         \.
-//          -__
-//
-//  - and next delta significant (at least twice) bigger:
-//         --_
-//            \.
-//
-//  - and next delta is nearly same:
-//          \.
-//           \.
-//
-//
-// if curr_delta is negative,
-//
-//  - and next delta is smaller (or changing direction):
-//          _--
-//         /
-//
-//  - and next delta significant (at least twice) bigger:
-//            /
-//         __- 
-//
-//  - and next delta is nearly same:
-//           /
-//          /
-//
-
-
 #include "gauss_i.h"
-
-////////////////////////////////////////////////////////////////////////
-
 #include "xa.c"
 #include <emscripten.h>
 
-
-#define PAUSE_W 5
+#define PAUSE_W 1
 #define PAUSE_L 1000
-
-////////////////////////////////////////////////////////////////////////
 
 extern int isMute;
 void CALLBACK SPUasync(unsigned long cycle)
 {
- if(isMute){
-     printf("mute....\n");
-    return;
- }
- //printf("spuasync %d %d\n", bSpuInit, iSpuAsyncWait);
- if(iSpuAsyncWait)
-  {
-   iSpuAsyncWait++;
-   if(iSpuAsyncWait<=64) return;
-   iSpuAsyncWait=0;
-  }
-
-   // MAINThread(0);                                      // -> linux high-compat mode
-
+if(isMute){
+printf("mute....\n");
+return;
 }
-
-// SPU UPDATE... new epsxe func
-//  1 time every 32 hsync lines
-//  (312/32)x50 in pal
-//  (262/32)x60 in ntsc
-
-// since epsxe 1.5.2 (linux) uses SPUupdate, not SPUasync, I will
-// leave that func in the linux port, until epsxe linux is using
-// the async function as well
+ //printf("spuasync %d %d\n", bSpuInit, iSpuAsyncWait);
+if(iSpuAsyncWait)
+{
+iSpuAsyncWait++;
+if(iSpuAsyncWait<=64) return;
+iSpuAsyncWait=0;
+}
+   // MAINThread(0);                                      // -> linux high-compat mode
+}
 
 void CALLBACK SPUupdate(void)
 {
- SPUasync(0);
+SPUasync(0);
 }
 
 // XA AUDIO
 void CALLBACK SPUplayADPCMchannel(xa_decode_t *xap)
 {
- if(!xap)       return;
- if(!xap->freq) return;                                // no xa freq ? bye
+if(!xap){return;}
+if(!xap->freq){return;}
  //printf("adpcm %p %d\n", xap, sizeof(*xap));
- EM_ASM_({SPUplayADPCMchannel($0);},xap);
- //FeedXA(xap);                                          // call main XA feeder
+EM_ASM_({SPUplayADPCMchannel($0);},xap);
+ //FeedXA(xap); 
 }
 
 // CDDA AUDIO
 void CALLBACK SPUplayCDDAchannel(short *pcm, int nbytes)
 {
- if (!pcm)      return;
- if (nbytes<=0) return;
- printf("cdda %p %d\n", pcm, nbytes);
-
+if(!pcm){return;}
+if(nbytes<=0){return;}
+// printf("cdda %p %d\n", pcm, nbytes);
  //FeedCDDA((unsigned char *)pcm, nbytes);
 }
 
-
-// INIT/EXIT STUFF
-
-// SPUINIT: this func will be called first by the main emu
 long CALLBACK SPUinit(void)
 {
-
- return 0;
+return 0;
 }
 
-// SPUOPEN: called by main emu after init
 long CALLBACK SPUopen(void)
 {
- return PSE_SPU_ERR_SUCCESS;
+return PSE_SPU_ERR_SUCCESS;
 }
 
-// SPUCLOSE: called before shutdown
 long CALLBACK SPUclose(void)
 {
- return 0;
+return 0;
 }
 
-// SPUSHUTDOWN: called by main emu on final exit
 long CALLBACK SPUshutdown(void)
 {
- return 0;
+return 0;
 }
 
-// SPUTEST: we don't test, we are always fine ;)
 long CALLBACK SPUtest(void)
 {
- return 0;
+return 0;
 }
 
-// SPUCONFIGURE: call config dialog
 long CALLBACK SPUconfigure(void)
 {
- return 0;
+return 0;
 }
 
-// SPUABOUT: show about window
 void CALLBACK SPUabout(void)
 {
 }
 
-// SETUP CALLBACKS
-// this functions will be called once, 
-// passes a callback that should be called on SPU-IRQ/cdda volume change
 void CALLBACK SPUregisterCallback(void (CALLBACK *callback)(void))
 {
- irqCallback = callback;
+irqCallback=callback;
 }
 
 void CALLBACK SPUregisterCDDAVolume(void (CALLBACK *CDDAVcallback)(unsigned short,unsigned short))
 {
- cddavCallback = CDDAVcallback;
+cddavCallback=CDDAVcallback;
 }
 
-// COMMON PLUGIN INFO FUNCS
 char * CALLBACK PSEgetLibName(void)
 {
- return _(libraryName);
+return _(libraryName);
 }
 
 unsigned long CALLBACK PSEgetLibType(void)
 {
- return  PSE_LT_SPU;
+return  PSE_LT_SPU;
 }
 
 unsigned long CALLBACK PSEgetLibVersion(void)
 {
- return (1 << 16) | (6 << 8);
+return (1 << 16) | (6 << 8);
 }
 
 char * SPUgetLibInfos(void)
 {
- return _(libraryInfo);
+return _(libraryInfo);
 }
 void * get_SPU_ptr(int i){
-    if(i==0){
-        return regArea;
-    }
-    return s_chan;
+if(i==0){
+return regArea;
+}
+return s_chan;
 }
