@@ -476,7 +476,7 @@ void *MAINThread(void *arg)
 
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
-nanosleep(&req,&rem);
+// nanosleep(&req,&rem);
 if(dwNewChannel){
 iSecureStart=1; 
 }       
