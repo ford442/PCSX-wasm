@@ -121,8 +121,8 @@ int iSecureStart=0; // secure start counter
 #include "xa.c"
 #include <emscripten.h>
 
-#define PAUSE_W 1
-#define PAUSE_L 1000
+#define PAUSE_W 10
+#define PAUSE_L 10000
 
 extern int isMute;
 void CALLBACK SPUasync(unsigned long cycle)
