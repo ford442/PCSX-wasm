@@ -192,7 +192,7 @@ free(pB);
 
 void ReadConfig(void){
 iVolume=2;
-iXAPitch=0;
+iXAPitch=1;
 iSPUIRQWait=1;
 iUseTimer=2;
 iUseReverb=1;
