@@ -23,6 +23,7 @@
 #include "cfg.h"
 #include "dsoundoss.h"
 #include "regs.h"
+#include "emscripten.h"
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
