@@ -111,7 +111,7 @@ void FrameCap (void)
 	if (tickstogo >= 30 && !(dwActFixes&16))
 		{//printf("fps sleep\n");
     updated_display = tickstogo*10 - 300;
-    //usleep(tickstogo*10 - 200); 
+    usleep(tickstogo*10 - 200); 
     }
       }
     }
