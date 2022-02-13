@@ -436,8 +436,8 @@ INLINE int iGetInterpolationVal(int ch)
 // .. can be made smaller (smallest val: 1 ms), but bigger waits give
 // better performance
 
-#define PAUSE_W 10
-#define PAUSE_L 10000
+#define PAUSE_W 5
+#define PAUSE_L 5000
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -476,9 +476,10 @@ void *MAINThread(void *arg)
 
      if(iUseTimer){ return 0;   }                        // linux no-thread mode? bye
 #ifdef PTHREAD
-for(int iii=0;iii<10;iii++){
+for(int iii=0;iii<5;iii++){
 nanosleep(&req,&rem);
 }
+EM_ASM({console.log("5ms nano");});
 if(dwNewChannel){
 iSecureStart=1; 
 }       
