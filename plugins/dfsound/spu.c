@@ -436,8 +436,8 @@ INLINE int iGetInterpolationVal(int ch)
 // .. can be made smaller (smallest val: 1 ms), but bigger waits give
 // better performance
 
-#define PAUSE_W 5
-#define PAUSE_L 5000
+#define PAUSE_W 1
+#define PAUSE_L 1000
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -465,7 +465,7 @@ void *MAINThread(void *arg)
    if(dwNewChannel)                                    // new channel should start immedately?
     {                                                  // (at least one bit 0 ... MAXCHANNEL is set?)
      iSecureStart++;                                   // -> set iSecure
-     if(iSecureStart>5) iSecureStart=0;                //    (if it is set 5 times - that means on 5 tries a new samples has been started - in a row, we will reset it, to give the sound update a chance)
+     if(iSecureStart>5) {iSecureStart=0;  }              //    (if it is set 5 times - that means on 5 tries a new samples has been started - in a row, we will reset it, to give the sound update a chance)
     }
    else iSecureStart=0;                                // 0: no new channel should start
 
@@ -474,9 +474,9 @@ void *MAINThread(void *arg)
     {
      iSecureStart=0;                                   // reset secure
 
-     if(iUseTimer) return 0;                           // linux no-thread mode? bye
+     if(iUseTimer){ return 0;   }                        // linux no-thread mode? bye
 #ifdef PTHREAD
-// nanosleep(&req,&rem);
+nanosleep(&req,&rem);
 if(dwNewChannel){
 iSecureStart=1; 
 }       
@@ -612,7 +612,7 @@ goto GOON;
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
                    //  usleep(1000L);
-                //    nanosleep(&req,&rem);
+                   nanosleep(&req,&rem);
                        }
                 }
                else
@@ -861,9 +861,9 @@ void RemoveTimer(void)
    int i=0;
    while(!bThreadEnded && i<2000) {
    //  usleep(1000L);
-   //  nanosleep(&req,&rem);
+     nanosleep(&req,&rem);
      i++;
-     printf("sleep\n");
+   //  printf("sleep\n");
    } 
    if(thread!=(pthread_t)-1) {pthread_cancel(thread);thread=(pthread_t)-1;}  // -> cancel thread anyway
   }
