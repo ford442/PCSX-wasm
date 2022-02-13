@@ -67,7 +67,7 @@ unsigned char * pMixIrq=0;
 
 int             iVolume=2;
 int             iXAPitch=0;
-int             iUseTimer=0;
+int             iUseTimer=2;
 int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
@@ -476,7 +476,7 @@ void *MAINThread(void *arg)
 
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
-nanosleep(&req,&rem);
+// nanosleep(&req,&rem);
 if(dwNewChannel){
 iSecureStart=1; 
 }       
