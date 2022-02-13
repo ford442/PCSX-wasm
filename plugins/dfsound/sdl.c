@@ -21,8 +21,8 @@
 #include <emscripten.h>
 #include <SDL2/SDL.h>
 
-// #define BUFFER_SIZE		(22050+4096)
-#define BUFFER_SIZE		(44100)
+#define BUFFER_SIZE		(22050+4096)
+// #define BUFFER_SIZE		(44100)
 
 short *pSndBuffer=NULL;
 int iBufSize=0;
@@ -39,9 +39,7 @@ iReadPos=0;
 --len;
 lBytes+=2;
 }
-EM_ASM_({
-pcsx_worker.postMessage({cmd:"soundBytes",lBytes:$0});
-},lBytes);
+EM_ASM_({pcsx_worker.postMessage({cmd:"soundBytes",lBytes:$0});},lBytes);
 while(len>0){
 *p++=0;
 --len;
