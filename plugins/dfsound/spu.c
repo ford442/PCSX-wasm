@@ -612,7 +612,7 @@ goto GOON;
                  while(iSpuAsyncWait && !bEndThread && 
                        timeGetTime_spu()<dwWatchTime){
                    //  usleep(1000L);
-                    nanosleep(&req,&rem);
+                //    nanosleep(&req,&rem);
                        }
                 }
                else
@@ -861,7 +861,7 @@ void RemoveTimer(void)
    int i=0;
    while(!bThreadEnded && i<2000) {
    //  usleep(1000L);
-     nanosleep(&req,&rem);
+   //  nanosleep(&req,&rem);
      i++;
      printf("sleep\n");
    } 
