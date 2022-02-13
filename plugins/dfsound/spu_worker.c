@@ -63,8 +63,8 @@ unsigned char * pMixIrq=0;
 
 // user settings
 
-int             iVolume=2;
-int             iXAPitch=1;
+int             iVolume=3;
+int             iXAPitch=0;
 int             iUseTimer=2;
 int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
