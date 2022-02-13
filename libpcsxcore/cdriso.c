@@ -59,7 +59,7 @@ pthread_t threadid;
 unsigned int initial_offset = 0;
 
 volatile boolean playing = FALSE;
-boolean cddaBigEndian = FALSE;
+boolean cddaBigEndian = TRUE;
 volatile unsigned int cddaCurOffset = 0;
 
 char* CALLBACK CDR__getDriveLetter(void);
