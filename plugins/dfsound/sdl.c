@@ -21,8 +21,7 @@
 #include <emscripten.h>
 #include <SDL2/SDL.h>
 
-// #define BUFFER_SIZE		(22050)
- #define BUFFER_SIZE		(44100)
+#define BUFFER_SIZE		(22050+4096)
 
 short *pSndBuffer=NULL;
 int iBufSize=0;
