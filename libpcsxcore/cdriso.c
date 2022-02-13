@@ -43,9 +43,9 @@ FILE *subHandle = NULL;
 boolean subChanMixed = FALSE;
 boolean subChanRaw = FALSE;
 
-static unsigned char cdbuffer[DATA_SIZE];
-static unsigned char subbuffer[SUB_FRAMESIZE];
-static unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
+unsigned char cdbuffer[DATA_SIZE];
+unsigned char subbuffer[SUB_FRAMESIZE];
+unsigned char sndbuffer[CD_FRAMESIZE_RAW * 10];
 
 #define CDDA_FRAMETIME			(1000 * (sizeof(sndbuffer) / CD_FRAMESIZE_RAW) / 75)
 #if 0
