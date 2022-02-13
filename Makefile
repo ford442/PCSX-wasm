@@ -2,7 +2,7 @@ CC=emcc
 CXX=em++
 CFLAGS= -pthread -sUSE_PTHREADS=1 -sPTHREAD_POOL_SIZE=2 --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -sOFFSCREEN_FRAMEBUFFER=1 -sGL_TESTING=1 -D USESDLSOUND -Wpointer-sign -sFORCE_FILESYSTEM=1 -lidbfs.js \
 -sELIMINATE_DUPLICATE_FUNCTIONS=1 -sALLOW_MEMORY_GROWTH=0 -sMALLOC="emmalloc"  -sINITIAL_MEMORY=1400mb \
--sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -O2 -ffast-math -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
+-sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -O3 -ffast-math -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
 # WORKER
@@ -33,10 +33,10 @@ ALL: pcsx_worker.js pcsx_ww.js
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o: %.cc
-	$(CC) -x c++ -std=c++2b -c -o $@ $< $(CFLAGS)
+	$(CC) -x c++ -std=gnu2b -c -o $@ $< $(CFLAGS)
 
 gui/xbrz.o: gui/xbrz.cpp gui/xbrz.h
-	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++2b -DNDEBUG $<
+	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=gnu2b -DNDEBUG $<
 
 pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CXX) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
