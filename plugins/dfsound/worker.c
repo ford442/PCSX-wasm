@@ -21,7 +21,7 @@
 #include "externals.h"
 #include <emscripten.h>
 
- #define BUFFER_SIZE		(22050+4096)
+ #define BUFFER_SIZE		(22050)
 //  #define BUFFER_SIZE		44100
 
 void SetupSound(void) {
