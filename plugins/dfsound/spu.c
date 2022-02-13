@@ -48,7 +48,7 @@ char * libraryName     = N_("NULL Sound");
 #endif
 
 struct timespec rem;
-struct timespec req={0,1000000};
+struct timespec req={0,4000000};
 
 char * libraryInfo     = N_("P.E.Op.S. Sound Driver V1.7\nCoded by Pete Bernert and the P.E.Op.S. team\n");
 
@@ -476,7 +476,7 @@ void *MAINThread(void *arg)
 
      if(iUseTimer) return 0;                           // linux no-thread mode? bye
 #ifdef PTHREAD
-// nanosleep(&req,&rem);
+nanosleep(&req,&rem);
 if(dwNewChannel){
 iSecureStart=1; 
 }       
