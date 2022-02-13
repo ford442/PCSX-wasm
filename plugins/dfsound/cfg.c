@@ -194,9 +194,9 @@ void ReadConfig(void){
 iVolume=2;
 iXAPitch=0;
 iSPUIRQWait=1;
-iUseTimer=1;
+iUseTimer=2;
 iUseReverb=2;
-iUseInterpolation=2;
+iUseInterpolation=1;
 iDisStereo=0;
  //ReadConfigFile();
 }
