@@ -285,7 +285,7 @@ void *playthread(void *param)
 		// nanosleep(&req,&rem);
 	// 	}
 		
-		usleep(d * 1000);
+	//	usleep(d * 1000);
 #endif
 
 		t = GetTickCount() + CDDA_FRAMETIME;
