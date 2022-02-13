@@ -111,7 +111,7 @@ void FrameCap (void)
 	if (tickstogo >= 30 && !(dwActFixes&16))
 		{//printf("fps sleep\n");
     updated_display = tickstogo*10 - 300;
-    //usleep(tickstogo*10 - 200); 
+    usleep(tickstogo*10 - 200); 
     }
       }
     }
@@ -226,7 +226,7 @@ void FrameSkip(void)
 		{
       //printf("fps sleep2\n");
     
-  //  usleep(tickstogo*10 - 200);}
+  usleep(tickstogo*10 - 200);}
       }
     }
    overslept = _ticks_since_last_update - dwWaitTime;
