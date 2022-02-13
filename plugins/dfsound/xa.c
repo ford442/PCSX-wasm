@@ -392,15 +392,12 @@ INLINE void FeedXA(xa_decode_t *xap)
 
 INLINE void FeedCDDA(unsigned char *pcm, int nBytes)
 {
- while(nBytes>0)
-  {
-   if(CDDAFeed==CDDAEnd) CDDAFeed=CDDAStart;
-   while(CDDAFeed==CDDAPlay-1||
-         (CDDAFeed==CDDAEnd-1&&CDDAPlay==CDDAStart))
+while(nBytes>0)
+{
+if(CDDAFeed==CDDAEnd){CDDAFeed=CDDAStart;}
+while(CDDAFeed==CDDAPlay-1||(CDDAFeed==CDDAEnd-1&&CDDAPlay==CDDAStart))
    {
-if(!iUseTimer){
-nanosleep(&req,&rem);
-}
+if(!iUseTimer){nanosleep(&req,&rem);}
 else return;
 }
    *CDDAFeed++=(*pcm | (*(pcm+1)<<8) | (*(pcm+2)<<16) | (*(pcm+3)<<24));
