@@ -284,6 +284,8 @@ void *playthread(void *param)
 		for(int ii=0;ii<d;ii++){
 		nanosleep(&req,&rem);
 		}
+		EM_ASM({console.log("5ms nano");});
+
 		
 	//	usleep(d * 1000);
 #endif
