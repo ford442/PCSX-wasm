@@ -191,12 +191,12 @@ free(pB);
 /////////////////////////////////////////////////////////
 
 void ReadConfig(void){
-iVolume=2;
-iXAPitch=1;
+iVolume=3;
+iXAPitch=0;
 iSPUIRQWait=1;
 iUseTimer=2;
 iUseReverb=1;
 iUseInterpolation=2;
-iDisStereo=1;
+iDisStereo=0;
  //ReadConfigFile();
 }
