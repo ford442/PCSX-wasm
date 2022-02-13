@@ -40,7 +40,7 @@ unsigned long SoundGetBytesBuffered(void) {
 		printf("lBytes %d\n", SoundGetBytesBuffered_value);
 		ccc=0;
 	}*/	
-if(SoundGetBytesBuffered_value>22050){
+if(SoundGetBytesBuffered_value>44100){
 return SOUNDSIZE;
 }
 return 0;
