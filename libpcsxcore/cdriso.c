@@ -281,9 +281,9 @@ void *playthread(void *param)
 		Sleep(d);
 #else
 		// printf("sleep\n");
-	// 	for(int ii=0;ii<d;ii++){
-		// nanosleep(&req,&rem);
-	// 	}
+		for(int ii=0;ii<d;ii++){
+		nanosleep(&req,&rem);
+		}
 		
 	//	usleep(d * 1000);
 #endif
