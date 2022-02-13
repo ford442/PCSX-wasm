@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-
 extern GpuConfS gpuConfig;
 char * pConfigFile=NULL;
 
@@ -50,34 +49,13 @@ void readconfig()
 
  if (stat(t, &buf) == -1) return;
  size = buf.st_size;
-
  in = fopen(t,"rb");
- 
-
-
  if (!in) return;
-
  pB=(char *)malloc(size);
  memset(pB,0,size);
-
  len = fread(pB, 1, size, in);
  fclose(in);
-
-
-/*	
- GetValue("Fullscreen", gpuConfig.bFullscreen);
- GetValue("Bilinear", gpuConfig.bBilinear);
- GetValue("MaxTextures", gpuConfig.nMaxTextures);
- GetValue("Wireframe", gpuConfig.bWireFrame);
- GetValue("Antialias", gpuConfig.bAntialias);
- GetValue("Clearscreen", gpuConfig.bClearScreen);
- GetValue("FrameLimit", gpuConfig.FrameLimit);
- GetValue("windowX", gpuConfig.windowX);
- GetValue("windowY", gpuConfig.windowY);
-*/
-
  free(pB);
-
 }
 
 void writeconfig()
@@ -87,7 +65,6 @@ void writeconfig()
 void ExecCfg(char *arg) {
 	char cfg[256];
 	struct stat buf;
-
 	strcpy(cfg, "./cfgDFOpenGL");
 	if (stat(cfg, &buf) != -1) {
 		sprintf(cfg, "%s %s", cfg, arg);
