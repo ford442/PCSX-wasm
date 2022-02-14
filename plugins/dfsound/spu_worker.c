@@ -70,7 +70,7 @@ int             iSPUIRQWait=1;
 int             iSoundDebugMode=0;
 int             iRecordMode=0;
 int             iUseReverb=1;
-int             iUseInterpolation=0;
+int             iUseInterpolation=2;
 int             iDisStereo=1;
 
 // MAIN infos struct for each channel
@@ -121,8 +121,8 @@ int iSecureStart=0; // secure start counter
 #include "xa.c"
 #include <emscripten.h>
 
-#define PAUSE_W 5
-#define PAUSE_L 5000
+#define PAUSE_W 2
+#define PAUSE_L 2000
 
 extern int isMute;
 void CALLBACK SPUasync(unsigned long cycle)
