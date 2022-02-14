@@ -477,7 +477,7 @@ void *MAINThread(void *arg)
 
      if(iUseTimer){ return 0;   }                        // linux no-thread mode? bye
 #ifdef PTHREAD
-for(int iii=0;iii<5;iii++){
+for(int iii=0;iii<2;iii++){
 nanosleep(&req,&rem);
 }
 EM_ASM({console.log("5ms nano");});
