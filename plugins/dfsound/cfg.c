@@ -196,7 +196,7 @@ iXAPitch=0;
 iSPUIRQWait=1;
 iUseTimer=2;
 iUseReverb=1;
-iUseInterpolation=0;
+iUseInterpolation=2;
 iDisStereo=0;
  //ReadConfigFile();
 }
