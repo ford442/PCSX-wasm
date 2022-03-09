@@ -83,8 +83,8 @@ var Module = {
   setStatus: function (text) {
     if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
     if (text === Module.setStatus.text) return;
-    var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-    var now = Date.now();
+   // var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+  //  var now = Date.now();
     document.getElementById('status').innerHTML = text;
     cout_print("setStatus: "+text);
   },
@@ -169,19 +169,7 @@ function var_setup() {
 }
 
 if (window.File && window.FileReader && window.FileList && window.Blob) {
-} else {
-  alert('The File APIs are not fully supported in this browser.')
-  cout_print('The File APIs are not fully supported in this browser.');
 }
-/* // for future wakelock api
-navigator.wakeLock.request("display")
-  .then(() => cout_print("Display wakeLock OK\n"))
-  .catch(() => cout_print("Display wakeLock failed\n"));
-  
-navigator.wakeLock.request("system")
-  .then(() => cout_print("System wakeLock OK\n"))
-  .catch(() => cout_print("System wakeLock failed\n"));
-*/
 var states_arrs = [];
 var check_controller = function () {
   _CheckJoy();
