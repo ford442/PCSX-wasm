@@ -168,8 +168,7 @@ function var_setup() {
   setTimeout("Module.setStatus('open an iso file using the above button.')", 2);
 }
 
-if (window.File && window.FileReader && window.FileList && window.Blob) {
-}
+// if (window.File && window.FileReader && window.FileList && window.Blob) {}
 var states_arrs = [];
 var check_controller = function () {
   _CheckJoy();
