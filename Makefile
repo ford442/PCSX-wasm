@@ -1,12 +1,10 @@
 CC=emcc
 CXX=em++
-CFLAGS= -pthread -sUSE_PTHREADS=1 -sPTHREAD_POOL_SIZE=4 --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES3=1 -D USESDLSOUND -Wpointer-sign \
+CFLAGS= -pthread -sUSE_PTHREADS=1 -sPTHREAD_POOL_SIZE=4 --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -D USESDLSOUND -Wpointer-sign \
 -DNDEBUG -sSUPPORT_ERRNO=0 -sGL_DEBUG=0 -sGL_TRACK_ERRORS=0 \
--sGL_POOL_TEMP_BUFFERS=0 -sMEMORY64=0 -sLEGALIZE_JS_FFI=0 -sWASM_BIGINT=1 \
 -sFORCE_FILESYSTEM=1 -lidbfs.js \
--sMAXIMUM_MEMORY=4GB \
--sELIMINATE_DUPLICATE_FUNCTIONS=1 -sALLOW_MEMORY_GROWTH=1 -sMALLOC="emmalloc" -sINITIAL_MEMORY=1400mb \
--sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=1 -sMAX_WEBGL_VERSION=2 -O2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
+-sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=1400mb \
+-sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS=
 
 # WORKER
@@ -30,17 +28,16 @@ UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
 plugins/sdlinput/sdljoy.o plugins/sdlinput/analog.o plugins/dfsound/sdl.o  
 UI_FLAGS= -sUSE_SDL=1 -sEXPORTED_FUNCTIONS=$(UI_EXPORT) -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']"
 
-
 ALL: pcsx_worker.js pcsx_ww.js
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o: %.cc
-	$(CC) -x c++ -std=gnu++2b -c -o $@ $< $(CFLAGS)
+	$(CC) -x c++ -std=c++2b -c -o $@ $< $(CFLAGS)
 
 gui/xbrz.o: gui/xbrz.cpp gui/xbrz.h
-	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=gnu++2b -DNDEBUG $<
+	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++2b -DNDEBUG $<
 
 pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CXX) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
