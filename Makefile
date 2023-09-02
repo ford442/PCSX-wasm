@@ -1,7 +1,6 @@
 CC=emcc
 CXX=emcc
-CFLAGS= -O3 -sFULL_ES2=1 -sFULL_ES3=1 -DUSESDLSOUND \
--sFORCE_FILESYSTEM=1 -lidbfs.js \
+CFLAGS= -O3 -DUSESDLSOUND -lidbfs.js \
 -sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= --llvm-lto 1
 
