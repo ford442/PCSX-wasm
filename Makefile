@@ -19,7 +19,7 @@ plugins/dfxvideo/prim.o plugins/dfxvideo/zn.o plugins/dfxvideo/draw_null.o \
 plugins/dfxvideo/gpu.o plugins/dfxvideo/soft.o \
 plugins/dfsound/spu.o plugins/dfsound/cfg.o  plugins/dfsound/dma.o plugins/dfsound/registers.o plugins/dfsound/worker.o \
 plugins/sdlinput/cfg.o plugins/sdlinput/pad_worker.o plugins/sdlinput/analog.o
-WORKER_FLAGS= --post-js js/worker_funcs.js -s TOTAL_MEMORY=419430400 -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT)
+WORKER_FLAGS= --post-js js/worker_funcs.js -s TOTAL_MEMORY=419430400 -sEXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue'] -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT)
 
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
