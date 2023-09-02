@@ -1,11 +1,11 @@
 CC=emcc
 CXX=em++
-CFLAGS= -pthread -sUSE_PTHREADS=1 -sPTHREAD_POOL_SIZE=4 --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -D USESDLSOUND -Wpointer-sign \
+CFLAGS= -pthread --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -D USESDLSOUND -Wpointer-sign \
 -DNDEBUG -sSUPPORT_ERRNO=0 -sGL_DEBUG=0 -sGL_TRACK_ERRORS=0 \
 -sFORCE_FILESYSTEM=1 -lidbfs.js \
--sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=1400mb \
+-sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=2147483648 \
 -sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
-LDFLAGS=
+LDFLAGS=--llvm-lto 1
 
 # WORKER
 WORKER_EXPORT="['_main', '_pcsx_init', '_one_iter', '_get_ptr', '_ls']"
@@ -21,7 +21,7 @@ plugins/dfxvideo/prim.o plugins/dfxvideo/zn.o plugins/dfxvideo/draw_null.o \
 plugins/dfxvideo/gpu.o plugins/dfxvideo/soft.o \
 plugins/dfsound/spu.o plugins/dfsound/cfg.o  plugins/dfsound/dma.o plugins/dfsound/registers.o plugins/dfsound/worker.o \
 plugins/sdlinput/cfg.o plugins/sdlinput/pad_worker.o plugins/sdlinput/analog.o
-WORKER_FLAGS= -sUSE_SDL=2 --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT)
+WORKER_FLAGS= -sUSE_SDL=1 --post-js js/worker_funcs.js -s"EXPORTED_RUNTIME_METHODS=['cwrap','ccall','getValue','setValue']" -sEXPORTED_FUNCTIONS=$(WORKER_EXPORT)
 
 UI_EXPORT="['_main','_get_ptr', '_render','_LoadPADConfig', '_CheckKeyboard', '_CheckJoy', '_SoundFeedStreamData', '_SoundGetBytesBuffered']"
 UI_OBJS=plugins/sdlinput/cfg.o plugins/sdlinput/xkb.o gui/wwGUI.o \
@@ -34,10 +34,10 @@ ALL: pcsx_worker.js pcsx_ww.js
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 %.o: %.cc
-	$(CC) -x c++ -std=c++2b -c -o $@ $< $(CFLAGS)
+	$(CC) -x c++ -std=c++14 -c -o $@ $< $(CFLAGS)
 
 gui/xbrz.o: gui/xbrz.cpp gui/xbrz.h
-	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++2b -DNDEBUG $<
+	$(CC) -c -o $@ $(CFLAGS) -x c++ -std=c++14 -DNDEBUG $<
 
 pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CXX) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
