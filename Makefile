@@ -1,7 +1,7 @@
 CC=emcc
 CXX=emcc
 CFLAGS= -O3 -DUSESDLSOUND -lidbfs.js \
--sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
+-Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= --llvm-lto 1
 
 # WORKER
@@ -40,7 +40,7 @@ pcsx_worker.js: $(WORKER_OBJS) js/worker_funcs.js
 	$(CXX) -o $@ $(CFLAGS) $(WORKER_OBJS) $(LDFLAGS) $(WORKER_FLAGS)
 
 pcsx_ww.js: $(UI_OBJS)
-	$(CXX) -o $@ $(CFLAGS) $(UI_OBJS) $(LDFLAGS) $(UI_FLAGS)
+	$(CXX) -o $@ $(CFLAGS) $(UI_OBJS) $(LDFLAGS) $(UI_FLAGS) -sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 
 
 clean:
 	rm -f *.o */*.o */*/*.o
