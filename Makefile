@@ -1,6 +1,6 @@
 CC=emcc
 CXX=emcc
-CFLAGS= -O2 -g --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -DUSESDLSOUND -Wpointer-sign \
+CFLAGS= -O3 -Wno-unused-result -g --closure 0 -sSUPPORT_BIG_ENDIAN=1 -sFULL_ES2=1 -sFULL_ES3=1 -DUSESDLSOUND -Wpointer-sign \
 -sFORCE_FILESYSTEM=1 -lidbfs.js \
 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=2147483648 \
 -sUSE_WEBGL2=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
