@@ -1,7 +1,6 @@
 CC=emcc
 CXX=emcc
-CFLAGS= -O3 -DUSESDLSOUND -lidbfs.js \
--Wno-unused-result -sUSE_ZLIB=1 -I./include -I./libpcsxcore
+CFLAGS= -O3 -DUSESDLSOUND -lidbfs.js -sUSE_ZLIB=1 -I./include -I./libpcsxcore
 LDFLAGS= --llvm-lto 1
 
 # WORKER
